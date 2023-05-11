@@ -18,6 +18,6 @@ To run over only 10k events in run 3100, the command is:
 While to run over all events present, the command is:  
 `./run.sh 3100`  
 
-Raw data files (.evio) should be linked in the `/DATA` directory  
-ROOT files that are processed from `./run.sh` should appear in the `/ROOT` directory  
-Output files (.root, .pdf, etc.) generated from `trdclass.C` should go in the `RunOutput` directory  
+Raw data files (.evio) should be linked in the `DATA/` directory  
+ROOT files that are processed from `./run.sh` should appear in the `ROOT/` directory  
+Output files (.root, .pdf, etc.) generated from `trdclass.C` should go in the `RunOutput/` directory  
