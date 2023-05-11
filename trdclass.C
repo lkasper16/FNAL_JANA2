@@ -69,6 +69,14 @@ void trdclass::Loop()
    f125_pi_amp2d = new TH2F("f125_pi_amp2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
    mmg_f125_el_amp2d = new TH2F("mmg_f125_el_amp2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
    mmg_f125_pi_amp2d = new TH2F("mmg_f125_pi_amp2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
+   urw_f125_el_amp2d = new TH2F("urw_f125_el_amp2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
+   urw_f125_pi_amp2d = new TH2F("urw_f125_pi_amp2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
+   f125_el_clu2d = new TH2F("f125_el_clu2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
+   f125_pi_clu2d = new TH2F("f125_pi_clu2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
+   mmg_f125_el_clu2d = new TH2F("mmg_f125_el_clu2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
+   mmg_f125_pi_clu2d = new TH2F("mmg_f125_pi_clu2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
+   urw_f125_el_clu2d = new TH2F("urw_f125_el_clu2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
+   urw_f125_pi_clu2d = new TH2F("urw_f125_pi_clu2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
 
    //=========================================
 
@@ -156,19 +164,26 @@ void trdclass::Loop()
        		float dchan=inv_card_ch+card*24+(slot-3)*72.;     int idchan = inv_card_ch+card*24+(slot-3)*72.;
 				
        		if (amp<0) amp=0;
-       		int MM_THR=100;
+       		int MM_THR=150;
 				
        		if(electron){
-	 				if ( (slot<6) || (slot==6 && chan<24) ) { f125_el_amp2d->Fill(time,dchan,amp); 
+	 				if ( (slot<6) || (slot==6 && chan<24) ) { f125_el_amp2d->Fill(time,dchan,amp); } 
+	 				if ( (slot<6) || (slot==6 && chan<24) ) { f125_el_clu2d->Fill(time,dchan,1.); 
 					//f125_el->Fill(amp); 
 				}
 	 			if (amp>MM_THR) {
-	   			if ((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48)) { 
-	     				mmg_f125_el_amp2d->Fill(time,dchan-240.,amp); mmg_f125_el->Fill(amp);
+	   			if ((slot==8)||(slot==9 && chan<48)) { 
+	     				mmg_f125_el_amp2d->Fill(time,dchan-360.,amp); mmg_f125_el->Fill(amp);
+	     				mmg_f125_el_clu2d->Fill(time,dchan-360.,1.); mmg_f125_el->Fill(amp);
 	   			}
 	 			}
+	   			if ((slot==6&&chan>23)||(slot==7)) { 
+	     				urw_f125_el_amp2d->Fill(time,dchan-240.,amp);
+	     				urw_f125_el_clu2d->Fill(time,dchan-240.,1.);
+	   			}
        	} else {
-	 			if ((slot<6)||(slot==6&&chan<24)) { f125_pi_amp2d->Fill(time,dchan,amp); 
+	 			if ((slot<6)||(slot==6&&chan<24)) { f125_pi_amp2d->Fill(time,dchan,amp);} 
+	 			if ((slot<6)||(slot==6&&chan<24)) { f125_pi_clu2d->Fill(time,dchan,1.); 
 				//f125_pi->Fill(amp); 
 	   		/*
 	     		if (itime==23 && idchan==15 && )
@@ -177,11 +192,16 @@ void trdclass::Loop()
 	   		*/
 	 		}
 	 		if (amp>MM_THR) {
-	   		if ( (slot==6&&chan>23) || (slot>6&&slot<9) || (slot==9&&chan<48)  ){  
-	     			mmg_f125_pi_amp2d->Fill(time,dchan-240.,amp);
+	   			if ((slot==8)||(slot==9 && chan<48)) { 
+	     			mmg_f125_pi_amp2d->Fill(time,dchan-360.,amp);
+	     			mmg_f125_pi_clu2d->Fill(time,dchan-360.,1.);
 	     			mmg_f125_pi->Fill(amp); 
 	   		}
 	 		}
+	   			if ((slot==6&&chan>23)||(slot==7)) { 
+	     			urw_f125_pi_amp2d->Fill(time,dchan-240.,amp);
+	     			urw_f125_pi_clu2d->Fill(time,dchan-240.,1.);
+                }
       }
 		
       if (peak_amp-ped>f125_amp_max) f125_amp_max=peak_amp-ped;
@@ -218,9 +238,8 @@ void trdclass::Loop()
 
    //open
    TFile* fOut;
-   char rootFileName[256]; sprintf(rootFileName, "Run%d_Output.root", RunNum);
+   char rootFileName[256]; sprintf(rootFileName, "RunOutput/Run%d_Output.root", RunNum);
    fOut = new TFile(rootFileName, "RECREATE");
-   //fOut->Open();
    fOut->cd();
    //write hists
    hCher_u_adc->Write(0, TObject::kOverwrite);
@@ -239,10 +258,18 @@ void trdclass::Loop()
    f125_pi->Write(0, TObject::kOverwrite);
    f125_el_amp2d->Write(0, TObject::kOverwrite);
    f125_pi_amp2d->Write(0, TObject::kOverwrite);
+   f125_el_clu2d->Write(0, TObject::kOverwrite);
+   f125_pi_clu2d->Write(0, TObject::kOverwrite);
    mmg_f125_el->Write(0, TObject::kOverwrite);
    mmg_f125_pi->Write(0, TObject::kOverwrite);
    mmg_f125_el_amp2d->Write(0, TObject::kOverwrite);
    mmg_f125_pi_amp2d->Write(0, TObject::kOverwrite);
+   mmg_f125_el_clu2d->Write(0, TObject::kOverwrite);
+   mmg_f125_pi_clu2d->Write(0, TObject::kOverwrite);
+   urw_f125_el_amp2d->Write(0, TObject::kOverwrite);
+   urw_f125_pi_amp2d->Write(0, TObject::kOverwrite);
+   urw_f125_el_clu2d->Write(0, TObject::kOverwrite);
+   urw_f125_pi_clu2d->Write(0, TObject::kOverwrite);
    fOut->Write(0, TObject::kOverwrite);
 	
    //close
@@ -252,7 +279,7 @@ void trdclass::Loop()
    //==================  P L O T ===========================
 
    //-----------------  canvas 1 calorimeter (fa250) ----------
-   char c1Title[256]; sprintf(c1Title,"Calorimeter_Run=%d.pdf",RunNum);
+   char c1Title[256]; sprintf(c1Title,"RunOutput/Calorimeter_Run=%d.pdf",RunNum);
    TCanvas *c1 = new TCanvas("CAL",c1Title,1,1,1300,900);
 
    c1->Divide(3,3);
@@ -273,7 +300,7 @@ void trdclass::Loop()
    c1->Print(c1Title);
 
    //-----------------  canvas 2 Cherenkov (fa250) ----------
-   char c2Title[256]; sprintf(c2Title,"Cherenkov_det_Run=%d.pdf",RunNum);
+   char c2Title[256]; sprintf(c2Title,"RunOutput/Cherenkov_det_Run=%d.pdf",RunNum);
    TCanvas *c2 = new TCanvas("CHER",c2Title,100,100,1300,900);
    c2->Divide(3,3);
    n=1;
@@ -293,7 +320,7 @@ void trdclass::Loop()
    c2->Print(c2Title);
 
    //-----------------  canvas 3 GEMTRD (fa125) ----------
-   char c3Title[256]; sprintf(c3Title,"GEMTRD_det_Run=%d.pdf",RunNum);
+   char c3Title[256]; sprintf(c3Title,"RunOutput/GEMTRD_det_Run=%d.pdf",RunNum);
    TCanvas *c3 = new TCanvas("GEMTRD",c3Title,100,100,1300,900);
    c3->Divide(3,3);
    n=1;

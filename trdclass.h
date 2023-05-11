@@ -193,7 +193,7 @@ trdclass::trdclass(int RunNum_in) : fChain(0)
 // used to generate this class and read the Tree.
    if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"ROOT/Run_%06d_000.root",RunNum);
+     sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
