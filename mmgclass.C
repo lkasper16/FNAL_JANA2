@@ -45,87 +45,97 @@ void mmgclass::Loop()
    #define gem_x_ch0 0
    
    // GEMTRD mapping
-   int GetGEMSlot(int ch) {
+   //int GetGEMSlot(int ch, int slot) {
+   //   return ch/72+3;
+   //}
+   int GetGEMChan(int ch, int slot) {
+      int cardNumber = ch/24;
+      int cardChannel = ch-cardNumber*24;
+      int invCardChannel = 23 - cardChannel;
       
-   }
-   int GetGEMChan(int ch) {
-      
+      return inv_card_ch+card*24+(slot-3)*72.;
    }
    
    // MMG-1 mapping
    int GetMMG1Slot(int ch, int runNum) {
       
       if (runNum<3148) { // -- Map #1
-         
+         return ch/72+6;
       } else if (runNum>3147 && runNum<3262) { // -- Map #2
-         
+         return ch/72+8;
       } else if (runNum>3261 && runNum<3279) { // -- Map #3
-         
+         return ch/72+7;
       } else if (runNum>3278) { // -- Map #4
-         
+         return ch/72+7;
       }
    }
    int GetMMG1Chan(int ch, int runNum) {
       int cardNumber = ch/24;
       int cardChannel = ch-cardNumber*24;
       int invCardChannel = 23 - cardChannel;
+      float dchan = inv_card_ch+card*24+(slot-3)*72.;
       
       if (runNum<3148) { // -- Map #1
-         return inv_card_ch+card*24+(slot-3)*72.;
+         for (ch>23) {
+            return dchan - 240.;
+         }
       } else if (runNum>3147 && runNum<3262) { // -- Map #2
-         
+         for (ch>119) {
+            return dchan - 360.;
+         }
       } else if (runNum>3261 && runNum<3279) { // -- Map #3
          
       } else if (runNum>3278) { // -- Map #4
-         
+         return dchan - 312.;
       }
    }
    
    // MMG-2 mapping
    int GetMMG2Slot(int ch, int runNum) {
-      if (runNum<3148) { // -- Map #1
-         
-      } else if (runNum>3147 && runNum<3262) { // -- Map #2
-         
-      } else if (runNum>3261 && runNum<3279) { // -- Map #3
-         
+      if (runNum>3261 && runNum<3279) { // -- Map #3
+         return ch/72+6;
       } else if (runNum>3278) { // -- Map #4
-         
+         return ch/72+6;
       }
    }
    int GetMMG2Chan(int ch, int runNum) {
-      if (runNum<3148) { // -- Map #1
-         
-      } else if (runNum>3147 && runNum<3262) { // -- Map #2
-         
-      } else if (runNum>3261 && runNum<3279) { // -- Map #3
-         
+      int cardNumber = ch/24;
+      int cardChannel = ch-cardNumber*24;
+      int invCardChannel = 23 - cardChannel;
+      float dchan = inv_card_ch+card*24+(slot-3)*72.;
+      
+      if (runNum>3261 && runNum<3279) { // -- Map #3
+         return dchan - 240.;
       } else if (runNum>3278) { // -- Map #4
-         
+         return dchan - 240.;
       }
    }
    
    // RWELLTRD mapping
    int GetRWELLSlot(int ch, int runNum) {
       if (runNum<3148) { // -- Map #1
-         
+         int slot = ch/72+9;
+         if (slot>12) slot = slot - 2;
+         return slot;
       } else if (runNum>3147 && runNum<3262) { // -- Map #2
-         
-      } else if (runNum>3261 && runNum<3279) { // -- Map #3
-         
-      } else if (runNum>3278) { // -- Map #4
-         
+         return ch/72+6;
       }
    }
    int GetRWELLChan(int ch, int runNum) {
+      int cardNumber = ch/24;
+      int cardChannel = ch-cardNumber*24;
+      int invCardChannel = 23 - cardChannel;
+      int slot = GetRWELLSlot(ch, runNum);
+      float dchan = inv_card_ch+card*24+(slot-3)*72.;
+      
       if (runNum<3148) { // -- Map #1
-         
+         for (ch>47) {
+            return dchan - 480.;
+         }
       } else if (runNum>3147 && runNum<3262) { // -- Map #2
-         
-      } else if (runNum>3261 && runNum<3279) { // -- Map #3
-         
-      } else if (runNum>3278) { // -- Map #4
-         
+         for (ch>23 && ch<144) {
+            return dchan - 240.;
+         }
       }
    }
    
@@ -163,9 +173,7 @@ void mmgclass::Loop()
    //=========================================
 
    Long64_t nentries = fChain->GetEntriesFast();
-
    Long64_t nbytes = 0, nb = 0;
-
    //nentries=100;
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -227,28 +235,43 @@ void mmgclass::Loop()
 			     ,i,f125_pulse_slot->at(i),f125_pulse_channel->at(i),f125_pulse_npk->at(i)
 			     ,f125_pulse_peak_time->at(i),f125_pulse_peak_amp->at(i),f125_pulse_pedestal->at(i));
 	
-     int slot = f125_pulse_slot->at(i);
+     int fADCSlot = f125_pulse_slot->at(i);
+     int fADCChan = f125_pulse_channel->at(i);
+     
+     //int gemSlot = GetGEMSlot(fADCSlot);
+     int gemChan = GetGEMChan(fADCChan, fADCSlot);
+     //int mmg1Slot = GetMMG1Slot(fADCChan, RunNum);
+     int mmg1Chan = GetMMG1Chan(fADCChan, RunNum);
+     //int mmg2Slot = GetMMG2Slot(fADCChan, RunNum);
+     int mmg2Chan = GetMMG2Chan(fADCChan, RunNum);
+     //int rwellSlot = GetRWELLSlot(fADCChan, RunNum);
+     int rwellChan = GetRWELLChan(fADCChan, RunNum);
+     
      float peak_amp = f125_pulse_peak_amp->at(i);
      float ped = f125_pulse_pedestal->at(i);
      float amp=peak_amp-ped;
      float time=f125_pulse_peak_time->at(i);
-     int chan=f125_pulse_channel->at(i);
-     int card=chan/24;
-     int card_ch=chan-card*24;
-     int inv_card_ch = 23-card_ch;
-     float dchan=inv_card_ch+card*24+(slot-3)*72.;
+     
+     //int card=chan/24;
+     //int card_ch=chan-card*24;
+     //int inv_card_ch = 23-card_ch;
+     //float dchan=inv_card_ch+card*24+(slot-3)*72.;
      
      
      
-       if(electron){
-        if((slot<6)||(slot==7&&chan<24))f125_el_amp2d->Fill(time,dchan,amp);
-        if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_el_amp2d->Fill(time,dchan-240.,amp);
-     } else {
-        if((slot<6)||(slot==7&&chan<24))f125_pi_amp2d->Fill(time,dchan,amp);
-        if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_pi_amp2d->Fill(time,dchan-240.,amp);
-     }
+      if(electron){
+         f125_el_amp2d->Fill(time, gemChan, amp);
+         mmg_f125_el_amp2d->Fill(time, mmgChan, amp);
+        //if((slot<6)||(slot==7&&chan<24))f125_el_amp2d->Fill(time,dchan,amp);
+        //if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_el_amp2d->Fill(time,dchan-240.,amp);
+      } else {
+         f125_pi_amp2d->Fill(time, gemChan, amp);
+         mmg_f125_pi_amp2d->Fill(time, mmgChan, amp);
+        //if((slot<6)||(slot==7&&chan<24))f125_pi_amp2d->Fill(time,dchan,amp);
+        //if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_pi_amp2d->Fill(time,dchan-240.,amp);
+      }
 
-     if(peak_amp-ped>f125_amp_max)f125_amp_max=peak_amp-ped;
+     if(peak_amp-ped>f125_amp_max) f125_amp_max = peak_amp-ped;
      hCal_sum->Fill(CalSum/7.);
      hCCor_ud->Fill(Ch_u,Ch_out);
      hCCCor_u->Fill(Ch_u,CalSum/7.);

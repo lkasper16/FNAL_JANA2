@@ -345,4 +345,16 @@ void trdclass::Loop()
     c3->Update();
     c3->Print(c3Title);
     
+    TCanvas *c4 = new TCanvas("c4","e/pi MMG", 1200, 800);
+	c4->cd();
+	mmg_f125_el_amp2d->ProjectionX("el");
+    mmg_f125_pi_amp2d->ProjectionX("pi");
+    el->Divide(pi);
+    el->Rebin(4);
+	el->SetLineColor(2);
+	el->GetXaxis()->SetTitle("Time (*8 ns)");
+	el->GetYaxis()->SetTitle("#Entries(electron) / #Entries(hadron)");
+	el->Draw();
+
+    
 }
