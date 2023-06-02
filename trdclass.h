@@ -1,4 +1,5 @@
-//////////////////////////////////////////////////////////
+/
+////////////////////////////////////////////////////////
 // This class has been automatically generated on
 // Sat May  6 17:30:16 2023 by ROOT version 6.28/00
 // from TTree events/jana4ml4fpga_tree_v1
@@ -173,11 +174,20 @@ public :
    TH1F *f125_pi;
    TH2F *f125_el_amp2d;
    TH2F *f125_pi_amp2d;
+   TH2F *f125_el_clu2d;
+   TH2F *f125_pi_clu2d;
 
    TH1F *mmg_f125_el;
    TH1F *mmg_f125_pi;
    TH2F *mmg_f125_el_amp2d;
    TH2F *mmg_f125_pi_amp2d;
+   TH2F *mmg_f125_el_clu2d;
+   TH2F *mmg_f125_pi_clu2d;
+   
+   TH2F *urw_f125_el_amp2d;
+   TH2F *urw_f125_pi_amp2d;
+   TH2F *urw_f125_el_clu2d;
+   TH2F *urw_f125_pi_clu2d;
 
    //=============================================
 };
@@ -185,7 +195,7 @@ public :
 #endif
 
 #ifdef trdclass_cxx
-trdclass::trdclass(int RunNum_in) : fChain(0) 
+trdclass::trdclass(int RunNum_in) : fChain(0)
 {
   RunNum=RunNum_in;
   TTree *tree=NULL;
