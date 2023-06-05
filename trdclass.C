@@ -35,9 +35,9 @@ void trdclass::Loop() {
 //========= Book Histograms =============
 
 //-----------------  canvas 0 Event Display ----------
-	char c0Title[256]; sprintf(c0Title,"Event_Display_Run=%d",RunNum);
-  	TCanvas *c0 = new TCanvas("DISP",c0Title,200,200,1500,1300);
-  	c0->Divide(2,2); c0->cd(1);
+	//char c0Title[256]; sprintf(c0Title,"Event_Display_Run=%d",RunNum);
+  	//TCanvas *c0 = new TCanvas("DISP",c0Title,200,200,1500,1300);
+  	//c0->Divide(2,2); c0->cd(1);
 	
   	hCal_occ = new TH1F("hCal_occ"," Calorimeter Occupancy",9,-0.5,8.5);
   	hCal_sum = new TH1F("hCal_sum"," Calorimeter Sum",4096,0.5,4095.5);
@@ -104,31 +104,27 @@ void trdclass::Loop() {
     	nb = fChain->GetEntry(jentry);
 		nbytes += nb;
 		
-    	if (jentry<MAX_PRINT || !(jentry%1000)) 
-      	printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu \n",jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count,srs_raw_count);
+    	//if (jentry<MAX_PRINT || !(jentry%1000)) printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu \n",jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count,srs_raw_count);
     	
 //==================================================================================================
 //                    Show Event 
 //==================================================================================================
-/*    	if (jentry<MAX_PRINT) {
+    	if (jentry<MAX_PRINT) {
 			
-      		printf("-------------------- Pulse CNT 125/250  ---------------------------\n");		
+      		//printf("-------------------- Pulse CNT 125/250  ---------------------------\n");		
       		for (int i=0;i<f125_pulse_count; i++) {
-				printf("F125:pulse: i=%d  sl=%d, ch=%d, npk=%d time=%d amp=%d ped=%d \n"
-	       		,i,f125_pulse_slot->at(i),f125_pulse_channel->at(i),f125_pulse_npk->at(i)
-	       		,f125_pulse_peak_time->at(i),f125_pulse_peak_amp->at(i),f125_pulse_pedestal->at(i));
-      		} */
-      /* 
+				//printf("F125:pulse: i=%d  sl=%d, ch=%d, npk=%d time=%d amp=%d ped=%d \n",i,f125_pulse_slot->at(i),f125_pulse_channel->at(i),f125_pulse_npk->at(i),f125_pulse_peak_time->at(i),f125_pulse_peak_amp->at(i),f125_pulse_pedestal->at(i));
+      		}
+      /*
 	 for (int i=0;i<f250_pulse_count; i++) {
 	 if (jentry<1) printf("F250:: i=%d  sl=%d, ch=%d, npk=%d time=%d amp=%d ped=%d \n"
 	 ,i,f250_pulse_slot->at(i),f250_pulse_channel->at(i),f250_pulse_npk->at(i)
 	 ,f250_pulse_peak_time->at(i),f250_pulse_peak_amp->at(i),f250_pulse_pedestal->at(i));
 	 }
-      */
-			
+      */	
       		printf("-------------------- Raw  125  ---------------------------\n");
       		for (int i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop 
-				printf("F125:raw: i=%d  sl=%d, ch=%d, idx=%d, cnt=%d \n",i,f125_wraw_slot->at(i),f125_wraw_channel->at(i),f125_wraw_samples_index->at(i),f125_wraw_samples_count->at(i));
+				//printf("F125:raw: i=%d  sl=%d, ch=%d, idx=%d, cnt=%d \n",i,f125_wraw_slot->at(i),f125_wraw_channel->at(i),f125_wraw_samples_index->at(i),f125_wraw_samples_count->at(i));
       		}
     	}
 		
@@ -190,7 +186,7 @@ void trdclass::Loop() {
 //                    Process Fa125  Pulse  data
 //==================================================================================================
     	if (!(jentry%1000)) {
-			//if(electron) f125_el_evt->Reset(); else  f125_pi_evt->Reset();
+			if(electron) f125_el_evt->Reset(); else  f125_pi_evt->Reset();
 		}
 		
     	float f125_amp_max=0.;
@@ -268,9 +264,9 @@ void trdclass::Loop() {
 //                    Process Fa125  RAW data
 //==================================================================================================
 
-		#define USE_125_RAW
+		//#define USE_125_RAW
 		#ifdef USE_125_RAW
-    	//if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
+    	if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
 		
     	for (int i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop 
       		//if (jentry<MAX_PRINT) printf("F125:RAW: i=%d  sl=%d, ch=%d, idx=%d, cnt=%d \n",i,f125_wraw_slot->at(i),f125_wraw_channel->at(i),f125_wraw_samples_index->at(i),f125_wraw_samples_count->at(i));
