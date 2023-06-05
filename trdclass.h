@@ -1,9 +1,8 @@
-/
-////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat May  6 17:30:16 2023 by ROOT version 6.28/00
+// Mon May 29 20:15:03 2023 by ROOT version 6.28/00
 // from TTree events/jana4ml4fpga_tree_v1
-// found on file: Run_003078_000.root
+// found on file: ROOT/Run_003264.root
 //////////////////////////////////////////////////////////
 
 #ifndef trdclass_h
@@ -33,8 +32,9 @@ public :
    vector<unsigned int> *srs_raw_channel;
    vector<unsigned int> *srs_raw_apv_id;
    vector<unsigned int> *srs_raw_channel_apv;
-   vector<unsigned long> *srs_raw_samples_index;
-   vector<unsigned long> *srs_raw_samples_count;
+   vector<unsigned short> *srs_raw_best_sample;
+   vector<unsigned short> *srs_raw_samples_index;
+   vector<unsigned short> *srs_raw_samples_count;
    vector<unsigned short> *srs_raw_samples;
    ULong64_t       f125_wraw_count;
    vector<unsigned int> *f125_wraw_roc;
@@ -43,9 +43,19 @@ public :
    vector<bool>    *f125_wraw_invalid_samples;
    vector<bool>    *f125_wraw_overflow;
    vector<unsigned int> *f125_wraw_itrigger;
-   vector<unsigned long> *f125_wraw_samples_index;
-   vector<unsigned long> *f125_wraw_samples_count;
+   vector<unsigned short> *f125_wraw_samples_index;
+   vector<unsigned short> *f125_wraw_samples_count;
    vector<unsigned short> *f125_wraw_samples;
+   ULong64_t       f250_wraw_count;
+   vector<unsigned int> *f250_wraw_roc;
+   vector<unsigned int> *f250_wraw_slot;
+   vector<unsigned int> *f250_wraw_channel;
+   vector<bool>    *f250_wraw_invalid_samples;
+   vector<bool>    *f250_wraw_overflow;
+   vector<unsigned int> *f250_wraw_itrigger;
+   vector<unsigned short> *f250_wraw_samples_index;
+   vector<unsigned short> *f250_wraw_samples_count;
+   vector<unsigned short> *f250_wraw_samples;
    ULong64_t       f125_pulse_count;
    vector<unsigned int> *f125_pulse_roc;
    vector<unsigned int> *f125_pulse_slot;
@@ -70,16 +80,40 @@ public :
    vector<unsigned int> *f125_pulse_integral_emulated;
    vector<unsigned int> *f125_pulse_peak_amp_emulated;
    vector<unsigned int> *f125_pulse_peak_time_emulated;
-   ULong64_t       f250_wraw_count;
-   vector<unsigned int> *f250_wraw_roc;
-   vector<unsigned int> *f250_wraw_slot;
-   vector<unsigned int> *f250_wraw_channel;
-   vector<bool>    *f250_wraw_invalid_samples;
-   vector<bool>    *f250_wraw_overflow;
-   vector<unsigned int> *f250_wraw_itrigger;
-   vector<unsigned long> *f250_wraw_samples_index;
-   vector<unsigned long> *f250_wraw_samples_count;
-   vector<unsigned short> *f250_wraw_samples;
+   ULong64_t       f250_pulse_count;
+   vector<unsigned int> *f250_pulse_event_within_block;
+   vector<bool>    *f250_pulse_qf_pedestal;
+   vector<unsigned int> *f250_pulse_pedestal;
+   vector<unsigned int> *f250_pulse_integral;
+   vector<bool>    *f250_pulse_qf_nsa_beyond_ptw;
+   vector<bool>    *f250_pulse_qf_overflow;
+   vector<bool>    *f250_pulse_qf_underflow;
+   vector<unsigned int> *f250_pulse_nsamples_over_threshold;
+   vector<unsigned int> *f250_pulse_course_time;
+   vector<unsigned int> *f250_pulse_fine_time;
+   vector<unsigned int> *f250_pulse_pulse_peak;
+   vector<bool>    *f250_pulse_qf_vpeak_beyond_nsa;
+   vector<bool>    *f250_pulse_qf_vpeak_not_found;
+   vector<bool>    *f250_pulse_qf_bad_pedestal;
+   vector<unsigned int> *f250_pulse_pulse_number;
+   vector<unsigned int> *f250_pulse_nsamples_integral;
+   vector<unsigned int> *f250_pulse_nsamples_pedestal;
+   vector<bool>    *f250_pulse_emulated;
+   vector<unsigned int> *f250_pulse_integral_emulated;
+   vector<unsigned int> *f250_pulse_pedestal_emulated;
+   vector<unsigned int> *f250_pulse_time_emulated;
+   vector<unsigned int> *f250_pulse_course_time_emulated;
+   vector<unsigned int> *f250_pulse_fine_time_emulated;
+   vector<unsigned int> *f250_pulse_pulse_peak_emulated;
+   vector<unsigned int> *f250_pulse_qf_emulated;
+   ULong64_t       gem_scluster_count;
+   vector<double>  *gem_scluster_x;
+   vector<double>  *gem_scluster_y;
+   vector<double>  *gem_scluster_energy;
+   vector<double>  *gem_scluster_adc;
+   ULong64_t       srs_prerecon_count;
+   vector<double>  *srs_prerecon_y;
+   vector<double>  *srs_prerecon_x;
 
    // List of branches
    TBranch        *b_srs_raw_count;   //!
@@ -88,6 +122,7 @@ public :
    TBranch        *b_srs_raw_channel;   //!
    TBranch        *b_srs_raw_apv_id;   //!
    TBranch        *b_srs_raw_channel_apv;   //!
+   TBranch        *b_srs_raw_best_sample;   //!
    TBranch        *b_srs_raw_samples_index;   //!
    TBranch        *b_srs_raw_samples_count;   //!
    TBranch        *b_srs_raw_samples;   //!
@@ -101,6 +136,16 @@ public :
    TBranch        *b_f125_wraw_samples_index;   //!
    TBranch        *b_f125_wraw_samples_count;   //!
    TBranch        *b_f125_wraw_samples;   //!
+   TBranch        *b_f250_wraw_count;   //!
+   TBranch        *b_f250_wraw_roc;   //!
+   TBranch        *b_f250_wraw_slot;   //!
+   TBranch        *b_f250_wraw_channel;   //!
+   TBranch        *b_f250_wraw_invalid_samples;   //!
+   TBranch        *b_f250_wraw_overflow;   //!
+   TBranch        *b_f250_wraw_itrigger;   //!
+   TBranch        *b_f250_wraw_samples_index;   //!
+   TBranch        *b_f250_wraw_samples_count;   //!
+   TBranch        *b_f250_wraw_samples;   //!
    TBranch        *b_f125_pulse_count;   //!
    TBranch        *b_f125_pulse_roc;   //!
    TBranch        *b_f125_pulse_slot;   //!
@@ -125,16 +170,40 @@ public :
    TBranch        *b_f125_pulse_integral_emulated;   //!
    TBranch        *b_f125_pulse_peak_amp_emulated;   //!
    TBranch        *b_f125_pulse_peak_time_emulated;   //!
-   TBranch        *b_f250_wraw_count;   //!
-   TBranch        *b_f250_wraw_roc;   //!
-   TBranch        *b_f250_wraw_slot;   //!
-   TBranch        *b_f250_wraw_channel;   //!
-   TBranch        *b_f250_wraw_invalid_samples;   //!
-   TBranch        *b_f250_wraw_overflow;   //!
-   TBranch        *b_f250_wraw_itrigger;   //!
-   TBranch        *b_f250_wraw_samples_index;   //!
-   TBranch        *b_f250_wraw_samples_count;   //!
-   TBranch        *b_f250_wraw_samples;   //!
+   TBranch        *b_f250_pulse_count;   //!
+   TBranch        *b_f250_pulse_event_within_block;   //!
+   TBranch        *b_f250_pulse_qf_pedestal;   //!
+   TBranch        *b_f250_pulse_pedestal;   //!
+   TBranch        *b_f250_pulse_integral;   //!
+   TBranch        *b_f250_pulse_qf_nsa_beyond_ptw;   //!
+   TBranch        *b_f250_pulse_qf_overflow;   //!
+   TBranch        *b_f250_pulse_qf_underflow;   //!
+   TBranch        *b_f250_pulse_nsamples_over_threshold;   //!
+   TBranch        *b_f250_pulse_course_time;   //!
+   TBranch        *b_f250_pulse_fine_time;   //!
+   TBranch        *b_f250_pulse_pulse_peak;   //!
+   TBranch        *b_f250_pulse_qf_vpeak_beyond_nsa;   //!
+   TBranch        *b_f250_pulse_qf_vpeak_not_found;   //!
+   TBranch        *b_f250_pulse_qf_bad_pedestal;   //!
+   TBranch        *b_f250_pulse_pulse_number;   //!
+   TBranch        *b_f250_pulse_nsamples_integral;   //!
+   TBranch        *b_f250_pulse_nsamples_pedestal;   //!
+   TBranch        *b_f250_pulse_emulated;   //!
+   TBranch        *b_f250_pulse_integral_emulated;   //!
+   TBranch        *b_f250_pulse_pedestal_emulated;   //!
+   TBranch        *b_f250_pulse_time_emulated;   //!
+   TBranch        *b_f250_pulse_course_time_emulated;   //!
+   TBranch        *b_f250_pulse_fine_time_emulated;   //!
+   TBranch        *b_f250_pulse_pulse_peak_emulated;   //!
+   TBranch        *b_f250_pulse_qf_emulated;   //!
+   TBranch        *b_gem_scluster_count;   //!
+   TBranch        *b_gem_scluster_x;   //!
+   TBranch        *b_gem_scluster_y;   //!
+   TBranch        *b_gem_scluster_energy;   //!
+   TBranch        *b_gem_scluster_adc;   //!
+   TBranch        *b_srs_prerecon_count;   //!
+   TBranch        *b_srs_prerecon_y;   //!
+   TBranch        *b_srs_prerecon_x;   //!
 
    trdclass(int RunNum);
    virtual ~trdclass();
@@ -145,11 +214,10 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-
    //==================  histograms ========================
 
    int RunNum;
- 
+   TH1F *h250_size;
    TH1F *hCal_occ;
    TH1F *hCal_sum;
    TH1F *hCal_sum_el;
@@ -172,8 +240,8 @@ public :
 
    TH1F *f125_el;
    TH1F *f125_pi;
-   TH2F *f125_el_amp2d;
-   TH2F *f125_pi_amp2d;
+   TH2F *f125_el_amp2d, *f125_el_evt;
+   TH2F *f125_pi_amp2d, *f125_pi_evt;
    TH2F *f125_el_clu2d;
    TH2F *f125_pi_clu2d;
 
@@ -183,7 +251,7 @@ public :
    TH2F *mmg_f125_pi_amp2d;
    TH2F *mmg_f125_el_clu2d;
    TH2F *mmg_f125_pi_clu2d;
-   
+
    TH2F *urw_f125_el_amp2d;
    TH2F *urw_f125_pi_amp2d;
    TH2F *urw_f125_el_clu2d;
@@ -195,7 +263,7 @@ public :
 #endif
 
 #ifdef trdclass_cxx
-trdclass::trdclass(int RunNum_in) : fChain(0)
+trdclass::trdclass(int RunNum_in) : fChain(0) 
 {
   RunNum=RunNum_in;
   TTree *tree=NULL;
@@ -203,7 +271,7 @@ trdclass::trdclass(int RunNum_in) : fChain(0)
 // used to generate this class and read the Tree.
    if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
+     sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOTData/Run_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
@@ -255,6 +323,7 @@ void trdclass::Init(TTree *tree)
    srs_raw_channel = 0;
    srs_raw_apv_id = 0;
    srs_raw_channel_apv = 0;
+   srs_raw_best_sample = 0;
    srs_raw_samples_index = 0;
    srs_raw_samples_count = 0;
    srs_raw_samples = 0;
@@ -267,6 +336,15 @@ void trdclass::Init(TTree *tree)
    f125_wraw_samples_index = 0;
    f125_wraw_samples_count = 0;
    f125_wraw_samples = 0;
+   f250_wraw_roc = 0;
+   f250_wraw_slot = 0;
+   f250_wraw_channel = 0;
+   f250_wraw_invalid_samples = 0;
+   f250_wraw_overflow = 0;
+   f250_wraw_itrigger = 0;
+   f250_wraw_samples_index = 0;
+   f250_wraw_samples_count = 0;
+   f250_wraw_samples = 0;
    f125_pulse_roc = 0;
    f125_pulse_slot = 0;
    f125_pulse_channel = 0;
@@ -290,15 +368,37 @@ void trdclass::Init(TTree *tree)
    f125_pulse_integral_emulated = 0;
    f125_pulse_peak_amp_emulated = 0;
    f125_pulse_peak_time_emulated = 0;
-   f250_wraw_roc = 0;
-   f250_wraw_slot = 0;
-   f250_wraw_channel = 0;
-   f250_wraw_invalid_samples = 0;
-   f250_wraw_overflow = 0;
-   f250_wraw_itrigger = 0;
-   f250_wraw_samples_index = 0;
-   f250_wraw_samples_count = 0;
-   f250_wraw_samples = 0;
+   f250_pulse_event_within_block = 0;
+   f250_pulse_qf_pedestal = 0;
+   f250_pulse_pedestal = 0;
+   f250_pulse_integral = 0;
+   f250_pulse_qf_nsa_beyond_ptw = 0;
+   f250_pulse_qf_overflow = 0;
+   f250_pulse_qf_underflow = 0;
+   f250_pulse_nsamples_over_threshold = 0;
+   f250_pulse_course_time = 0;
+   f250_pulse_fine_time = 0;
+   f250_pulse_pulse_peak = 0;
+   f250_pulse_qf_vpeak_beyond_nsa = 0;
+   f250_pulse_qf_vpeak_not_found = 0;
+   f250_pulse_qf_bad_pedestal = 0;
+   f250_pulse_pulse_number = 0;
+   f250_pulse_nsamples_integral = 0;
+   f250_pulse_nsamples_pedestal = 0;
+   f250_pulse_emulated = 0;
+   f250_pulse_integral_emulated = 0;
+   f250_pulse_pedestal_emulated = 0;
+   f250_pulse_time_emulated = 0;
+   f250_pulse_course_time_emulated = 0;
+   f250_pulse_fine_time_emulated = 0;
+   f250_pulse_pulse_peak_emulated = 0;
+   f250_pulse_qf_emulated = 0;
+   gem_scluster_x = 0;
+   gem_scluster_y = 0;
+   gem_scluster_energy = 0;
+   gem_scluster_adc = 0;
+   srs_prerecon_y = 0;
+   srs_prerecon_x = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -311,6 +411,7 @@ void trdclass::Init(TTree *tree)
    fChain->SetBranchAddress("srs_raw_channel", &srs_raw_channel, &b_srs_raw_channel);
    fChain->SetBranchAddress("srs_raw_apv_id", &srs_raw_apv_id, &b_srs_raw_apv_id);
    fChain->SetBranchAddress("srs_raw_channel_apv", &srs_raw_channel_apv, &b_srs_raw_channel_apv);
+   fChain->SetBranchAddress("srs_raw_best_sample", &srs_raw_best_sample, &b_srs_raw_best_sample);
    fChain->SetBranchAddress("srs_raw_samples_index", &srs_raw_samples_index, &b_srs_raw_samples_index);
    fChain->SetBranchAddress("srs_raw_samples_count", &srs_raw_samples_count, &b_srs_raw_samples_count);
    fChain->SetBranchAddress("srs_raw_samples", &srs_raw_samples, &b_srs_raw_samples);
@@ -324,6 +425,16 @@ void trdclass::Init(TTree *tree)
    fChain->SetBranchAddress("f125_wraw_samples_index", &f125_wraw_samples_index, &b_f125_wraw_samples_index);
    fChain->SetBranchAddress("f125_wraw_samples_count", &f125_wraw_samples_count, &b_f125_wraw_samples_count);
    fChain->SetBranchAddress("f125_wraw_samples", &f125_wraw_samples, &b_f125_wraw_samples);
+   fChain->SetBranchAddress("f250_wraw_count", &f250_wraw_count, &b_f250_wraw_count);
+   fChain->SetBranchAddress("f250_wraw_roc", &f250_wraw_roc, &b_f250_wraw_roc);
+   fChain->SetBranchAddress("f250_wraw_slot", &f250_wraw_slot, &b_f250_wraw_slot);
+   fChain->SetBranchAddress("f250_wraw_channel", &f250_wraw_channel, &b_f250_wraw_channel);
+   fChain->SetBranchAddress("f250_wraw_invalid_samples", &f250_wraw_invalid_samples, &b_f250_wraw_invalid_samples);
+   fChain->SetBranchAddress("f250_wraw_overflow", &f250_wraw_overflow, &b_f250_wraw_overflow);
+   fChain->SetBranchAddress("f250_wraw_itrigger", &f250_wraw_itrigger, &b_f250_wraw_itrigger);
+   fChain->SetBranchAddress("f250_wraw_samples_index", &f250_wraw_samples_index, &b_f250_wraw_samples_index);
+   fChain->SetBranchAddress("f250_wraw_samples_count", &f250_wraw_samples_count, &b_f250_wraw_samples_count);
+   fChain->SetBranchAddress("f250_wraw_samples", &f250_wraw_samples, &b_f250_wraw_samples);
    fChain->SetBranchAddress("f125_pulse_count", &f125_pulse_count, &b_f125_pulse_count);
    fChain->SetBranchAddress("f125_pulse_roc", &f125_pulse_roc, &b_f125_pulse_roc);
    fChain->SetBranchAddress("f125_pulse_slot", &f125_pulse_slot, &b_f125_pulse_slot);
@@ -348,16 +459,40 @@ void trdclass::Init(TTree *tree)
    fChain->SetBranchAddress("f125_pulse_integral_emulated", &f125_pulse_integral_emulated, &b_f125_pulse_integral_emulated);
    fChain->SetBranchAddress("f125_pulse_peak_amp_emulated", &f125_pulse_peak_amp_emulated, &b_f125_pulse_peak_amp_emulated);
    fChain->SetBranchAddress("f125_pulse_peak_time_emulated", &f125_pulse_peak_time_emulated, &b_f125_pulse_peak_time_emulated);
-   fChain->SetBranchAddress("f250_wraw_count", &f250_wraw_count, &b_f250_wraw_count);
-   fChain->SetBranchAddress("f250_wraw_roc", &f250_wraw_roc, &b_f250_wraw_roc);
-   fChain->SetBranchAddress("f250_wraw_slot", &f250_wraw_slot, &b_f250_wraw_slot);
-   fChain->SetBranchAddress("f250_wraw_channel", &f250_wraw_channel, &b_f250_wraw_channel);
-   fChain->SetBranchAddress("f250_wraw_invalid_samples", &f250_wraw_invalid_samples, &b_f250_wraw_invalid_samples);
-   fChain->SetBranchAddress("f250_wraw_overflow", &f250_wraw_overflow, &b_f250_wraw_overflow);
-   fChain->SetBranchAddress("f250_wraw_itrigger", &f250_wraw_itrigger, &b_f250_wraw_itrigger);
-   fChain->SetBranchAddress("f250_wraw_samples_index", &f250_wraw_samples_index, &b_f250_wraw_samples_index);
-   fChain->SetBranchAddress("f250_wraw_samples_count", &f250_wraw_samples_count, &b_f250_wraw_samples_count);
-   fChain->SetBranchAddress("f250_wraw_samples", &f250_wraw_samples, &b_f250_wraw_samples);
+   fChain->SetBranchAddress("f250_pulse_count", &f250_pulse_count, &b_f250_pulse_count);
+   fChain->SetBranchAddress("f250_pulse_event_within_block", &f250_pulse_event_within_block, &b_f250_pulse_event_within_block);
+   fChain->SetBranchAddress("f250_pulse_qf_pedestal", &f250_pulse_qf_pedestal, &b_f250_pulse_qf_pedestal);
+   fChain->SetBranchAddress("f250_pulse_pedestal", &f250_pulse_pedestal, &b_f250_pulse_pedestal);
+   fChain->SetBranchAddress("f250_pulse_integral", &f250_pulse_integral, &b_f250_pulse_integral);
+   fChain->SetBranchAddress("f250_pulse_qf_nsa_beyond_ptw", &f250_pulse_qf_nsa_beyond_ptw, &b_f250_pulse_qf_nsa_beyond_ptw);
+   fChain->SetBranchAddress("f250_pulse_qf_overflow", &f250_pulse_qf_overflow, &b_f250_pulse_qf_overflow);
+   fChain->SetBranchAddress("f250_pulse_qf_underflow", &f250_pulse_qf_underflow, &b_f250_pulse_qf_underflow);
+   fChain->SetBranchAddress("f250_pulse_nsamples_over_threshold", &f250_pulse_nsamples_over_threshold, &b_f250_pulse_nsamples_over_threshold);
+   fChain->SetBranchAddress("f250_pulse_course_time", &f250_pulse_course_time, &b_f250_pulse_course_time);
+   fChain->SetBranchAddress("f250_pulse_fine_time", &f250_pulse_fine_time, &b_f250_pulse_fine_time);
+   fChain->SetBranchAddress("f250_pulse_pulse_peak", &f250_pulse_pulse_peak, &b_f250_pulse_pulse_peak);
+   fChain->SetBranchAddress("f250_pulse_qf_vpeak_beyond_nsa", &f250_pulse_qf_vpeak_beyond_nsa, &b_f250_pulse_qf_vpeak_beyond_nsa);
+   fChain->SetBranchAddress("f250_pulse_qf_vpeak_not_found", &f250_pulse_qf_vpeak_not_found, &b_f250_pulse_qf_vpeak_not_found);
+   fChain->SetBranchAddress("f250_pulse_qf_bad_pedestal", &f250_pulse_qf_bad_pedestal, &b_f250_pulse_qf_bad_pedestal);
+   fChain->SetBranchAddress("f250_pulse_pulse_number", &f250_pulse_pulse_number, &b_f250_pulse_pulse_number);
+   fChain->SetBranchAddress("f250_pulse_nsamples_integral", &f250_pulse_nsamples_integral, &b_f250_pulse_nsamples_integral);
+   fChain->SetBranchAddress("f250_pulse_nsamples_pedestal", &f250_pulse_nsamples_pedestal, &b_f250_pulse_nsamples_pedestal);
+   fChain->SetBranchAddress("f250_pulse_emulated", &f250_pulse_emulated, &b_f250_pulse_emulated);
+   fChain->SetBranchAddress("f250_pulse_integral_emulated", &f250_pulse_integral_emulated, &b_f250_pulse_integral_emulated);
+   fChain->SetBranchAddress("f250_pulse_pedestal_emulated", &f250_pulse_pedestal_emulated, &b_f250_pulse_pedestal_emulated);
+   fChain->SetBranchAddress("f250_pulse_time_emulated", &f250_pulse_time_emulated, &b_f250_pulse_time_emulated);
+   fChain->SetBranchAddress("f250_pulse_course_time_emulated", &f250_pulse_course_time_emulated, &b_f250_pulse_course_time_emulated);
+   fChain->SetBranchAddress("f250_pulse_fine_time_emulated", &f250_pulse_fine_time_emulated, &b_f250_pulse_fine_time_emulated);
+   fChain->SetBranchAddress("f250_pulse_pulse_peak_emulated", &f250_pulse_pulse_peak_emulated, &b_f250_pulse_pulse_peak_emulated);
+   fChain->SetBranchAddress("f250_pulse_qf_emulated", &f250_pulse_qf_emulated, &b_f250_pulse_qf_emulated);
+   fChain->SetBranchAddress("gem_scluster_count", &gem_scluster_count, &b_gem_scluster_count);
+   fChain->SetBranchAddress("gem_scluster_x", &gem_scluster_x, &b_gem_scluster_x);
+   fChain->SetBranchAddress("gem_scluster_y", &gem_scluster_y, &b_gem_scluster_y);
+   fChain->SetBranchAddress("gem_scluster_energy", &gem_scluster_energy, &b_gem_scluster_energy);
+   fChain->SetBranchAddress("gem_scluster_adc", &gem_scluster_adc, &b_gem_scluster_adc);
+   fChain->SetBranchAddress("srs_prerecon_count", &srs_prerecon_count, &b_srs_prerecon_count);
+   fChain->SetBranchAddress("srs_prerecon_y", &srs_prerecon_y, &b_srs_prerecon_y);
+   fChain->SetBranchAddress("srs_prerecon_x", &srs_prerecon_x, &b_srs_prerecon_x);
    Notify();
 }
 
