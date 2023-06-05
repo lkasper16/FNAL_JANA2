@@ -252,6 +252,8 @@ public :
    TH2F *mmg_f125_el_clu2d;
    TH2F *mmg_f125_pi_clu2d;
 
+   TH1F *urw_f125_el;
+   TH1F *urw_f125_pi;
    TH2F *urw_f125_el_amp2d;
    TH2F *urw_f125_pi_amp2d;
    TH2F *urw_f125_el_clu2d;
