@@ -39,8 +39,8 @@ void trdclass::Loop() {
   	//TCanvas *c0 = new TCanvas("DISP",c0Title,200,200,1500,1300);
   	//c0->Divide(2,2); c0->cd(1);
 	
-  	hCal_occ = new TH1F("hCal_occ"," Calorimeter Occupancy",9,-0.5,8.5);
-  	hCal_sum = new TH1F("hCal_sum"," Calorimeter Sum",4096,0.5,4095.5);
+  	hCal_occ = new TH1F("hCal_occ","Calorimeter Occupancy",9,-0.5,8.5);
+  	hCal_sum = new TH1F("hCal_sum","Calorimeter Sum",4096,0.5,4095.5);
   	for (int cc=0; cc<NCAL; cc++) {
     	char hName[128];  sprintf(hName,"hCal_adc%d",cc);
     	char hTitle[128]; sprintf(hTitle,"Calorimeter ADC, cell%d",cc);   
@@ -48,7 +48,7 @@ void trdclass::Loop() {
   	}
 	
   	h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);
-	
+
   	hCal_sum_el = new TH1F("hCal_sum_el"," Calorimeter Sum for electrons",4096,0.5,4095.5);
   	hCal_sum_pi = new TH1F("hCal_sum_pi"," Calorimeter Sum for pions",4096,0.5,4095.5);
   	hCher_u_adc = new TH1F("hCher_u_adc"," Cherenkov Upstream ADC ; ADC Amplitude ",4096,-0.5,4095.5);
@@ -79,12 +79,12 @@ void trdclass::Loop() {
   	mmg_f125_pi_amp2d = new TH2F("mmg_f125_pi_amp2d","MMG-TRD Amp for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   	urw_f125_el_amp2d = new TH2F("urw_f125_el_amp2d","uRW-TRD Amp for Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   	urw_f125_pi_amp2d = new TH2F("urw_f125_pi_amp2d","uRW-TRD Amp for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
-  	f125_el_clu2d = new TH2F("f125_el_clu2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
-  	f125_pi_clu2d = new TH2F("f125_pi_clu2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
-  	mmg_f125_el_clu2d = new TH2F("mmg_f125_el_clu2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
-  	mmg_f125_pi_clu2d = new TH2F("mmg_f125_pi_clu2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
-  	urw_f125_el_clu2d = new TH2F("urw_f125_el_clu2d","amp (ch,time) for electrons",200,0.5,200.5,240,0.5,240.5);
-  	urw_f125_pi_clu2d = new TH2F("urw_f125_pi_clu2d","amp (ch,time) for pions",200,0.5,200.5,240,0.5,240.5);
+  	f125_el_clu2d = new TH2F("f125_el_clu2d","GEM-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);
+  	f125_pi_clu2d = new TH2F("f125_pi_clu2d","GEM-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
+  	mmg_f125_el_clu2d = new TH2F("mmg_f125_el_clu2d","MMG-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);
+  	mmg_f125_pi_clu2d = new TH2F("mmg_f125_pi_clu2d","MMG-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
+  	urw_f125_el_clu2d = new TH2F("urw_f125_el_clu2d","uRW-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);
+  	urw_f125_pi_clu2d = new TH2F("urw_f125_pi_clu2d","uRW-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
 	
 //=========================================
 
@@ -104,7 +104,7 @@ void trdclass::Loop() {
     	nb = fChain->GetEntry(jentry);
 		nbytes += nb;
 		
-    	//if (jentry<MAX_PRINT || !(jentry%1000)) printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu \n",jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count,srs_raw_count);
+    	if (jentry<MAX_PRINT || !(jentry%1000)) printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu \n",jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count,srs_raw_count);
     	
 //==================================================================================================
 //                    Show Event 
@@ -189,7 +189,13 @@ void trdclass::Loop() {
 			if(electron) f125_el_evt->Reset(); else  f125_pi_evt->Reset();
 		}
 		
+		int gem_chan_max=-1;
+		int mmg_chan_max=-1;
+		int urw_chan_max=-1;
     	float f125_amp_max=0.;
+		float mmg_f125_amp_max=0.;
+		float urw_f125_amp_max=0.;
+		
     	for (int i=0;i<f125_pulse_count; i++) {
       		//if (jentry<MAX_PRINT) printf("F125:: i=%d  sl=%d, ch=%d, npk=%d time=%d amp=%d ped=%d \n",i,f125_pulse_slot->at(i),f125_pulse_channel->at(i),f125_pulse_npk->at(i),f125_pulse_peak_time->at(i),f125_pulse_peak_amp->at(i),f125_pulse_pedestal->at(i));
       		//cout<<" ++++++++++++++++++++ f125_pulse_npk= "<<f125_pulse_npk->at(i)<<endl;
@@ -217,13 +223,15 @@ void trdclass::Loop() {
 					//if (!(jentry%1000)) f125_el_evt->Fill(time,dchan,amp);
 				}
 				if (amp>MM_THR) {
-	  				if ((slot==8)||(slot==9 && chan<48)) { 
-	    				mmg_f125_el_amp2d->Fill(time,dchan-360.,amp);
+	  				if ((slot==8)||(slot==7 && chan>23)||(slot==9 && chan<48)) { 
+	    				mmg_f125_el_amp2d->Fill(time,dchan-312.,amp);
 						mmg_f125_el->Fill(amp);
-	    				mmg_f125_el_clu2d->Fill(time,dchan-360.,1.);
+	    				mmg_f125_el_clu2d->Fill(time,dchan-312.,1.);
 	  				}
 				}
-				if ((slot==6&&chan>23)||(slot==7)) { 
+				if ((slot==6&&chan>23)||(slot==7&&chan<24)) {
+					if (chan<24) chan-=48;
+                    if (chan<48) chan+=48;
 	  				urw_f125_el_amp2d->Fill(time,dchan-240.,amp);
 					urw_f125_el->Fill(amp);
 	  				urw_f125_el_clu2d->Fill(time,dchan-240.,1.);
@@ -236,20 +244,25 @@ void trdclass::Loop() {
 					//if (!(jentry%1000)) f125_pi_evt->Fill(time,dchan,amp);
 				}
 				if (amp>MM_THR) {
-	  				if ((slot==8)||(slot==9 && chan<48)) { 
-	    				mmg_f125_pi_amp2d->Fill(time,dchan-360.,amp);
-	    				mmg_f125_pi_clu2d->Fill(time,dchan-360.,1.);
+	  				if ((slot==8)||(slot==7 && chan>23)||(slot==9 && chan<48)) { 
+	    				mmg_f125_pi_amp2d->Fill(time,dchan-312.,amp);
+	    				mmg_f125_pi_clu2d->Fill(time,dchan-312.,1.);
 	    				mmg_f125_pi->Fill(amp); 
 	  				}
 				}
-				if ((slot==6&&chan>23)||(slot==7)) { 
+				if ((slot==6&&chan>23)||(slot==7&&chan<24)) {
+					if (chan<24) chan-=48;
+					if (chan<48) chan+=48;
 	  				urw_f125_pi_amp2d->Fill(time,dchan-240.,amp);
 	  				urw_f125_pi_clu2d->Fill(time,dchan-240.,1.);
 					urw_f125_pi->Fill(amp);
 				}
       		}
 			
-      		if (peak_amp-ped>f125_amp_max) f125_amp_max=peak_amp-ped;
+      		if (peak_amp-ped>f125_amp_max) {
+				f125_amp_max=peak_amp-ped;
+				chan_max = chan;
+			}
 			
       		hCal_sum->Fill(CalSum/7.);
       		hCCor_ud->Fill(Ch_u,Ch_out);
@@ -321,7 +334,7 @@ void trdclass::Loop() {
 
   	//open
   	TFile* fOut;
-  	char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/Run%d_Output_MMTHR50.root", RunNum);
+  	char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/Run%d_Output_MapTest.root", RunNum);
   	fOut = new TFile(rootFileName, "RECREATE");
   	fOut->cd();
   	//write hists
@@ -367,11 +380,11 @@ void trdclass::Loop() {
 //=====================================================================================
 	
 //-----------------  canvas 1 calorimeter (fa250) ----------
-  	char c1Title[256]; sprintf(c1Title,"FNAL_JANA2/RunOutput/PDFs/Calorimeter_Run=%d.pdf",RunNum);
+	int n=1;
+/*  	char c1Title[256]; sprintf(c1Title,"FNAL_JANA2/RunOutput/PDFs/Calorimeter_Run=%d.pdf",RunNum);
   	TCanvas *c1 = new TCanvas("CAL",c1Title,1,1,1300,900);
   	c1->Divide(3,3);
 	
-  	int n=1;
   	c1->cd(n++);  hCal_occ->Draw();
   	c1->cd(n++);  gPad->SetLogy(); hCal_adc[6]->Draw(); 
   	c1->cd(n++);  hCal_sum->Draw();
@@ -385,12 +398,12 @@ void trdclass::Loop() {
   	c1->Modified();
   	c1->Update();
   	c1->Print(c1Title);
-	
+*/	
 //-----------------  canvas 2 Cherenkov (fa250) ----------
-  	char c2Title[256]; sprintf(c2Title,"FNAL_JANA2/RunOutput/PDFs/Cherenkov_det_Run=%d.pdf",RunNum);
+/*  	char c2Title[256]; sprintf(c2Title,"FNAL_JANA2/RunOutput/PDFs/Cherenkov_det_Run=%d.pdf",RunNum);
   	TCanvas *c2 = new TCanvas("CHER",c2Title,100,100,1300,900);
   	c2->Divide(3,3);
-  	n=1;
+	n=1;
   	c2->cd(n++);  gPad->SetLogy();  hCher_u_adc->Draw();
   	c2->cd(n++);  gPad->SetLogy();  hCher_din_adc->Draw();
   	c2->cd(n++);  gPad->SetLogy();  hCher_dout_adc->Draw();
@@ -404,7 +417,7 @@ void trdclass::Loop() {
   	c2->Modified();
   	c2->Update();
   	c2->Print(c2Title);
-	
+*/	
 //-----------------  canvas 3 GEMTRD (fa125) ----------
   	char c3Title[256]; sprintf(c3Title,"FNAL_JANA2/RunOutput/PDFs/GEMTRD_det_Run=%d.pdf",RunNum);
   	TCanvas *c3 = new TCanvas("GEMTRD",c3Title,100,100,1300,900);
