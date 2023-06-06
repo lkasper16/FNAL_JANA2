@@ -8,9 +8,39 @@
 #ifndef trdclass_h
 #define trdclass_h
 
+#include "TSystem.h"
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TH2.h>
+#include <sstream>
+
+#include "TROOT.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TBrowser.h"
+#include "TH2.h"
+#include "TRandom.h"
+#include <iostream>
+#include "TRandom3.h"
+#include "TCanvas.h"
+#include "TMultiLayerPerceptron.h"
+#include "TMLPAnalyzer.h"
+#include "TLegend.h"
+#include "TGraph.h"
+#include "TString.h"
+#include "TLatex.h"
+#include "TStyle.h"
+#include "TLine.h"
+#include "TLinearFitter.h"
+#include "TGraphErrors.h"
+#include "TF1.h"
+#include "TPaveStats.h"
+#include "TCutG.h"
+#include "TProfile.h"
+
+#include "stdio.h"
+
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -81,6 +111,9 @@ public :
    vector<unsigned int> *f125_pulse_peak_amp_emulated;
    vector<unsigned int> *f125_pulse_peak_time_emulated;
    ULong64_t       f250_pulse_count;
+   vector<unsigned int> *f250_pulse_roc;
+   vector<unsigned int> *f250_pulse_slot;
+   vector<unsigned int> *f250_pulse_channel;
    vector<unsigned int> *f250_pulse_event_within_block;
    vector<bool>    *f250_pulse_qf_pedestal;
    vector<unsigned int> *f250_pulse_pedestal;
@@ -171,6 +204,9 @@ public :
    TBranch        *b_f125_pulse_peak_amp_emulated;   //!
    TBranch        *b_f125_pulse_peak_time_emulated;   //!
    TBranch        *b_f250_pulse_count;   //!
+   TBranch        *b_f250_pulse_roc;   //!
+   TBranch        *b_f250_pulse_slot;   //!
+   TBranch        *b_f250_pulse_channel;   //!
    TBranch        *b_f250_pulse_event_within_block;   //!
    TBranch        *b_f250_pulse_qf_pedestal;   //!
    TBranch        *b_f250_pulse_pedestal;   //!
@@ -205,7 +241,7 @@ public :
    TBranch        *b_srs_prerecon_y;   //!
    TBranch        *b_srs_prerecon_x;   //!
 
-   trdclass(int RunNum);
+   trdclass(int RunNum, int MaxEvt);
    virtual ~trdclass();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -214,10 +250,17 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+   double   TrkFit(TH2F *h2, TF1 &fx, const char *cfx);
+   void Count(const char *tit);
+   void Count(const char *tit, double cut1);
+   void Count(const char *tit, double cut1, double cut2);
+   
    //==================  histograms ========================
 
    int RunNum;
-   TH1F *h250_size;
+   Long64_t MaxEvt;
+   TH1F *h250_size; 
+   TH1D *hcount;
    TH1F *hCal_occ;
    TH1F *hCal_sum;
    TH1F *hCal_sum_el;
@@ -238,10 +281,10 @@ public :
    TH2F *hCCCor_u;
    TH2F *hCCCor_dout;
 
-   TH1F *f125_el;
-   TH1F *f125_pi;
-   TH2F *f125_el_amp2d, *f125_el_evt;
-   TH2F *f125_pi_amp2d, *f125_pi_evt;
+   TH1F *f125_el, *f125_el_chi2;
+   TH1F *f125_pi, *f125_pi_chi2;
+   TH2F *f125_el_amp2d, *f125_el_amp2ds, *f125_el_evt, *f125_el_raw, *f125_el_fit;
+   TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt, *f125_pi_raw, *f125_pi_fit;
    TH2F *f125_el_clu2d;
    TH2F *f125_pi_clu2d;
 
@@ -251,7 +294,7 @@ public :
    TH2F *mmg1_f125_pi_amp2d;
    TH2F *mmg1_f125_el_clu2d;
    TH2F *mmg1_f125_pi_clu2d;
-   
+
    TH1F *mmg2_f125_el;
    TH1F *mmg2_f125_pi;
    TH2F *mmg2_f125_el_amp2d;
@@ -272,15 +315,16 @@ public :
 #endif
 
 #ifdef trdclass_cxx
-trdclass::trdclass(int RunNum_in) : fChain(0) 
+trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0) 
 {
   RunNum=RunNum_in;
+  MaxEvt=MaxEvt_in;
   TTree *tree=NULL;
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOTData/Run_%06d.root",RunNum);
+     sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
@@ -435,6 +479,9 @@ void trdclass::Init(TTree *tree)
    fChain->SetBranchAddress("f125_wraw_samples_count", &f125_wraw_samples_count, &b_f125_wraw_samples_count);
    fChain->SetBranchAddress("f125_wraw_samples", &f125_wraw_samples, &b_f125_wraw_samples);
    fChain->SetBranchAddress("f250_wraw_count", &f250_wraw_count, &b_f250_wraw_count);
+   fChain->SetBranchAddress("f250_pulse_roc", &f250_pulse_roc, &b_f250_pulse_roc);
+   fChain->SetBranchAddress("f250_pulse_slot", &f250_pulse_slot, &b_f250_pulse_slot);
+   fChain->SetBranchAddress("f250_pulse_channel", &f250_pulse_channel, &b_f250_pulse_channel);
    fChain->SetBranchAddress("f250_wraw_roc", &f250_wraw_roc, &b_f250_wraw_roc);
    fChain->SetBranchAddress("f250_wraw_slot", &f250_wraw_slot, &b_f250_wraw_slot);
    fChain->SetBranchAddress("f250_wraw_channel", &f250_wraw_channel, &b_f250_wraw_channel);
@@ -530,4 +577,76 @@ Int_t trdclass::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
+
+double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx )
+{
+  //----------  SF fit ---------------------------
+  /*
+    h1f->Fit("gaus")
+    TF1 * f = h1f->GetFunction("gaus")
+    f->GetNDF()
+    f->GetChisquare()    
+    f->GetProb()
+    Int_t bin = h3->GetBin(binx,biny,binz);
+    Float_t y = h3->GetBinContent(bin);
+    virtual Double_t TH2::GetBinContent     (       Int_t   binx,           Int_t   biny    )       
+  */
+
+  // TF1 fx("fx","pol1",100,190);
+ 
+  TCutG *cutgx = new TCutG("cutgx",5);
+  cutgx->SetPoint(0,  100,40);      cutgx->SetPoint(1, 190,40);      cutgx->SetPoint(2, 190, 200);      cutgx->SetPoint(3,  100, 200);      cutgx->SetPoint(4,  100,40);
+
+  TProfile *profx = h2_evt->ProfileX("profx", 5, 500,"[cutgx]");
+  //profx->Fit("fx","QNR");
+  profx->Fit(cfx,"QNR");
+  Double_t chi2x = fx.GetChisquare();
+  Double_t Ndfx = fx.GetNDF();
+  Double_t p0x = fx.GetParameter(0);
+  Double_t p1x = fx.GetParameter(1);
+
+  //profx->Draw();
+  //fx.DrawClone("same");
+
+  //printf("+++>   Chi2/Ndf = %f \n",chi2x/Ndfx);
+
+  //chi2xy->Fill(chi2x/Ndfx,chi2y/Ndfy);      
+     
+  int kfit = 0;
+  //if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) { 
+  if (chi2x/Ndfx<100  && Ndfx>10) { 
+    kfit=1;
+    //    hp0x->Fill(p0x);
+    //    hp1x->Fill(p1x);
+    //    sct_plot->Add(ct_plot);
+    //    scty_plot->Add(cty_plot);
+  }
+
+  //printf("Ndfx = %f \n",Ndfx);
+  double chi2=chi2x/Ndfx;  if (Ndfx<3) chi2=-chi2;
+
+  return chi2;
+
+}
+
+
+//==================================================================
+void trdclass::Count(const char *tit) {
+  hcount->Fill(tit,1);
+}
+void trdclass::Count(const char *tit, double cut1) {
+  char clab[20];
+  sprintf(clab,"%s_%.1f",tit,cut1);    
+  hcount->Fill(clab,1);
+}
+void  trdclass::Count(const char *tit, double cut1, double cut2) {
+  char clab[20];
+  sprintf(clab,"%s_%.1f_%.1f",tit,cut1,cut2);    
+  hcount->Fill(clab,1);
+}
+//------------------------------------------------------------------
+
+
+
+
 #endif // #ifdef trdclass_cxx
