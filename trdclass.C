@@ -12,9 +12,9 @@ int GetGEMChan(int ch, int slot) {
 	int invCardChannel = 23-cardChannel;
 	if (slot<6 || (slot==6 && ch<24)) {
 	    return invCardChannel+cardNumber*24+(slot-3)*72.;
-	} else {
+	}// else {
   		return -1;
-	}
+	//}
 }
 
 // -- MMG-1 mapping --
@@ -43,9 +43,9 @@ int GetMMG1Chan(int ch, int slot, int runNum) {
 	    if (slot==8 || (slot==7&&ch>23) || (slot==9&&ch<48)) {
 	        return dchan - 264.;
 	    }
-	} else {
+	}// else {
   		return -1;
-	}
+	//}
 }
 
 // -- MMG-2 mapping --
@@ -75,9 +75,9 @@ int GetMMG2Chan(int ch, int slot, int runNum) {
 	    if (slot==7&&ch<24) {
 	        return dchan - 240.;
 	    }
-	} else {
+	}// else {
   		return -1;
-	}
+	//}
 }
 
 // -- uRWELLTRD mapping --
@@ -99,9 +99,9 @@ int GetRWELLChan(int ch, int slot, int runNum) {
 	    if (slot==7 || (slot==6&&ch>23)) {
 	        return dchan - 240.;
 	    }
-	} else {
+	}// else {
   		return -1;
-	}
+	//}
 }
 
 void trdclass::Loop() {
@@ -361,7 +361,12 @@ void trdclass::Loop() {
 	float mmg_f125_amp_max=0.;
 	float urw_f125_amp_max=0.;
 	//float f125_amp_max=0.;
-
+	int old_slot = 0;
+	int old_ch = 0;
+	int old_itime = 0;
+	float old_time = 0.;
+	float old_peak_amp = 0.;
+	
 	for (ULong64_t i=0;i<f125_pulse_count; i++) {
 	/*    if (jentry<MAX_PRINT) printf("F125:: i=%lld  sl=%d, ch=%d, npk=%d time=%d amp=%d ped=%d \n"
 				   ,i,f125_pulse_slot->at(i),f125_pulse_channel->at(i),f125_pulse_npk->at(i)
@@ -375,6 +380,15 @@ void trdclass::Loop() {
 	    float time=f125_pulse_peak_time->at(i);   int itime=f125_pulse_peak_time->at(i);
 	    int fADCSlot = f125_pulse_slot->at(i);
 	    int fADCChan = f125_pulse_channel->at(i);
+		
+		//if (old_slot==fADCSlot && old_ch==fADCChan && old_time==itime && old_peak_amp==peak_amp) cout<<"Double event !!    event#="<<jentry<<" Slot="<<fADCSlot<<" Chan="<<fADCChan<<" Time="<<itime<<" Pulse_Peak_Amp="<<peak_amp<<endl;
+		//if (old_slot==fADCSlot && old_ch==fADCChan && old_time==itime) cout<<"Double event !!    event#="<<jentry<<" Slot="<<fADCSlot<<" Chan="<<fADCChan<<" int_Time="<<itime<<endl;
+		//if (old_slot==fADCSlot && old_ch==fADCChan && old_time==time) cout<<"Double event !!     event#="<<jentry<<" Slot="<<fADCSlot<<" Chan="<<fADCChan<<" fl_Time="<<time<<endl;
+		//old_slot = fADCSlot;
+		//old_ch = fADCChan;
+		//old_time = time;
+		//old_itime = itime;
+		//old_peak_amp = peak_amp;
 		
 	    int gemChan = GetGEMChan(fADCChan, fADCSlot);
 	    int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
@@ -530,7 +544,8 @@ void trdclass::Loop() {
 
   //open
   TFile* fOut;
-  char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/Run_%06d_Output_MapTest.root", RunNum);
+  char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/Run_%06d_Output.root", RunNum);
+  //char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/eventsTree_Run%06d_Output_%06dEntries.root", RunNum, jentry);
   fOut = new TFile(rootFileName, "RECREATE");
   fOut->cd();
   //write hists
@@ -589,7 +604,7 @@ void trdclass::Loop() {
   const char *OutputDir="FNAL_JANA2/RunOutput";
   int NN_MODE = 8;
   char ctit[120];
-  sprintf(G_DIR,"%s/Run_%06d",OutputDir,RunNum);
+  sprintf(G_DIR,"%s/SINGLERun_%06d",OutputDir,RunNum);
   sprintf(ctit,"File=%s",G_DIR);
   bool COMPACT=false;
   TCanvas *cc;

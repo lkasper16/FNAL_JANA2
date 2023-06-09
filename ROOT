@@ -1,1 +1,1 @@
-/home/kaspel1/store/user/kaspel1/FNAL2023_Data/ROOTData/
+../store/user/kaspel1/FNAL2023_Data/ROOTData

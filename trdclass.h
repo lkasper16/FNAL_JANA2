@@ -325,6 +325,7 @@ trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0)
    if (tree == 0) {
      char FileName[128];
      sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOTData/Run_%06d.root",RunNum);
+     //sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOT/eventsTree_003216_003217_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
