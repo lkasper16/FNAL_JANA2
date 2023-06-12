@@ -5,6 +5,10 @@
 #include <TCanvas.h>
 #include "PlotLib.C"
 
+#define NPRT 1000
+//#define NPRT 10
+#define USE_TRK
+
 // -- GEMTRD mapping --
 int GetGEMChan(int ch, int slot) {
 	int cardNumber = ch/24;
@@ -12,9 +16,8 @@ int GetGEMChan(int ch, int slot) {
 	int invCardChannel = 23-cardChannel;
 	if (slot<6 || (slot==6 && ch<24)) {
 	    return invCardChannel+cardNumber*24+(slot-3)*72.;
-	}// else {
-  		return -1;
-	//}
+  	}
+  	return -1;	
 }
 
 // -- MMG-1 mapping --
@@ -43,9 +46,8 @@ int GetMMG1Chan(int ch, int slot, int runNum) {
 	    if (slot==8 || (slot==7&&ch>23) || (slot==9&&ch<48)) {
 	        return dchan - 264.;
 	    }
-	}// else {
-  		return -1;
-	//}
+  	}
+  	return -1;
 }
 
 // -- MMG-2 mapping --
@@ -75,9 +77,8 @@ int GetMMG2Chan(int ch, int slot, int runNum) {
 	    if (slot==7&&ch<24) {
 	        return dchan - 240.;
 	    }
-	}// else {
-  		return -1;
-	//}
+  	}
+  	return -1;
 }
 
 // -- uRWELLTRD mapping --
@@ -99,9 +100,8 @@ int GetRWELLChan(int ch, int slot, int runNum) {
 	    if (slot==7 || (slot==6&&ch>23)) {
 	        return dchan - 240.;
 	    }
-	}// else {
-  		return -1;
-	//}
+	}
+  	return -1;
 }
 
 void trdclass::Loop() {
@@ -186,11 +186,16 @@ void trdclass::Loop() {
   f125_el_chi2 = new  TH1F("f125_el_chi2","TRK_el_chi2",100,0.,10000.);
   f125_pi_chi2 = new  TH1F("f125_pi_chi2","TRK_pi_chi2",100,0.,10000.);
   
+  int THRESH=200;
   f125_el_evt = new TH2F("f125_el_evt","GEM-TRD track for Electrons ; Time Response (8ns) ; Channel ",100,100.5,200.5,160,40.5,200.5);
+  f125_el_evt->SetStats(0);  f125_el_evt->SetMinimum(THRESH);  f125_el_evt->SetMaximum(1000.); 
   f125_pi_evt = new TH2F("f125_pi_evt","GEM-TRD track for Pions ; Time Response (8ns) ; Channel ",100,100.5,200.5,160,40.5,200.5);
+  f125_pi_evt->SetStats(0); f125_pi_evt->SetMinimum(THRESH); f125_pi_evt->SetMaximum(1000.); 
   f125_el_raw = new TH2F("f125_el_raw","GEM-TRD track for Electrons ; Time Response (8ns) ; Channel ",100,100.5,200.5,160,40.5,200.5);
+  f125_el_raw->SetStats(0);  f125_el_raw->SetMinimum(THRESH);   f125_el_raw->SetMaximum(1000.); 
   f125_pi_raw = new TH2F("f125_pi_raw","GEM-TRD track for Pions ; Time Response (8ns) ; Channel ",100,100.5,200.5,160,40.5,200.5);
-
+  f125_pi_raw->SetStats(0); f125_pi_raw->SetMinimum(THRESH); f125_pi_raw->SetMaximum(1000.);
+  
   f125_el_fit = new TH2F("f125_el_fit","GEM-TRD track for Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   f125_pi_fit = new TH2F("f125_pi_fit","GEM-TRD track for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
 
@@ -213,7 +218,6 @@ void trdclass::Loop() {
   mmg2_f125_pi_clu2d = new TH2F("mmg2_f125_pi_clu2d","MMG2-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
   urw_f125_el_clu2d = new TH2F("urw_f125_el_clu2d","uRW-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);
   urw_f125_pi_clu2d = new TH2F("urw_f125_pi_clu2d","uRW-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
-  https://github.com/lkasper16/FNAL_JANA2
 
 //=========================================
 
@@ -237,7 +241,7 @@ void trdclass::Loop() {
 	nb = fChain->GetEntry(jentry);   nbytes += nb;
 	// if (Cut(ientry) < 0) continue;
 	
-	if (jentry<MAX_PRINT || !(jentry%1000))
+    	if (jentry<MAX_PRINT || !(jentry%NPRT)) 
 	  printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu \n"
 		 ,jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count,srs_raw_count);
 	
@@ -342,9 +346,14 @@ void trdclass::Loop() {
 //==================================================================================================
 //                    Process Fa125  Pulse  data
 //==================================================================================================
-	if (!(jentry%1000)) {
-		if(electron) f125_el_evt->Reset();
-		else  f125_pi_evt->Reset();
+	if (!(jentry%NPRT)) {
+		if(electron) {
+			f125_el_evt->Reset();
+			f125_el_raw->Reset();
+		} else {
+			f125_pi_evt->Reset();
+			f125_pi_raw->Reset();
+		}
 	}
 	if (electron) {
 	    f125_el_fit->Reset();
@@ -399,10 +408,15 @@ void trdclass::Loop() {
 	    int MM_THR=50;
 	    if(electron){
 	        if (gemChan>0) {
-	            f125_el_amp2d->Fill(time,gemChan,amp);
+			#ifdef USE_TRK
+        		f125_el_amp2ds->Fill(time,gemChan,amp);
+			f125_el_fit->Fill(time,gemChan,amp);
+			#else
+	            	f125_el_amp2d->Fill(time,gemChan,amp);
+			#endif
+			if (!(jentry%NPRT)) f125_el_evt->Fill(time,gemChan,amp);
 	            f125_el->Fill(amp);
 	            f125_el_clu2d->Fill(time,gemChan,1.);
-	            //if (!(jentry%1000)) f125_el_evt->Fill(time,dchan,amp);
 	        }
 	        if (amp>MM_THR && mmg1Chan>0) {
 	            mmg1_f125_el_amp2d->Fill(time,mmg1Chan,amp);
@@ -421,10 +435,15 @@ void trdclass::Loop() {
 	        }
 	    } else {
 	        if (gemChan>0) {
+			#ifdef USE_TRK
+        		f125_pi_amp2ds->Fill(time,gemChan,amp);  
+			f125_pi_fit->Fill(time,gemChan,amp); 
+			#else
 	            f125_pi_amp2d->Fill(time,gemChan,amp);
+			#endif
+			if (!(jentry%NPRT)) f125_pi_evt->Fill(time,gemChan,amp); 
 	            f125_pi->Fill(amp);
 	            f125_pi_clu2d->Fill(time,gemChan,1.);
-	            //if (!(jentry%1000)) f125_pi_evt->Fill(time,gemChan,amp);
 	        }
 	        if (amp>MM_THR && mmg1Chan>0) {
 	            mmg1_f125_pi_amp2d->Fill(time,mmg1Chan,amp);
@@ -457,6 +476,7 @@ void trdclass::Loop() {
 
 	//------  Track FIT -----
 	/*
+	#ifdef USE_TRK
 	  double chi2_max=3000;
 	  if (electron)  {
 	  double chi2el = TrkFit(f125_el_fit,fx,"fx");
@@ -467,6 +487,7 @@ void trdclass::Loop() {
 	  f125_pi_chi2->Fill(chi2pi);
 	  if ( 1 || chi2pi>0. && chi2pi<chi2_max) { f125_pi_amp2d->Add(f125_pi_amp2ds);  Count("n_trk_pi"); N_trk_pi++;}
 	  }
+	#endif
 	*/
 //======================= End Process Fa125 Pulse data ================================
 
@@ -478,16 +499,20 @@ void trdclass::Loop() {
     #ifdef USE_125_RAW
 	//if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
 	
-	for (int i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop
-	/*  if (jentry<MAX_PRINT) printf("F125:RAW: i=%d  sl=%d, ch=%d, idx=%d, cnt=%d \n"
+    for (ULong64_t i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop 
+    /*  if (jentry<MAX_PRINT) printf("F125:RAW: i=%lld  sl=%d, ch=%d, idx=%d, cnt=%d \n"
 				   ,i,f125_wraw_slot->at(i),f125_wraw_channel->at(i)
 				   ,f125_wraw_samples_index->at(i),f125_wraw_samples_count->at(i));
 	*/
-	    int fadc_chan = f125_wraw_channel->at(i);
+	    //int fadc_chan = f125_wraw_channel->at(i);
 	    int fadc_window = f125_wraw_samples_count->at(i);
 		
-	    int amax=0;
-	    int tmax=0;
+      int fADCSlot = f125_wraw_slot->at(i);
+      int fADCChan = f125_wraw_channel->at(i);			
+      int gemChan = GetGEMChan(fADCChan, fADCSlot);
+		
+      int amax=0;
+	int tmax=0;
 	    for (int si=0; si<fadc_window; si++) {
 	        //printf("f125Loop:: %d fadc_window=%d\n",si,fadc_window);
 	        int time=si;
@@ -496,16 +521,36 @@ void trdclass::Loop() {
 	            amax=adc;
 	            tmax=si;
 	        }
-        
-/*	if (electron)  {
-	  if (!(jentry%1000)) f125_el_raw->Fill(time,gemChan,amp);
-	}else {
-	  if (!(jentry%1000)) f125_el_raw->Fill(time,gemChan,amp);
-	}
-*/
-
+        /*
+		if (!(jentry%NPRT)) {
+	  		double adc_fill=adc;
+	  		if (electron)  {
+	    			f125_el_raw->Fill(time,gemChan,adc);
+			}else {
+	    			f125_pi_raw->Fill(time,gemChan,adc);
+			}
+		}
+	*/
 	    } // --  end of samples loop
 	} // -- end of fadc125 channels loop
+  /*  
+    if (!(jentry%NPRT)) {
+      int nx = f125_el_raw->GetNbinsX();
+      int ny = f125_el_raw->GetNbinsY();
+      double pedestal=100.;
+      for (int ii=0;ii<nx;ii++) {
+	for (int jj=0;jj<ny;jj++) {
+	  if (electron)  {
+	    double cc = f125_el_raw->GetBinContent(ii, jj);  printf("EL: %d %d cc=%f \n",ii,jj,cc);
+	    if (cc == 0.) f125_el_raw->Fill(ii,jj,pedestal);
+	  } else {
+	    double cc = f125_pi_raw->GetBinContent(ii, jj);
+	    if (cc == 0.) f125_pi_raw->Fill(ii,jj,pedestal);
+	  }
+	}
+      }
+    }
+  */
 
 //=======================  End Fa125 RAW  process Loop  =====================================================
 
@@ -524,14 +569,19 @@ void trdclass::Loop() {
 //===                     Event Display                                            ====
 //=====================================================================================
 	/*
-	if (jentry<MAX_PRINT || !(jentry%1000)) {
+	if (jentry<MAX_PRINT || !(jentry%NPRT)) {
 	  c0->cd(1); f125_el_amp2d->Draw("colz");
 	  c0->cd(4); f125_pi_amp2d->Draw("colz");
 	  c0->cd(2); f125_el_evt->Draw("colz");         double chi2e = TrkFit(f125_el_evt,fx1,"fx1"); if (chi2e>0. && chi2e < 1000. ) fx1.Draw("same");
-	  c0->cd(5); f125_pi_evt->Draw("colz");         double chi2p = TrkFit(f125_pi_evt,fx2,"fx2"); if (chi2p>0. && chi2p < 1000. ) fx2.Draw("same"); printf("========================>>>  Chi2 e=%f p=%f \n",chi2e,chi2p);
-	  c0->cd(3); f125_el_chi2->Draw("colz");
-	  c0->cd(6); f125_pi_chi2->Draw("colz");
-	  c0->Modified();   c0->Update(); //sleep(1);
+	  c0->cd(5); f125_pi_evt->Draw("colz");         double chi2p = TrkFit(f125_pi_evt,fx2,"fx2"); if (chi2p>0. && chi2p < 1000. ) fx2.Draw("same");
+	printf("========================>>>  Chi2 e=%f p=%f \n",chi2e,chi2p);
+      //c0->cd(3); f125_el_chi2->Draw("colz"); 
+      //c0->cd(6); f125_pi_chi2->Draw("colz"); 
+      c0->cd(3); f125_el_raw->Draw("colz");  f125_el_evt->Draw("same"); 
+      c0->cd(6); f125_pi_raw->Draw("colz");  f125_pi_evt->Draw("same"); 
+
+      c0->Modified();   c0->Update();  
+      if (NPRT<1000) sleep(1);
 	}
 	*/
   } // -- end of event loop
