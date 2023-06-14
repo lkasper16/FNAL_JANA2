@@ -259,7 +259,7 @@ public :
 
    int RunNum;
    Long64_t MaxEvt;
-   TH1F *h250_size; 
+   TH1F *h250_size;
    TH1D *hcount;
    TH1F *hCal_occ;
    TH1F *hCal_sum;
@@ -308,6 +308,46 @@ public :
    TH2F *urw_f125_pi_amp2d;
    TH2F *urw_f125_el_clu2d;
    TH2F *urw_f125_pi_clu2d;
+   
+   //----- EVENT STRUCTURE -----
+   TTree *EVENT_VECT_GEM;
+   TTree *EVENT_VECT_MMG1;
+   TTree *EVENT_VECT_MMG2;
+   TTree *EVENT_VECT_URW;
+   //---------------------------
+   int event_num;
+   int gem_hit_size;
+   std::vector <int> gem_xpos;
+   std::vector <int> gem_ypos;
+   std::vector <float> gem_zpos;
+   std::vector <float> gem_dedx;
+   std::vector <int> gem_trackID;
+   std::vector <bool> gem_parID;
+   
+   int mmg1_hit_size;
+   std::vector <int> mmg1_xpos;
+   std::vector <int> mmg1_ypos;
+   std::vector <float> mmg1_zpos;
+   std::vector <float> mmg1_dedx;
+   std::vector <int> mmg1_trackID;
+   std::vector <bool> mmg1_parID;
+	
+	int mmg2_hit_size;
+   std::vector <int> mmg2_xpos;
+   std::vector <int> mmg2_ypos;
+   std::vector <float> mmg2_zpos;
+   std::vector <float> mmg2_dedx;
+   std::vector <int> mmg2_trackID;
+   std::vector <bool> mmg2_parID;
+	
+	int urw_hit_size;
+   std::vector <int> urw_xpos;
+   std::vector <int> urw_ypos;
+   std::vector <float> urw_zpos;
+   std::vector <float> urw_dedx;
+   std::vector <int> urw_trackID;
+   std::vector <bool> urw_parID;
+   //---------------------------
 
    //=============================================
 };
@@ -315,7 +355,7 @@ public :
 #endif
 
 #ifdef trdclass_cxx
-trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0) 
+trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0)
 {
   RunNum=RunNum_in;
   MaxEvt=MaxEvt_in;
@@ -586,11 +626,11 @@ double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx )
     h1f->Fit("gaus")
     TF1 * f = h1f->GetFunction("gaus")
     f->GetNDF()
-    f->GetChisquare()    
+    f->GetChisquare()
     f->GetProb()
     Int_t bin = h3->GetBin(binx,biny,binz);
     Float_t y = h3->GetBinContent(bin);
-    virtual Double_t TH2::GetBinContent     (       Int_t   binx,           Int_t   biny    )       
+    virtual Double_t TH2::GetBinContent     (       Int_t   binx,           Int_t   biny    )
   */
 
   // TF1 fx("fx","pol1",100,190);
@@ -611,11 +651,11 @@ double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx )
 
   //printf("+++>   Chi2/Ndf = %f \n",chi2x/Ndfx);
 
-  //chi2xy->Fill(chi2x/Ndfx,chi2y/Ndfy);      
+  //chi2xy->Fill(chi2x/Ndfx,chi2y/Ndfy);
      
   int kfit = 0;
-  //if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) { 
-  if (chi2x/Ndfx<100  && Ndfx>10) { 
+  //if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) {
+  if (chi2x/Ndfx<100  && Ndfx>10) {
     kfit=1;
     //    hp0x->Fill(p0x);
     //    hp1x->Fill(p1x);
@@ -637,12 +677,12 @@ void trdclass::Count(const char *tit) {
 }
 void trdclass::Count(const char *tit, double cut1) {
   char clab[20];
-  sprintf(clab,"%s_%.1f",tit,cut1);    
+  sprintf(clab,"%s_%.1f",tit,cut1);
   hcount->Fill(clab,1);
 }
 void  trdclass::Count(const char *tit, double cut1, double cut2) {
   char clab[20];
-  sprintf(clab,"%s_%.1f_%.1f",tit,cut1,cut2);    
+  sprintf(clab,"%s_%.1f_%.1f",tit,cut1,cut2);
   hcount->Fill(clab,1);
 }
 //------------------------------------------------------------------

@@ -199,8 +199,9 @@ void trdclass::Loop() {
   f125_el_fit = new TH2F("f125_el_fit","GEM-TRD track for Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   f125_pi_fit = new TH2F("f125_pi_fit","GEM-TRD track for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
 
-  f125_el_amp2ds = new TH2F("f125_el_amp2ds","GEM-TRD Amp for Single Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
-  f125_pi_amp2ds = new TH2F("f125_pi_amp2ds","GEM-TRD Amp for Single Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
+  //f125_el_amp2ds = new TH2F("f125_el_amp2ds","GEM-TRD Amp for Single Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
+  //f125_pi_amp2ds = new TH2F("f125_pi_amp2ds","GEM-TRD Amp for Single Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
+  
   f125_el_amp2d = new TH2F("f125_el_amp2d","GEM-TRD Amp for Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   f125_pi_amp2d = new TH2F("f125_pi_amp2d","GEM-TRD Amp for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
 
@@ -210,6 +211,7 @@ void trdclass::Loop() {
   mmg2_f125_pi_amp2d = new TH2F("mmg2_f125_pi_amp2d","MMG2-TRD Amp for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   urw_f125_el_amp2d = new TH2F("urw_f125_el_amp2d","uRW-TRD Amp for Electrons ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
   urw_f125_pi_amp2d = new TH2F("urw_f125_pi_amp2d","uRW-TRD Amp for Pions ; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);
+  
   f125_el_clu2d = new TH2F("f125_el_clu2d","GEM-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);
   f125_pi_clu2d = new TH2F("f125_pi_clu2d","GEM-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
   mmg1_f125_el_clu2d = new TH2F("mmg1_f125_el_clu2d","MMG1-TRD Amp for Electrons (Clusters)",200,0.5,200.5,240,0.5,240.5);
@@ -220,10 +222,61 @@ void trdclass::Loop() {
   urw_f125_pi_clu2d = new TH2F("urw_f125_pi_clu2d","uRW-TRD Amp for Pions (Clusters)",200,0.5,200.5,240,0.5,240.5);
 
 //=========================================
+  TFile* fHits;
+  int save_hits_root = 1;
+  
+  if (save_hits_root) {
+	  char hitsFileName[256]; sprintf(hitsFileName, "FNAL_JANA2/RunOutput/trd_singleTrackHits_tb_Run_%06d.root", RunNum);
+	  fHits = new TFile(hitsFileName, "RECREATE");
+  	  //fHits = new TFile("trd_hits_tb.root","RECREATE");
+	  //printf(" Creating new TTree file \n");
+	  
+	  //--- Vector Branches -----
+	  EVENT_VECT_GEM = new TTree("gem_hits","GEM TTree with single track hit info");
+	  EVENT_VECT_GEM->Branch("event_num",&event_num,"event_num/I");
+	  EVENT_VECT_GEM->Branch("hit_size",&gem_hit_size,"gem_hit_size/I");
+	  //EVENT_VECT_GEM->Branch("trackID",&gem_trackID);
+	  //EVENT_VECT_GEM->Branch("xpos",&gem_xpos);
+	  EVENT_VECT_GEM->Branch("ypos",&gem_ypos);
+	  EVENT_VECT_GEM->Branch("zpos",&gem_zpos);
+	  EVENT_VECT_GEM->Branch("dedx",&gem_dedx);
+	  EVENT_VECT_GEM->Branch("parID",&gem_parID);
+	  
+	  EVENT_VECT_MMG1 = new TTree("mmg1_hits","MMG1 TTree with single track hit info");
+	  EVENT_VECT_MMG1->Branch("event_num",&event_num,"event_num/I");
+	  EVENT_VECT_MMG1->Branch("hit_size",&mmg1_hit_size,"mmg1_hit_size/I");
+	  //EVENT_VECT_MMG1->Branch("trackID",&mmg1_trackID);
+	  //EVENT_VECT_MMG1->Branch("xpos",&mmg1_xpos);
+	  EVENT_VECT_MMG1->Branch("ypos",&mmg1_ypos);
+	  EVENT_VECT_MMG1->Branch("zpos",&mmg1_zpos);
+	  EVENT_VECT_MMG1->Branch("dedx",&mmg1_dedx);
+	  EVENT_VECT_MMG1->Branch("parID",&mmg1_parID);
+	  
+	  EVENT_VECT_MMG2 = new TTree("mmg2_hits","MMG2 TTree with single track hit info");
+	  EVENT_VECT_MMG2->Branch("event_num",&event_num,"event_num/I");
+	  EVENT_VECT_MMG2->Branch("hit_size",&mmg2_hit_size,"hmmg2_it_size/I");
+	  //EVENT_VECT_MMG2->Branch("trackID",&mmg2_trackID);
+	  //EVENT_VECT_MMG2->Branch("xpos",&mmg2_xpos);
+	  EVENT_VECT_MMG2->Branch("ypos",&mmg2_ypos);
+	  EVENT_VECT_MMG2->Branch("zpos",&mmg2_zpos);
+	  EVENT_VECT_MMG2->Branch("dedx",&mmg2_dedx);
+	  EVENT_VECT_MMG2->Branch("parID",&mmg2_parID);
+	  
+	  EVENT_VECT_URW = new TTree("urw_hits","uRWELL TTree with single track hit info");
+	  EVENT_VECT_URW->Branch("event_num",&event_num,"event_num/I");
+	  EVENT_VECT_URW->Branch("hit_size",&urw_hit_size,"urw_hit_size/I");
+	  //EVENT_VECT_URW->Branch("trackID",&urw_trackID);
+	  //EVENT_VECT_URW->Branch("xpos",&urw_xpos);
+	  EVENT_VECT_URW->Branch("ypos",&urw_ypos);
+	  EVENT_VECT_URW->Branch("zpos",&urw_zpos);
+	  EVENT_VECT_URW->Branch("dedx",&urw_dedx);
+	  EVENT_VECT_URW->Branch("parID",&urw_parID);
+  }
+
+//=========================================
 
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-
   if (MaxEvt>0) nentries=MaxEvt;  //-- limit number of events for test
   int MAX_PRINT=2; //--- debug printing ---
 
@@ -233,7 +286,7 @@ void trdclass::Loop() {
   int N_trk_pi=0;
 
   Long64_t jentry=0;
-  for (jentry=0; jentry<nentries; jentry++) {
+  for (jentry=0; jentry<nentries; jentry++) { //-- Event Loop --
 	
   	  //printf("------ Next event %lld ---\n",jentry );
 	  Long64_t ientry = LoadTree(jentry);
@@ -241,10 +294,37 @@ void trdclass::Loop() {
 	  nb = fChain->GetEntry(jentry);   nbytes += nb;
 	  // if (Cut(ientry) < 0) continue;
 	  
-      if (jentry<MAX_PRINT || !(jentry%NPRT))
+	  if (jentry<MAX_PRINT || !(jentry%NPRT))
 	  printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu \n"
 		 ,jentry,f125_wraw_count, f125_pulse_count, f250_wraw_count,srs_raw_count);
 	
+		
+	    event_num = jentry;
+	    gem_hit_size=0;
+		gem_xpos.clear();
+		gem_ypos.clear();
+		gem_zpos.clear();
+		gem_dedx.clear();
+		gem_parID.clear();
+		mmg1_hit_size=0;
+        mmg1_xpos.clear();
+        mmg1_ypos.clear();
+        mmg1_zpos.clear();
+        mmg1_dedx.clear();
+        mmg1_parID.clear();
+		mmg2_hit_size=0;
+        mmg2_xpos.clear();
+        mmg2_ypos.clear();
+        mmg2_zpos.clear();
+        mmg2_dedx.clear();
+        mmg2_parID.clear();
+		urw_hit_size=0;
+        urw_xpos.clear();
+		urw_ypos.clear();
+		urw_zpos.clear();
+		urw_dedx.clear();
+		urw_parID.clear();
+	  
 //==================================================================================================
 //                    Show Event
 //==================================================================================================
@@ -357,13 +437,13 @@ void trdclass::Loop() {
 	}
 	if (electron) {
 	    f125_el_fit->Reset();
-	    f125_el_amp2ds->Reset();
+	    //f125_el_amp2ds->Reset();
 	} else {
 	    f125_pi_fit->Reset();
-	    f125_pi_amp2ds->Reset();
+	    //f125_pi_amp2ds->Reset();
 	}
 	
-	//------  Track FIT -----	
+	//------  Track FIT -----
 	int gem_chan_max=-1;
 	int mmg_chan_max=-1;
 	int urw_chan_max=-1;
@@ -376,39 +456,39 @@ void trdclass::Loop() {
 				   ,i,f125_pulse_slot->at(i),f125_pulse_channel->at(i),f125_pulse_npk->at(i)
 				   ,f125_pulse_peak_time->at(i),f125_pulse_peak_amp->at(i),f125_pulse_pedestal->at(i));
 	    //cout<<" ++++++++++++++++++++ f125_pulse_npk= "<<f125_pulse_npk->at(i)<<endl;
-	*/	
+	*/
 		
 		//------ TRACK FITTING FILL ------
 		float peak_amp = f125_pulse_peak_amp->at(i);
-        float ped = f125_pulse_pedestal->at(i);
-        if (0 > ped || ped > 200 ) ped = 100;
-        float amp=peak_amp-ped;
-        float time=f125_pulse_peak_time->at(i);   int itime=f125_pulse_peak_time->at(i);
-        int fADCSlot = f125_pulse_slot->at(i);
-        int fADCChan = f125_pulse_channel->at(i);
-        int gemChan = GetGEMChan(fADCChan, fADCSlot);
-        int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
-        int mmg2Chan = GetMMG2Chan(fADCChan, fADCSlot, RunNum);
-        int rwellChan = GetRWELLChan(fADCChan, fADCSlot, RunNum);
+		float ped = f125_pulse_pedestal->at(i);
+		if (0 > ped || ped > 200 ) ped = 100;
+		float amp=peak_amp-ped;
+		float time=f125_pulse_peak_time->at(i);   int itime=f125_pulse_peak_time->at(i);
+		int fADCSlot = f125_pulse_slot->at(i);
+		int fADCChan = f125_pulse_channel->at(i);
+		int gemChan = GetGEMChan(fADCChan, fADCSlot);
+		int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
+		int mmg2Chan = GetMMG2Chan(fADCChan, fADCSlot, RunNum);
+		int rwellChan = GetRWELLChan(fADCChan, fADCSlot, RunNum);
 	
 		if (amp<0) amp=0;
-        int MM_THR=50;
-        if(electron){
-            if (gemChan>-1) {
-                #ifdef USE_TRK
-                //f125_el_amp2ds->Fill(time,gemChan,amp);
-                f125_el_fit->Fill(time,gemChan,amp);
-                //#else
-                //f125_el_amp2d->Fill(time,gemChan,amp);
-                #endif
+		int MM_THR=50;
+		if(electron){
+			if (gemChan>-1) {
+				#ifdef USE_TRK
+				//f125_el_amp2ds->Fill(time,gemChan,amp);
+				f125_el_fit->Fill(time,gemChan,amp);
+				//#else
+				//f125_el_amp2d->Fill(time,gemChan,amp);
+				#endif
 			} else {
    		        if (gemChan>-1) {
 	                 #ifdef USE_TRK
-    	             //f125_pi_amp2ds->Fill(time,gemChan,amp);
-        	         f125_pi_fit->Fill(time,gemChan,amp);
-            	     //#else
-                	 //f125_pi_amp2d->Fill(time,gemChan,amp);
-                 	#endif
+		             //f125_pi_amp2ds->Fill(time,gemChan,amp);
+			         f125_pi_fit->Fill(time,gemChan,amp);
+				     //#else
+					 //f125_pi_amp2d->Fill(time,gemChan,amp);
+				 	#endif
 				}
 			}
 		}
@@ -458,13 +538,13 @@ void trdclass::Loop() {
 	    	int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
 	    	int mmg2Chan = GetMMG2Chan(fADCChan, fADCSlot, RunNum);
 	   		int rwellChan = GetRWELLChan(fADCChan, fADCSlot, RunNum);
-	   		
+			
 	    	if (amp<0) amp=0;
 	    	int MM_THR=50;
 	    	if(electron){
 	        	if (gemChan>-1) {
 					//#ifdef USE_TRK
-        			//f125_el_amp2ds->Fill(time,gemChan,amp);
+					//f125_el_amp2ds->Fill(time,gemChan,amp);
 					//f125_el_fit->Fill(time,gemChan,amp);
 					//#else
 	            	f125_el_amp2d->Fill(time,gemChan,amp);
@@ -472,26 +552,52 @@ void trdclass::Loop() {
 					if (!(jentry%NPRT)) f125_el_evt->Fill(time,gemChan,amp);
 	            	f125_el->Fill(amp);
 	            	f125_el_clu2d->Fill(time,gemChan,1.);
+	            	
+	            	gem_ypos.push_back(gemChan);
+	            	gem_dedx.push_back(amp);
+	   				gem_zpos.push_back(time);
+	   				gem_parID.push_back(electron);
+	   				gem_hit_size++;
+	   				//printf("Evt %d, Fill gem tree - Electron ... %d\n", event_num, gem_hit_size);
+	            	
 	        	}
 	        	if (amp>MM_THR && mmg1Chan>-1) {
 	            	mmg1_f125_el_amp2d->Fill(time,mmg1Chan,amp);
 	            	mmg1_f125_el->Fill(amp);
 	            	mmg1_f125_el_clu2d->Fill(time,mmg1Chan,1.);
+	            	
+	            	mmg1_ypos.push_back(mmg1Chan);
+	            	mmg1_dedx.push_back(amp);
+	   				mmg1_zpos.push_back(time);
+	   				mmg1_parID.push_back(electron);
+	   				mmg1_hit_size++;
 	        	}
 	        	if (mmg2Chan>-1) {
 		        	mmg2_f125_el_amp2d->Fill(time,mmg2Chan,amp);
 		        	mmg2_f125_el->Fill(amp);
 		   		    mmg2_f125_el_clu2d->Fill(time,mmg2Chan,1.);
+		   		    
+		   		    mmg2_ypos.push_back(mmg2Chan);
+	            	mmg2_dedx.push_back(amp);
+	   				mmg2_zpos.push_back(time);
+	   				mmg2_parID.push_back(electron);
+	   				mmg2_hit_size++;
 	        	}
 	        	if (rwellChan>-1) {
 	            	urw_f125_el_amp2d->Fill(time,rwellChan,amp);
 	            	urw_f125_el->Fill(amp);
 	            	urw_f125_el_clu2d->Fill(time,rwellChan,1.);
+	            	
+	            	urw_ypos.push_back(rwellChan);
+	            	urw_dedx.push_back(amp);
+	   				urw_zpos.push_back(time);
+	   				urw_parID.push_back(electron);
+	   				urw_hit_size++;
 	        	}
 	    	} else {
 	        	if (gemChan>-1) {
 					//#ifdef USE_TRK
-        			//f125_pi_amp2ds->Fill(time,gemChan,amp);
+					//f125_pi_amp2ds->Fill(time,gemChan,amp);
 					//f125_pi_fit->Fill(time,gemChan,amp);
 					//#else
 	            	f125_pi_amp2d->Fill(time,gemChan,amp);
@@ -499,21 +605,46 @@ void trdclass::Loop() {
 					if (!(jentry%NPRT)) f125_pi_evt->Fill(time,gemChan,amp);
 	            	f125_pi->Fill(amp);
 	            	f125_pi_clu2d->Fill(time,gemChan,1.);
+	            	
+	   				gem_ypos.push_back(gemChan);
+	            	gem_dedx.push_back(amp);
+	   				gem_zpos.push_back(time);
+	   				gem_parID.push_back(electron);
+	   				gem_hit_size++;
+	   				//printf("Evt %d, Fill gem tree - Pion ... %d\n", event_num, gem_hit_size);
 	        	}
 	        	if (amp>MM_THR && mmg1Chan>-1) {
 	            	mmg1_f125_pi_amp2d->Fill(time,mmg1Chan,amp);
 	            	mmg1_f125_pi_clu2d->Fill(time,mmg1Chan,1.);
 	            	mmg1_f125_pi->Fill(amp);
+	            	
+	            	mmg1_ypos.push_back(mmg1Chan);
+	            	mmg1_dedx.push_back(amp);
+	   				mmg1_zpos.push_back(time);
+	   				mmg1_parID.push_back(electron);
+	   				mmg1_hit_size++;
 	        	}
 	        	if (mmg2Chan>-1) {
 		        	mmg2_f125_pi_amp2d->Fill(time,mmg2Chan,amp);
 		        	mmg2_f125_pi->Fill(amp);
 		        	mmg2_f125_pi_clu2d->Fill(time,mmg2Chan,1.);
+		        	
+		        	mmg2_ypos.push_back(mmg2Chan);
+	            	mmg2_dedx.push_back(amp);
+	   				mmg2_zpos.push_back(time);
+	   				mmg2_parID.push_back(electron);
+	   				mmg2_hit_size++;
 	        	}
 	        	if (rwellChan>-1) {
 	            	urw_f125_pi_amp2d->Fill(time,rwellChan,amp);
 	            	urw_f125_pi_clu2d->Fill(time,rwellChan,1.);
 	            	urw_f125_pi->Fill(amp);
+	            	
+	            	urw_ypos.push_back(rwellChan);
+	            	urw_dedx.push_back(amp);
+	   				urw_zpos.push_back(time);
+	   				urw_parID.push_back(electron);
+	   				urw_hit_size++;
 	        	}
 	    	}
 			
@@ -537,20 +668,20 @@ void trdclass::Loop() {
 //==================================================================================================
 
 	//#define USE_125_RAW
-    #ifdef USE_125_RAW
+	#ifdef USE_125_RAW
 	//if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
 	
-    for (ULong64_t i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop
-    /*  if (jentry<MAX_PRINT) printf("F125:RAW: i=%lld  sl=%d, ch=%d, idx=%d, cnt=%d \n"
+	for (ULong64_t i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop
+	/*  if (jentry<MAX_PRINT) printf("F125:RAW: i=%lld  sl=%d, ch=%d, idx=%d, cnt=%d \n"
 				   ,i,f125_wraw_slot->at(i),f125_wraw_channel->at(i)
 				   ,f125_wraw_samples_index->at(i),f125_wraw_samples_count->at(i));
 	*/
 		int fadc_window = f125_wraw_samples_count->at(i);
 		
-      	int fADCSlot = f125_wraw_slot->at(i);
-      	int fADCChan = f125_wraw_channel->at(i);
-      	int gemChan = GetGEMChan(fADCChan, fADCSlot);
-      	int amax=0;
+	  	int fADCSlot = f125_wraw_slot->at(i);
+	  	int fADCChan = f125_wraw_channel->at(i);
+	  	int gemChan = GetGEMChan(fADCChan, fADCSlot);
+	  	int amax=0;
 		int tmax=0;
 		
 	    for (int si=0; si<fadc_window; si++) {
@@ -572,11 +703,11 @@ void trdclass::Loop() {
 	    } // --  end of samples loop
 	} // -- end of fadc125 channels loop
   	  
-    if (!(jentry%NPRT)) {
-      	int nx = f125_el_raw->GetNbinsX();
-      	int ny = f125_el_raw->GetNbinsY();
-      	double pedestal=100.;
-      	for (int ii=0; ii<nx; ii++) {
+	if (!(jentry%NPRT)) {
+	  	int nx = f125_el_raw->GetNbinsX();
+	  	int ny = f125_el_raw->GetNbinsY();
+	  	double pedestal=100.;
+	  	for (int ii=0; ii<nx; ii++) {
 			for (int jj=0; jj<ny; jj++) {
 	  			if (electron) {
 	    			double cc = f125_el_raw->GetBinContent(ii, jj);
@@ -591,38 +722,53 @@ void trdclass::Loop() {
 	}
 
 //=======================  End Fa125 RAW  process Loop  =====================================================
-
-/*    if(electron){
-	  f125_el->Fill(f125_amp_max);
-	  //if((slot<6)||(slot==7&&chan<24))f125_el->Fill(f125_amp_max);
-	  //if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_el->Fill(f125_amp_max);
+	
+/*  if(electron){
+		f125_el->Fill(f125_amp_max);
+	  	//if((slot<6)||(slot==7&&chan<24))f125_el->Fill(f125_amp_max);
+	  	//if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_el->Fill(f125_amp_max);
 	} else {
-	  f125_pi->Fill(f125_amp_max);
-	  //if((slot<6)||(slot==7&&chan<24))f125_pi->Fill(f125_amp_max);
-	  //if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_pi->Fill(f125_amp_max);
-	}*/
-
-    #endif
-	  
+	  	f125_pi->Fill(f125_amp_max);
+	  	//if((slot<6)||(slot==7&&chan<24))f125_pi->Fill(f125_amp_max);
+	  	//if((slot==6&&chan>23)||(slot>6&&slot<9)||(slot==9&&chan<48))mmg_f125_pi->Fill(f125_amp_max);
+	}
+*/
+	#endif
+	
 //=====================================================================================
 //===                     Event Display                                            ====
 //=====================================================================================
 	/*
 	if (jentry<MAX_PRINT || !(jentry%NPRT)) {
-	  c0->cd(1); f125_el_amp2d->Draw("colz");
-	  c0->cd(4); f125_pi_amp2d->Draw("colz");
-	  c0->cd(2); f125_el_evt->Draw("colz");         double chi2e = TrkFit(f125_el_evt,fx1,"fx1"); if (chi2e>0. && chi2e < 1000. ) fx1.Draw("same");
-	  c0->cd(5); f125_pi_evt->Draw("colz");         double chi2p = TrkFit(f125_pi_evt,fx2,"fx2"); if (chi2p>0. && chi2p < 1000. ) fx2.Draw("same");
-	printf("========================>>>  Chi2 e=%f p=%f \n",chi2e,chi2p);
-      //c0->cd(3); f125_el_chi2->Draw("colz");
-      //c0->cd(6); f125_pi_chi2->Draw("colz");
-      c0->cd(3); f125_el_raw->Draw("colz");  f125_el_evt->Draw("same");
-      c0->cd(6); f125_pi_raw->Draw("colz");  f125_pi_evt->Draw("same");
-
-      c0->Modified();   c0->Update();
-      if (NPRT<1000) sleep(1);
+		c0->cd(1); f125_el_amp2d->Draw("colz");
+	  	c0->cd(4); f125_pi_amp2d->Draw("colz");
+	  	c0->cd(2); f125_el_evt->Draw("colz");
+	  	double chi2e = TrkFit(f125_el_evt,fx1,"fx1");
+	  	if (chi2e>0. && chi2e < 1000. ) fx1.Draw("same");
+	  	c0->cd(5); f125_pi_evt->Draw("colz");
+	  	double chi2p = TrkFit(f125_pi_evt,fx2,"fx2");
+	  	if (chi2p>0. && chi2p < 1000. ) fx2.Draw("same");
+		printf("========================>>>  Chi2 e=%f p=%f \n",chi2e,chi2p);
+	  	//c0->cd(3); f125_el_chi2->Draw("colz");
+	  	//c0->cd(6); f125_pi_chi2->Draw("colz");
+	  	c0->cd(3); f125_el_raw->Draw("colz");
+	  	f125_el_evt->Draw("same");
+	  	c0->cd(6); f125_pi_raw->Draw("colz");
+	  	f125_pi_evt->Draw("same");
+		
+	  	c0->Modified();   c0->Update();
+	  	if (NPRT<1000) sleep(1);
 	}
 	*/
+	
+	//--- Fill Track Hit Tree ---
+	//printf("Filling hits tree ... ev=%d  Nhits=%d  Ntracks=%d \n", event_num, hit_size, track_size);
+	//printf("Filling hits tree ... ev=%d  Nhits=%d \n", event_num, hit_size);
+    if (gem_hit_size>0) EVENT_VECT_GEM->Fill();
+    if (mmg1_hit_size>0)EVENT_VECT_MMG1->Fill();
+    if (mmg2_hit_size>0)EVENT_VECT_MMG2->Fill();
+    if (urw_hit_size>0)EVENT_VECT_URW->Fill();
+    
   } // -- end of event loop
    
   cout<<" Total events= "<<jentry<< "  N_trk_el=" << N_trk_el++ << " N_trk_pi=" << N_trk_pi <<endl;
@@ -633,8 +779,8 @@ void trdclass::Loop() {
 
   //open
   TFile* fOut;
-  //char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/Run_%06d_SingleTrkOutput.root", RunNum);
-  char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/singleTrkEventsTree_Run%06d_Output_%06dEntries.root", RunNum, jentry);
+  char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/Run_%06d_SingleTrkOutput.root", RunNum);
+  //char rootFileName[256]; sprintf(rootFileName, "FNAL_JANA2/RunOutput/singleTrkEventsTree_Run%06d_Output_%06dEntries.root", RunNum, jentry);
   fOut = new TFile(rootFileName, "RECREATE");
   fOut->cd();
   //write hists
@@ -683,6 +829,25 @@ void trdclass::Loop() {
   //close
   fOut->Close();
   delete fOut;
+  
+//=====================================================================================
+//===                 S A V E   T R A C K   H I T   T T R E E                      ====
+//=====================================================================================
+
+  if (save_hits_root) {
+  	  //open
+	  //fHits = new TFile("trd_hits_tb.root","RECREATE");
+	  printf(" Creating new TTree file... \n");
+  	  //printf("OK, save_hits_root ...  \n");
+      fHits->cd();
+      EVENT_VECT_GEM->Write();
+      EVENT_VECT_MMG1->Write();
+      EVENT_VECT_MMG2->Write();
+      EVENT_VECT_URW->Write();
+      printf("OK, TTree File Write() ...  \n");
+      fHits->Close();
+      printf("OK, TTree File Close() ...  \n");
+  }
 
 //=====================================================================================
 //===                 P L O T  H I S T O G R A M S                                  ===
