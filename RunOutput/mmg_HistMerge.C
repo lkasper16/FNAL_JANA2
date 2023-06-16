@@ -35,6 +35,7 @@ void mmg_HistMerge(){
 	TFile *_file3 = TFile::Open("Run_003277_Output.root");
 	TFile *_file4 = TFile::Open("Run_003286_Output.root");
 	TFile *_file5 = TFile::Open("eventsTree_Run003288_Output_211417Entries.root");
+	//TFile *_file5 = TFile::Open("singleTrkEventsTree_Run003288_Output_211417Entries.root");
 	
 	//Electron distributions
 	TH1F *mmg1_f125_el_625 = (TH1F*)_file0->Get("mmg1_f125_el");
@@ -52,26 +53,30 @@ void mmg_HistMerge(){
 	TH1F *mmg1_f125_pi_670 = (TH1F*)_file4->Get("mmg1_f125_pi");
 	TH1F *mmg1_f125_pi_675 = (TH1F*)_file5->Get("mmg1_f125_pi");
 	
-	_file0->cd();
+	//_file5->cd();
 	
 	////////Plot Electron distributions/////////
 	TCanvas *c1 = new TCanvas("c1","MMG-1 ADC Distributions", 1200, 800);
 	gStyle->SetOptStat(00000);
 	c1->cd();
 	gPad->SetLogy();
+	gPad->SetGridx();
+	gPad->SetGridy();
 	
 	mmg1_f125_el_675->GetXaxis()->SetTitle("ADC Amplitude");
 	mmg1_f125_el_675->GetYaxis()->SetTitle("Counts");
 	mmg1_f125_el_675->SetTitle("MMG1-TRD ADC Distributions in XeCO2 for Varied HV");
 	mmg1_f125_el_675->SetLineWidth(2);
 	mmg1_f125_el_675->SetLineColor(4);
+	float nFill = mmg1_f125_el_675->Integral(400.,4000.);
+	cout<<nFill<<endl;
 	mmg1_f125_el_675->Scale(1./125329);
 	mmg1_f125_el_675->Draw();
 	
 	mmg1_f125_el_670->SetLineColor(209);
 	mmg1_f125_el_670->SetLineWidth(2);
 	mmg1_f125_el_670->Scale(1./11732);
-	mmg1_f125_el_670->Draw("same");
+	//mmg1_f125_el_670->Draw("same");
 	
 	mmg1_f125_el_655->SetLineColor(51);
 	mmg1_f125_el_655->SetLineWidth(2);
@@ -81,17 +86,17 @@ void mmg_HistMerge(){
 	mmg1_f125_el_645->SetLineColor(7);
 	mmg1_f125_el_645->SetLineWidth(2);
 	mmg1_f125_el_645->Scale(1./8633);
-	mmg1_f125_el_645->Draw("same");
+	//mmg1_f125_el_645->Draw("same");
 	
 	mmg1_f125_el_635->SetLineColor(2);
 	mmg1_f125_el_635->SetLineWidth(2);
 	mmg1_f125_el_635->Scale(1./13494);
-	mmg1_f125_el_635->Draw("same");
+	//mmg1_f125_el_635->Draw("same");
 	
 	mmg1_f125_el_625->SetLineColor(94);
 	mmg1_f125_el_625->SetLineWidth(2);
-	mmg1_f125_el_625->Draw("same");
 	mmg1_f125_el_625->Scale(1./302858);
+	mmg1_f125_el_625->Draw("same");
 
 /*	TLegend *l1 = new TLegend(0.75, 0.65, 0.9, 0.9);
 	l1->AddEntry(mmg1_f125_el_675, "4800V/675V", "L");
@@ -129,7 +134,7 @@ void mmg_HistMerge(){
 	mmg1_f125_pi_670->SetMarkerStyle(3);
 	mmg1_f125_pi_670->SetMarkerColor(209);
 	mmg1_f125_pi_670->Scale(1./8010);
-	mmg1_f125_pi_670->Draw("same");
+	//mmg1_f125_pi_670->Draw("same");
 	
 	mmg1_f125_pi_655->SetLineColor(51);
 	mmg1_f125_pi_655->SetLineWidth(2);
@@ -145,7 +150,7 @@ void mmg_HistMerge(){
 	mmg1_f125_pi_645->SetMarkerStyle(3);
 	mmg1_f125_pi_645->SetMarkerColor(7);
 	mmg1_f125_pi_645->Scale(1./6354);
-	mmg1_f125_pi_645->Draw("same");
+	//mmg1_f125_pi_645->Draw("same");
 	
 	mmg1_f125_pi_635->SetLineColor(2);
 	mmg1_f125_pi_635->SetLineWidth(2);
@@ -153,7 +158,7 @@ void mmg_HistMerge(){
 	mmg1_f125_pi_635->SetMarkerStyle(3);
 	mmg1_f125_pi_635->SetMarkerColor(2);
 	mmg1_f125_pi_635->Scale(1./9979);
-	mmg1_f125_pi_635->Draw("same");
+	//mmg1_f125_pi_635->Draw("same");
 	
 	mmg1_f125_pi_625->SetLineColor(94);
 	mmg1_f125_pi_625->SetLineWidth(2);
@@ -163,18 +168,20 @@ void mmg_HistMerge(){
 	mmg1_f125_pi_625->Scale(1./210931);
 	mmg1_f125_pi_625->Draw("same");
 	
-	//mmg1_f125_el_675->SetLineColor(1);
-	//mmg1_f125_pi_675->SetLineColor(1);
 	TLegend *l1 = new TLegend(0.75, 0.65, 0.9, 0.9);
-    l1->AddEntry(mmg1_f125_el_675, "4800V/675V", "L");
-    l1->AddEntry(mmg1_f125_el_670, "4800V/670V", "L");
-    l1->AddEntry(mmg1_f125_el_655, "4850V/655V", "L");
-    l1->AddEntry(mmg1_f125_el_645, "4850V/645V", "L");
-    l1->AddEntry(mmg1_f125_el_635, "4850V/635V", "L");
-    l1->AddEntry(mmg1_f125_el_625, "4825V/625V", "L");
-    l1->AddEntry((TObject*)0, "", "");
-    l1->AddEntry(mmg1_f125_el_675, "Electrons", "LP");
-    l1->AddEntry(mmg1_f125_pi_675, "Pions", "LP");
+    l1->AddEntry(mmg1_f125_el_675, "4800V/675V - electrons", "LP");
+    l1->AddEntry(mmg1_f125_pi_675, "4800V/675V - pions", "LP");
+	//l1->AddEntry(mmg1_f125_pi_675, "4800V/675V - P", "LP");
+	//l1->AddEntry(mmg1_f125_el_670, "4800V/670V", "L");
+    l1->AddEntry(mmg1_f125_el_655, "4850V/655V - electrons", "LP");
+	l1->AddEntry(mmg1_f125_pi_655, "4850V/655V - pions", "LP");
+    //l1->AddEntry(mmg1_f125_el_645, "4850V/645V", "L");
+    //l1->AddEntry(mmg1_f125_el_635, "4850V/635V", "L");
+    l1->AddEntry(mmg1_f125_el_625, "4825V/625V - electrons", "LP");
+	l1->AddEntry(mmg1_f125_pi_625, "4825V/625V - pions", "LP");
+    //l1->AddEntry((TObject*)0, "", "");
+    //l1->AddEntry(mmg1_f125_el_675, "Electrons", "LP");
+    //l1->AddEntry(mmg1_f125_pi_675, "Pions", "LP");
     l1->Draw();
 		
 /*	TLegend *l2 = new TLegend(0.75, 0.65, 0.9, 0.9);

@@ -316,37 +316,45 @@ public :
    TTree *EVENT_VECT_URW;
    //---------------------------
    int event_num;
-   int gem_hit_size;
+   int gem_nhit;
    std::vector <int> gem_xpos;
    std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
    std::vector <int> gem_trackID;
    std::vector <bool> gem_parID;
+   std::vector <float> gem_zHist_vect;
+   TH1F *gem_zHist;
    
-   int mmg1_hit_size;
+   int mmg1_nhit;
    std::vector <int> mmg1_xpos;
    std::vector <int> mmg1_ypos;
    std::vector <float> mmg1_zpos;
    std::vector <float> mmg1_dedx;
    std::vector <int> mmg1_trackID;
    std::vector <bool> mmg1_parID;
-	
-	int mmg2_hit_size;
+   std::vector <float> mmg1_zHist_vect;
+   TH1F *mmg1_zHist;
+   
+   int mmg2_nhit;
    std::vector <int> mmg2_xpos;
    std::vector <int> mmg2_ypos;
    std::vector <float> mmg2_zpos;
    std::vector <float> mmg2_dedx;
    std::vector <int> mmg2_trackID;
    std::vector <bool> mmg2_parID;
-	
-	int urw_hit_size;
+   std::vector <float> mmg2_zHist_vect;
+   TH1F *mmg2_zHist;
+   
+   int urw_nhit;
    std::vector <int> urw_xpos;
    std::vector <int> urw_ypos;
    std::vector <float> urw_zpos;
    std::vector <float> urw_dedx;
    std::vector <int> urw_trackID;
    std::vector <bool> urw_parID;
+   std::vector <float> urw_zHist_vect;
+   TH1F *urw_zHist;
    //---------------------------
 
    //=============================================
@@ -365,7 +373,7 @@ trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0)
    if (tree == 0) {
      char FileName[128];
      sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOTData/Run_%06d.root",RunNum);
-     //sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOT/eventsTree_003216_003217_%06d.root",RunNum);
+     //sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOT/eventsTree_003250_003251_003252_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
