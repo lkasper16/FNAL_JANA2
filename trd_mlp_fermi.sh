@@ -5,7 +5,7 @@ source setup_env.sh
 # only root needed
 
 RUNNUM=${1-none}
-MAXEVT=${2-0}
+#MAXEVT=${2-0}
 
 if [[ ${RUNNUM} == "none" ]] ; then
     echo "================================="
@@ -17,7 +17,5 @@ fi
 echo "====>  Process RUN=$RUNNUM <=========="
 
 root --web=off -l <<EOC
-.L trdclass.C+
-trdclass t(${RUNNUM},${MAXEVT})
-t.Loop()
+.x trd_mlp_fermi.C++(${RUNNUM})
 EOC

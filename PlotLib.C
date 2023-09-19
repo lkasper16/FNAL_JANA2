@@ -89,10 +89,18 @@ TCanvas *NextPlot(int nx, int ny) {
 	sprintf(PSname,"%s-v%d.pdf",G_DIR,G_VERS);
 	ps = new TPDF(PSname,111);
 	//ps = new TPDF(PSname,-100111); // Letter
+#elif USE_PDF_MLP
+  sprintf(PSname,"mlpOutput/%s-v%d.pdf",G_DIR,G_VERS);
+  ps = new TPDF(PSname,111);
 #else
-	sprintf(PSname,"%s-v%d.ps",G_DIR,G_VERS);
-	ps = new TPostScript(PSname,-100111);
+  sprintf(PSname,"%s-v%d.ps",G_DIR,G_VERS);
+  ps = new TPostScript(PSname,-100111);
+//#else
+//  sprintf(PSname,"mlpOutput/%s-v%d.ps",G_DIR,G_VERS);
+//  ps = new TPostScript(PSname,-100111);
 #endif
+
+
 	//ps->Range(30.,30.);
 	printf("Open new file PSname=%s \n",PSname);
       }
@@ -139,7 +147,7 @@ TCanvas *NextPlot(int nx, int ny) {
   //gPad->SetFillColor(0);
   //gStyle->SetFillColor(0);
 
-  printf("next: Plot=%d, pad=%d  ican=%d\n",iplot,ipad,ican);
+  //printf("next: Plot=%d, pad=%d  ican=%d\n",iplot,ipad,ican);
   ipad++; iplot++;   
   return c1;
 }

@@ -34,10 +34,12 @@
 #include "TLine.h"
 #include "TLinearFitter.h"
 #include "TGraphErrors.h"
+#include <TError.h>
 #include "TF1.h"
 #include "TPaveStats.h"
 #include "TCutG.h"
 #include "TProfile.h"
+#include "TBox.h"
 
 #include "stdio.h"
 
@@ -147,6 +149,15 @@ public :
    ULong64_t       srs_prerecon_count;
    vector<double>  *srs_prerecon_y;
    vector<double>  *srs_prerecon_x;
+   ULong64_t       gem_peak_count;
+   vector<unsigned int> *gem_peak_plane_id;
+   vector<string>  *gem_peak_plane_name;
+   vector<unsigned int> *gem_peak_index;
+   vector<unsigned int> *gem_peak_apv_id;
+   vector<double>  *gem_peak_height;
+   vector<double>  *gem_peak_width;
+   vector<double>  *gem_peak_area;
+   vector<double>  *gem_peak_real_pos;
 
    // List of branches
    TBranch        *b_srs_raw_count;   //!
@@ -240,6 +251,15 @@ public :
    TBranch        *b_srs_prerecon_count;   //!
    TBranch        *b_srs_prerecon_y;   //!
    TBranch        *b_srs_prerecon_x;   //!
+   TBranch        *b_gem_peak_count;   //!
+   TBranch        *b_gem_peak_plane_id;   //!
+   TBranch        *b_gem_peak_plane_name;   //!
+   TBranch        *b_gem_peak_index;   //!
+   TBranch        *b_gem_peak_apv_id;   //!
+   TBranch        *b_gem_peak_height;   //!
+   TBranch        *b_gem_peak_width;   //!
+   TBranch        *b_gem_peak_area;   //!
+   TBranch        *b_gem_peak_real_pos;   //!
 
    trdclass(int RunNum, int MaxEvt);
    virtual ~trdclass();
@@ -250,7 +270,7 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   double   TrkFit(TH2F *h2, TF1 &fx, const char *cfx);
+   double   TrkFit(TH2F *h2, TF1 &fx, const char *cfx, int rob);
    void Count(const char *tit);
    void Count(const char *tit, double cut1);
    void Count(const char *tit, double cut1, double cut2);
@@ -265,9 +285,14 @@ public :
    TH1F *hCal_sum;
    TH1F *hCal_sum_el;
    TH1F *hCal_sum_pi;
-   const int NCAL=7;
+   //const int NCAL=7;
+   #define  NCAL 7
    TH1F *hCal_adc[7];  //---  FADC250 channles 0 - 8
+   TH2F *hCal_cor[7];      //---  FADC250 channles 0 - 8
+   TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
+   TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
    TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
+   TH2F *cal_el_evt, *cal_pi_evt; 
    const int NCHER=3;
    //TH1F *hCher_adc[3]; //-- FADC250 channels 13,14,15
    TH1F *hCher_u_adc;
@@ -280,9 +305,11 @@ public :
    TH2F *hCCor_ud;
    TH2F *hCCCor_u;
    TH2F *hCCCor_dout;
+   TH1F *srs_ncl;
+   TH2F *srs_trk_el, *srs_trk_pi, *srs_gem_dx, *srs_gem_x, *srs_gem_y, *srs_cal_corr, *srs_etrd_corr, *srs_etrd_beam, *srs_etrd_pion, *srs_etrd_ratio;
 
-   TH1F *f125_el, *f125_el_chi2;
-   TH1F *f125_pi, *f125_pi_chi2;
+   TH1F *f125_el, *f125_el_chi2, *f125_el_fita;
+   TH1F *f125_pi, *f125_pi_chi2, *f125_pi_fita;
    TH2F *f125_el_amp2d, *f125_el_amp2ds, *f125_el_evt, *f125_el_raw, *f125_el_fit;
    TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt, *f125_pi_raw, *f125_pi_fit;
    TH2F *f125_el_clu2d;
@@ -372,8 +399,7 @@ trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0)
 // used to generate this class and read the Tree.
    if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOTData/Run_%06d.root",RunNum);
-     //sprintf(FileName,"/store/user/kaspel1/FNAL2023_Data/ROOT/eventsTree_003250_003251_003252_%06d.root",RunNum);
+     sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
@@ -470,6 +496,9 @@ void trdclass::Init(TTree *tree)
    f125_pulse_integral_emulated = 0;
    f125_pulse_peak_amp_emulated = 0;
    f125_pulse_peak_time_emulated = 0;
+   f250_pulse_roc = 0;
+   f250_pulse_slot = 0;
+   f250_pulse_channel = 0;
    f250_pulse_event_within_block = 0;
    f250_pulse_qf_pedestal = 0;
    f250_pulse_pedestal = 0;
@@ -501,6 +530,14 @@ void trdclass::Init(TTree *tree)
    gem_scluster_adc = 0;
    srs_prerecon_y = 0;
    srs_prerecon_x = 0;
+   gem_peak_plane_id = 0;
+   gem_peak_plane_name = 0;
+   gem_peak_index = 0;
+   gem_peak_apv_id = 0;
+   gem_peak_height = 0;
+   gem_peak_width = 0;
+   gem_peak_area = 0;
+   gem_peak_real_pos = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -598,6 +635,15 @@ void trdclass::Init(TTree *tree)
    fChain->SetBranchAddress("srs_prerecon_count", &srs_prerecon_count, &b_srs_prerecon_count);
    fChain->SetBranchAddress("srs_prerecon_y", &srs_prerecon_y, &b_srs_prerecon_y);
    fChain->SetBranchAddress("srs_prerecon_x", &srs_prerecon_x, &b_srs_prerecon_x);
+   fChain->SetBranchAddress("gem_peak_count", &gem_peak_count, &b_gem_peak_count);
+   fChain->SetBranchAddress("gem_peak_plane_id", &gem_peak_plane_id, &b_gem_peak_plane_id);
+   fChain->SetBranchAddress("gem_peak_plane_name", &gem_peak_plane_name, &b_gem_peak_plane_name);
+   fChain->SetBranchAddress("gem_peak_index", &gem_peak_index, &b_gem_peak_index);
+   fChain->SetBranchAddress("gem_peak_apv_id", &gem_peak_apv_id, &b_gem_peak_apv_id);
+   fChain->SetBranchAddress("gem_peak_height", &gem_peak_height, &b_gem_peak_height);
+   fChain->SetBranchAddress("gem_peak_width", &gem_peak_width, &b_gem_peak_width);
+   fChain->SetBranchAddress("gem_peak_area", &gem_peak_area, &b_gem_peak_area);
+   fChain->SetBranchAddress("gem_peak_real_pos", &gem_peak_real_pos, &b_gem_peak_real_pos);
    Notify();
 }
 
@@ -627,7 +673,7 @@ Int_t trdclass::Cut(Long64_t entry)
    return 1;
 }
 
-double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx )
+double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
 {
   //----------  SF fit ---------------------------
   /*
@@ -642,13 +688,20 @@ double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx )
   */
 
   // TF1 fx("fx","pol1",100,190);
+  
+  
+  gErrorIgnoreLevel = kBreak; // Suppress warning messages from empty fit data
  
   TCutG *cutgx = new TCutG("cutgx",5);
-  cutgx->SetPoint(0,  100,40);      cutgx->SetPoint(1, 190,40);      cutgx->SetPoint(2, 190, 200);      cutgx->SetPoint(3,  100, 200);      cutgx->SetPoint(4,  100,40);
+  cutgx->SetPoint(0,  100,20);      cutgx->SetPoint(1, 190,20);      cutgx->SetPoint(2, 190, 220);      cutgx->SetPoint(3,  100, 220);      cutgx->SetPoint(4,  100,20);
 
   TProfile *profx = h2_evt->ProfileX("profx", 5, 500,"[cutgx]");
   //profx->Fit("fx","QNR");
-  profx->Fit(cfx,"QNR");
+  if (rob>0) {
+    profx->Fit(cfx,"QNR+rob=0.75"); //  "+rob=0.75"
+  } else {
+    profx->Fit(cfx,"QNR"); // 
+  }
   Double_t chi2x = fx.GetChisquare();
   Double_t Ndfx = fx.GetNDF();
   Double_t p0x = fx.GetParameter(0);
