@@ -2,6 +2,37 @@
 
 ## Repository for Fermilab May 2023 TRD Test Beam
 
+Workflow on JLab Gluon compute nodes:   
+Log in to Gluon nodes with JLab computing account (must have 2FA)
+```
+ssh -XY [$USERNAME]@scilogin.jlab.org  
+Password: [Pin+OTP]  
+ssh hallgw  
+Password: [Pin+OTP]  
+ssh gluon[100-150]  
+Password: [JLab CUE]  
+```
+After cloning repo, make directory links   
+```
+./make_gluon_links.sh  
+```
+And use executable files for run analysis   
+```
+./trdclass.sh [$RUNNUMBER]
+./trd_mlp_fermi.sh [$RUNNUMBER]  
+```
+With this workflow, raw .evio data files have already been processed using `./run.sh [$RUNNUMBER]` and the readable .root files that result now live in the `ROOT/` directory. These root files are processed with the `trdclass.C` analysis macro. Output from there in the form of a .root file is passed on to `trd_mlp_fermi.C` as input where a rejection factor calculation is done for different particle efficiencies.  
+
+See JLab's [2FA documentation](https://jlab.servicenowservices.com/sp?id=kb_article_view&sysparm_article=KB0012313&sys_kb_id=a8caee091b990910a552ed3ce54bcbe3&spa=1.)  
+See JLab analysis code repository: [trd_root](https://github.com/JeffersonLab/trd_root/tree/main)  
+See JLab JANA repository: [JANA4ML4FPGA](https://github.com/JeffersonLab/JANA4ML4FPGA/tree/main)  
+
+
+###################################################  
+## Historical -- defunct  
+> :warning: The following workflow usage is outdated for this project & should no longer be used.
+
+
 Workflow (assuming JANA2 installation is complete):  
 ```
 source env.csh  
