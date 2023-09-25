@@ -411,6 +411,7 @@ void trdclass::Loop() {
   int pi_CC=0;
   int el_CC=0;
   int e_CHR=0;
+  int e_CHR_Up=0;
   int _calsum=0.0;
   int _calsum_ecut=0.0;
   int _calsum_pcut=0.0;
@@ -539,6 +540,7 @@ void trdclass::Loop() {
     double Ch_u=0;
     double Ch_in=0;
     double Ch_out=0;
+    bool electron_chUp=false;
     bool electron_ch=false;
     bool electron=false;
     bool pion=false;
@@ -566,9 +568,10 @@ void trdclass::Loop() {
 				hCal_adc[fadc_chan]->Fill(amax); 
 				CalSum+=Ecal[fadc_chan];
       } else { // Cherenkov
-				if (fadc_chan==13) { hCher_u_adc->Fill(amax);   hCher_u_time->Fill(tmax); Ch_u=amax; }
+				//if (fadc_chan==13) { hCher_u_adc->Fill(amax);   hCher_u_time->Fill(tmax); Ch_u=amax; }
+				if (fadc_chan==13) { if(amax>130)electron_chUp=true; hCher_u_adc->Fill(amax);  hCher_u_time->Fill(tmax); Ch_u=amax; Count("eCHR_Up"); e_CHR_Up++;}
 				if (fadc_chan==14) { hCher_din_adc->Fill(amax);  hCher_din_time->Fill(tmax); Ch_in=amax; }
-				if (fadc_chan==15) { if(amax>300)electron_ch=true; hCher_dout_adc->Fill(amax);  hCher_dout_time->Fill(tmax);Ch_out=amax; Count("eCHR"); e_CHR++;}
+				if (fadc_chan==15) { if(amax>300)electron_ch=true; hCher_dout_adc->Fill(amax);  hCher_dout_time->Fill(tmax); Ch_out=amax; Count("eCHR"); e_CHR++;}
       }
     } // -- end of fadc250 channels loop
 		
@@ -579,8 +582,10 @@ void trdclass::Loop() {
     if (CalSum<Ebeam_pi && CalSum>0.) {Count("calSumPi"); _calsum_pcut++;}
 //    if (electron_ch  && CalSum > Ebeam_el) { electron=true;  Count("elCC"); el_CC++;}
 //    if (!electron_ch && CalSum < Ebeam_pi) { pion=true;  Count("piCC"); pi_CC++;}  
-    if (electron_ch) { electron=true;  Count("elCC"); el_CC++;}
-    if (!electron_ch) { pion=true;  Count("piCC"); pi_CC++;}
+    if (electron_ch  && electron_chUp) { electron=true;  Count("elCC"); el_CC++;}
+    if (!electron_ch && !electron_chUp) { pion=true;  Count("piCC"); pi_CC++;}
+//    if (electron_ch) { electron=true;  Count("elCC"); el_CC++;}
+//    if (!electron_ch) { pion=true;  Count("piCC"); pi_CC++;}
 		
     //=======================  End Fa250 RAW  process Loop  =====================================================
 		
@@ -902,7 +907,7 @@ void trdclass::Loop() {
 	          mmg1_nhit++;
 	          mmg1_zHist->Fill(time, amp);
 	        }
-	        if (mp>MM_THR && mmg2Chan>-1) {
+	        if (amp>MM_THR && mmg2Chan>-1) {
 	          mmg2_f125_el_amp2d->Fill(time,mmg2Chan,amp);
 	          mmg2_f125_el->Fill(amp);
 	          mmg2_f125_el_clu2d->Fill(time,mmg2Chan,1.);
@@ -1162,7 +1167,7 @@ void trdclass::Loop() {
   } // ------------------------ end of event loop  ------------------------------
    
   cout<<" Total events= "<<jentry<< "  N_trk_el=" << N_trk_el << " N_trk_pi=" << N_trk_pi <<endl;
-  cout<<" hcount values: 1TRK="<<_1trk<<" 1eTRK="<<e_1trk<<" 1pTRK="<<p_1trk<<" eCHR="<<e_CHR<<" elCC="<<el_CC<<" piCC="<<pi_CC<<" nclSRS="<<n_clSRS<<" CalSum="<<_calsum<<" CalSumEl="<<_calsum_ecut<<" CalSumPi="<<_calsum_pcut<<endl;
+  cout<<" hcount values: 1TRK="<<_1trk<<" 1eTRK="<<e_1trk<<" 1pTRK="<<p_1trk<<" eCHR="<<e_CHR<<" elCC="<<el_CC<<" piCC="<<pi_CC<<" nclSRS="<<n_clSRS<<" CalSum="<<_calsum<<" CalSumEl="<<_calsum_ecut<<" CalSumPi="<<_calsum_pcut<<" eCHR_Up="<<e_CHR_Up<<endl;
 
   //=====================================================================================
   //===                 S A V E   H I S T O G R A M S                                ====
