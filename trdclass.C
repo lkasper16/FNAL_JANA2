@@ -215,9 +215,9 @@ void trdclass::Loop() {
   //srs_mmg2_y = new TH2F("srs_mmg2_y","Correlation MMG2TRD & GEMTRKR Y ; Y GEMtrkr; MMG-2 X Chan",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_y);
   
   //-- GEM-TRD & Prototype Correlations
-  //gem_mmg1_x = new TH2F("gem_mmg1_x","Correlation GEMTRD-MMG1 X ; MMG-1 X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_mmg1_x);
-  //gem_urw_x = new TH2F("gem_urw_x","Correlation GEMTRD-uRWell X ; uRWell X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_urw_x);
-  //gem_mmg2_x = new TH2F("gem_mmg2_x","Correlation GEMTRD-MMG2 X ; MMG-2 X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_mmg2_x);
+  gem_mmg1_x = new TH2F("gem_mmg1_x","Correlation GEMTRD-MMG1 X ; MMG-1 X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_mmg1_x);
+  gem_urw_x = new TH2F("gem_urw_x","Correlation GEMTRD-uRWell X ; uRWell X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_urw_x);
+  gem_mmg2_x = new TH2F("gem_mmg2_x","Correlation GEMTRD-MMG2 X ; MMG-2 X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_mmg2_x);
   
   //-- GEM-TRKR & PID/Beam Correlations
   //srs_cal_corr = new TH2F("srs_cal_corr","Correlation GEMTRKR & CAL; X ; Y ",100,-55.,55.,100,-55.,55.);            HistList->Add(srs_cal_corr);
@@ -700,33 +700,14 @@ void trdclass::Loop() {
     }
     
     double x0=0;
+    double x0_mmg1=0;
+    double x0_gem=0;
     double chi2_max=20000;
-    //--------------------- GEMTRD Correlation with other TRD Prototypes ----------------
-    //double chi2cc = TrkFit(mmg1_f125_el_fit,fx,"fx",1);
-    //double a = fx.GetParameter(1);
-    //double b = fx.GetParameter(0);
-    //if (chi2cc>0. && chi2cc<chi2_max)  {
-    //  x0=fx.Eval(100.)*0.4-50.;  // to [mm] ;
-    //  for (ULong64_t i=0;i<f125_pulse_count; i++) {   // --- SRS cluster loop
-    //    double gemtrd_x=0., x;
-    //    x=f125_pulse_x->at(i); if (x<=0) gemtrd_x=x+50.; else gemtrd_x=x-50.; gemtrd_x*=-1.;
-        //y=f125_pulse_y->at(i); if (y<=0) gemtrd_y=y+50.; else gemtrd_y=y-50.; gemtrd_y*=-1.;
-        //double gemtrk_E=gem_scluster_energy->at(i);
-    //    gem_mmg1_x->Fill(gemtrd_x, x0);
-    //    if (RunNum<3262) {gem_urw_x->Fill(gemtrd_x, x0);} else {gem_mmg2_x->Fill(gemtrd_x, x0);}
-    //  }
-    //}
     
     for (ULong64_t i=0;i<f125_pulse_count; i++) {
 
       //if (jentry<MAX_PRINT) printf("F125:: i=%lld  sl=%d, ch=%d, npk=%d time=%d amp=%d ped=%d \n", i, f125_pulse_slot->at(i), f125_pulse_channel->at(i), f125_pulse_npk->at(i), f125_pulse_peak_time->at(i), f125_pulse_peak_amp->at(i), f125_pulse_pedestal->at(i));
       //cout<<" ++++++++++++++++++++ f125_pulse_npk= "<<f125_pulse_npk->at(i)<<endl;
-      //----------------------
-      //double gemtrd_x=0., x;
-      //x=f125_pulse_x->at(i); if (x<=0) gemtrd_x=x+50.; else gemtrd_x=x-50.; gemtrd_x*=-1.;
-      //y=f125_pulse_y->at(i); if (y<=0) gemtrd_y=y+50.; else gemtrd_y=y-50.; gemtrd_y*=-1.;
-      //gem_mmg1_x->Fill(gemtrd_x, x0);
-      //if (RunNum<3262) {gem_urw_x->Fill(gemtrd_x, x0);} else {gem_mmg2_x->Fill(gemtrd_x, x0);}
       
       //===== Fill Histos to Perform Chi^2 Track Fitting On =====
       
@@ -797,18 +778,20 @@ void trdclass::Loop() {
      	}
    	} //---- End Fadc125 Pulse Loop ----
     
-    //==== Correlation with GEM-TRKR & TRD Prototypes ====
+    //==============================================================
+    //        Correlation with GEM-TRKR & TRD Prototypes
+    //==============================================================
     
     double chi2cc = TrkFit(f125_el_fit,fx,"fx",1);
     double a = fx.GetParameter(1);
     double b = fx.GetParameter(0);
-    
-    double chi2cc_mmg2 = TrkFit(mmg2_f125_el_fit,fx_mmg2,"fx_mmg2",1);
-    double a_mmg2 = fx_mmg2.GetParameter(1);
-    double b_mmg2 = fx_mmg2.GetParameter(0);
+    double chi2cc_mmg1 = TrkFit(mmg1_f125_el_fit,fx_mmg1,"fx_mmg1",1);
+    double a_mmg1 = fx_mmg1.GetParameter(1);
+    double b_mmg1 = fx_mmg1.GetParameter(0);
     
     if (chi2cc>0. && chi2cc<chi2_max) {
-      x0=fx.Eval(100.)*0.4-50.;  //-- Convert channels (strips) to [mm]
+      x0=fx.Eval(100.)*0.4-50.;  //-- Convert channels (strips) to [mm] -- 400u pitch
+      if (chi2cc_mmg1>0. && chi2cc_mmg1<chi2_max) x0_mmg1=fx_mmg1.Eval(80.)*0.4-0.;
       for (ULong64_t i=0;i<gem_scluster_count; i++) { //-- SRS cluster loop
 				if (i==0) { Count("nclSRS"); n_clSRS++;}
 				double gemtrk_x=0., gemtrk_y=0., x, y;
@@ -816,6 +799,7 @@ void trdclass::Loop() {
 				//y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
 				//double gemtrk_E=gem_scluster_energy->at(i);
 				srs_gem_x->Fill(gemtrk_x, x0);
+        gem_mmg1_x->Fill(x0_mmg1, x0);
 				//srs_gem_y->Fill(gemtrk_y, x0);
       }
 // What does this tell us ??
@@ -840,11 +824,9 @@ void trdclass::Loop() {
       }
 */
     }
-    double chi2cc_mmg1 = TrkFit(mmg1_f125_el_fit,fx_mmg1,"fx_mmg1",1);
-    double a_mmg1 = fx_mmg1.GetParameter(1);
-    double b_mmg1 = fx_mmg1.GetParameter(0);
+    
     if (chi2cc_mmg1>0. && chi2cc_mmg1<chi2_max) {
-      x0=fx_mmg1.Eval(80.)*0.4-50.;  //-- Convert channels (strips) to [mm]
+      x0=fx_mmg1.Eval(80.)*0.4-0.;  //-- Convert channels (strips) to [mm] -- 400u pitch
       for (ULong64_t i=0;i<gem_scluster_count; i++) { //-- SRS cluster loop
         double gemtrk_x=0., gemtrk_y=0., x, y;
         x=gem_scluster_x->at(i); if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.; gemtrk_x*=-1.;
@@ -859,13 +841,15 @@ void trdclass::Loop() {
       double a_urw = fx_urw.GetParameter(1);
       double b_urw = fx_urw.GetParameter(0);
       if (chi2cc_urw>0. && chi2cc_urw<chi2_max) {
-        x0=fx_urw.Eval(80.)*0.4-50.;  //-- Convert channels (strips) to [mm]
+        x0=fx_urw.Eval(80.)*0.8-50.;  //-- Convert channels (strips) to [mm] -- 800u pitch
+        if (chi2cc>0. && chi2cc<chi2_max) x0_gem=fx.Eval(100.)*0.4-50.;
         for (ULong64_t i=0;i<gem_scluster_count; i++) { //-- SRS cluster loop
           double gemtrk_x=0., gemtrk_y=0., x, y;
           x=gem_scluster_x->at(i); if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.; gemtrk_x*=-1.;
           //y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
           //double gemtrk_E=gem_scluster_energy->at(i);
           srs_urw_x->Fill(gemtrk_x, x0);
+          gem_urw_x->Fill(x0, x0_gem);
           //srs_urw_y->Fill(gemtrk_y, x0);
         }
       }
@@ -874,16 +858,26 @@ void trdclass::Loop() {
       double a_mmg2 = fx_mmg2.GetParameter(1);
       double b_mmg2 = fx_mmg2.GetParameter(0);
       if (chi2cc_mmg2>0. && chi2cc_mmg2<chi2_max) {
-        x0=fx_mmg2.Eval(80.)*0.8-50.;  //-- Convert channels (strips) to [mm]
+        x0=fx_mmg2.Eval(80.)*1.6-50.;  //-- Convert channels (strips) to [mm] -- 1600u pitch
+        if (chi2cc>0. && chi2cc<chi2_max) x0_gem=fx.Eval(100.)*0.4-50.;
         for (ULong64_t i=0;i<gem_scluster_count; i++) { //-- SRS cluster loop
           double gemtrk_x=0., gemtrk_y=0., x, y;
           x=gem_scluster_x->at(i); if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.; gemtrk_x*=-1.;
           //y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
           //double gemtrk_E=gem_scluster_energy->at(i);
           srs_mmg2_x->Fill(gemtrk_x, x0);
+          gem_mmg2_x->Fill(x0, x0_gem);
           //srs_mmg2_y->Fill(gemtrk_y, x0);
         }
       }
+    }
+    
+    //==============================================================
+    //              Correlation with TRD Prototypes
+    //==============================================================
+    
+    if (chi2cc>0. && chi2cc<chi2_max && chi2cc_mmg1>0. && chi2cc_mmg1>chi2_max) {
+      
     }
 	  
 	  //==============================================================
@@ -1166,16 +1160,16 @@ void trdclass::Loop() {
 	      //hCCCor_u->Fill(Ch_u,CalSum);
 	      //hCCCor_dout->Fill(Ch_out,CalSum);
         
-        if ((electron || pion) && amp>THRESH) {
-          ch_gem_mmg1->Fill(mmg1Chan, gemChan);
+/*        if (amp>THRESH) {
+          ch_gem_mmg1->Fill(mmg1Chan, gemChan, amp);
           if (RunNum<3262) {
-            ch_gem_urw->Fill(rwellChan, gemChan);
-            ch_mmg1_urw->Fill(mmg1Chan, rwellChan);
+            ch_gem_urw->Fill(rwellChan, gemChan, amp);
+            ch_mmg1_urw->Fill(mmg1Chan, rwellChan, amp);
           } else {
-            ch_gem_mmg2->Fill(mmg2Chan, gemChan);
+            ch_gem_mmg2->Fill(mmg2Chan, gemChan, amp);
 			    }
         }
-        
+*/        
       } //--- end Fa125 Pulse Loop ---
 		
       for (int i=1; i<21; i++) {
@@ -1361,13 +1355,14 @@ void trdclass::Loop() {
   //=====================================================================================
 
   if (save_hits_root) {
-    printf(" Writing Hit Info TTree files... \n");
+    printf("Writing Hit Info TTree files... \n");
     fHits->cd();
-    if (gem_nhit>0) EVENT_VECT_GEM->Write();
-    if (mmg1_nhit>0) EVENT_VECT_MMG1->Write();
-    if (mmg2_nhit>0 && RunNum>3261) EVENT_VECT_MMG2->Write();
-    if (urw_nhit>0 && RunNum<3262) EVENT_VECT_URW->Write();
+    EVENT_VECT_GEM->Write();
+    EVENT_VECT_MMG1->Write();
+    if (RunNum>3261) EVENT_VECT_MMG2->Write();
+    if (RunNum<3262) EVENT_VECT_URW->Write();
     fHits->Close();
+    printf("TTree files written & closed OK \n");
   }
 
   //=====================================================================================
@@ -1500,9 +1495,8 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);  mmg1_f125_pi_chi2->Draw("colz");
   cc=NextPlot(nxd,nyd);  mmg1_f125_el_fita->Draw("colz");
   cc=NextPlot(nxd,nyd);  mmg1_f125_pi_fita->Draw("colz");
-  cc=NextPlot(nxd,nyd);  srs_mmg1_x->Draw("colz");  //ftrk.Draw("same");
+  cc=NextPlot(nxd,nyd);  srs_mmg1_x->Draw("colz");  ftrk.Draw("same");
   //cc=NextPlot(nxd,nyd);  srs_mmg1_y->Draw("colz");
-  //cc=NextPlot(nxd,nyd);  gem_mmg1_x->Draw("colz");
 
   //---------------------  page 8 --------------------
   htitle(" SRS & TRD Prototypes - Tracking");   if (!COMPACT) cc=NextPlot(0,0);
@@ -1512,23 +1506,28 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);  urw_f125_pi_chi2->Draw("colz");
   cc=NextPlot(nxd,nyd);  urw_f125_el_fita->Draw("colz");
   cc=NextPlot(nxd,nyd);  urw_f125_pi_fita->Draw("colz");
-  cc=NextPlot(nxd,nyd);  srs_urw_x->Draw("colz");  //ftrk.Draw("same");
+  cc=NextPlot(nxd,nyd);  srs_urw_x->Draw("colz");  ftrk.Draw("same");
   //cc=NextPlot(nxd,nyd);  srs_urw_y->Draw("colz");
-  //cc=NextPlot(nxd,nyd);  gem_urw_x->Draw("colz");
 
   } else {
   cc=NextPlot(nxd,nyd);  mmg2_f125_el_chi2->Draw("colz");
   cc=NextPlot(nxd,nyd);  mmg2_f125_pi_chi2->Draw("colz");
   cc=NextPlot(nxd,nyd);  mmg2_f125_el_fita->Draw("colz");
   cc=NextPlot(nxd,nyd);  mmg2_f125_pi_fita->Draw("colz");
-  cc=NextPlot(nxd,nyd);  srs_mmg2_x->Draw("colz");  //ftrk.Draw("same");
+  cc=NextPlot(nxd,nyd);  srs_mmg2_x->Draw("colz");  ftrk.Draw("same");
   //cc=NextPlot(nxd,nyd);  srs_mmg2_y->Draw("colz");
-  //cc=NextPlot(nxd,nyd);  gem_mmg2_x->Draw("colz");
   }
   
   //---------------------  page 9 --------------------
   htitle(" TRD Prototype Channel (Strip) Correlations");   if (!COMPACT) cc=NextPlot(0,0);
   
+  cc=NextPlot(nxd,nyd);  gem_mmg1_x->Draw("colz");  ftrk.Draw("same");
+  if (RunNum<3262) {
+    cc=NextPlot(nxd,nyd);  gem_urw_x->Draw("colz");  ftrk.Draw("same");
+  } else {
+    cc=NextPlot(nxd,nyd);  gem_mmg2_x->Draw("colz");  ftrk.Draw("same");
+  }
+/*  
   cc=NextPlot(nxd,nyd);  ch_gem_mmg1->Draw("colz");
   if (RunNum<3262) {
     cc=NextPlot(nxd,nyd);  ch_gem_urw->Draw("colz");
@@ -1536,7 +1535,7 @@ void trdclass::Loop() {
   } else {
     cc=NextPlot(nxd,nyd);  ch_gem_mmg2->Draw("colz");
   }
-  
+*/  
   //--- close PDF file ----
   cc=NextPlot(-1,-1);
   //--- the end ---

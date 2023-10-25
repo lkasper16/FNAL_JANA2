@@ -340,6 +340,10 @@ public :
    TH2F *ch_gem_mmg2;
    TH2F *ch_mmg1_urw;
    
+   TH2F *gem_mmg1_x;
+   TH2F *gem_urw_x;
+   TH2F *gem_mmg2_x;
+   
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
    TTree *EVENT_VECT_MMG1;
