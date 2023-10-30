@@ -435,7 +435,7 @@ void trdclass::Loop() {
   
   int THRESH=100;
   int MM_THR=50;
-  int URW_THR=100;
+  int URW_THR=85;
   
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
@@ -793,13 +793,13 @@ void trdclass::Loop() {
       x0=fx.Eval(100.)*0.4-50.;  //-- Convert channels (strips) to [mm] -- 400u pitch
       if (chi2cc_mmg1>0. && chi2cc_mmg1<chi2_max) x0_mmg1=fx_mmg1.Eval(80.)*0.4-0.;
       for (ULong64_t i=0;i<gem_scluster_count; i++) { //-- SRS cluster loop
-				if (i==0) { Count("nclSRS"); n_clSRS++;}
+				//if (i==0) { Count("nclSRS"); n_clSRS++;}
 				double gemtrk_x=0., gemtrk_y=0., x, y;
 				x=gem_scluster_x->at(i); if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.; gemtrk_x*=-1.;
 				//y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
 				//double gemtrk_E=gem_scluster_energy->at(i);
 				srs_gem_x->Fill(gemtrk_x, x0);
-        gem_mmg1_x->Fill(x0_mmg1, x0);
+        if(x0_mmg1!=0)gem_mmg1_x->Fill(x0_mmg1, x0);
 				//srs_gem_y->Fill(gemtrk_y, x0);
       }
 // What does this tell us ??
@@ -849,7 +849,7 @@ void trdclass::Loop() {
           //y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
           //double gemtrk_E=gem_scluster_energy->at(i);
           srs_urw_x->Fill(gemtrk_x, x0);
-          gem_urw_x->Fill(x0, x0_gem);
+          if(x0_gem!=0)gem_urw_x->Fill(x0, x0_gem);
           //srs_urw_y->Fill(gemtrk_y, x0);
         }
       }
@@ -866,18 +866,10 @@ void trdclass::Loop() {
           //y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
           //double gemtrk_E=gem_scluster_energy->at(i);
           srs_mmg2_x->Fill(gemtrk_x, x0);
-          gem_mmg2_x->Fill(x0, x0_gem);
+          if(x0_gem!=0)gem_mmg2_x->Fill(x0, x0_gem);
           //srs_mmg2_y->Fill(gemtrk_y, x0);
         }
       }
-    }
-    
-    //==============================================================
-    //              Correlation with TRD Prototypes
-    //==============================================================
-    
-    if (chi2cc>0. && chi2cc<chi2_max && chi2cc_mmg1>0. && chi2cc_mmg1>chi2_max) {
-      
     }
 	  
 	  //==============================================================
@@ -1100,7 +1092,7 @@ void trdclass::Loop() {
           
 	      } else if (pion) {
 	        if (i==0) {
-            Count("1pTRK");
+            Count("1piTRK");
             p_1trk++;
           }
 	        if (amp>THRESH && gemChan>-1) {
@@ -1336,7 +1328,7 @@ void trdclass::Loop() {
   } // ================== End of Event Loop  ====================
    
   cout<<" Total events= "<<jentry<< "  N_trk_el=" << N_trk_el << " N_trk_pi=" << N_trk_pi <<endl;
-  cout<<" hcount values: 1TRK="<<_1trk<<" 1eTRK="<<e_1trk<<" 1piTRK="<<p_1trk<<" eCHR="<<e_CHR<<" elCC="<<el_CC<<" piCC="<<pi_CC<<" nclSRS="<<n_clSRS<<" CalSum="<<_calsum<<" CalSumEl="<<_calsum_ecut<<" CalSumPi="<<_calsum_pcut<<" eCHR_Up="<<e_CHR_Up<<endl;
+  cout<<" hcount values: 1_TRK="<<_1trk<<" 1eTRK="<<e_1trk<<" 1piTRK="<<p_1trk<<" eCHR="<<e_CHR<<" elCC="<<el_CC<<" piCC="<<pi_CC<<" nclSRS="<<n_clSRS<<" CalSum="<<_calsum<<" CalSumEl="<<_calsum_ecut<<" CalSumPi="<<_calsum_pcut<<" eCHR_Up="<<e_CHR_Up<<endl;
 
   //=====================================================================================
   //===                 S A V E   H I S T O G R A M S                                ====
