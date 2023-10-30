@@ -320,29 +320,43 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
 
       switch (runnum) {
 
-      case 3131:   tw1=110; tw2=160; tw3=185; e_chan1=95;   e_chan2=140;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break;   
-      case 3196:
-      case 3197:
-      case 3200:   tw1=110; tw2=160; tw3=185; e_chan1=95;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;   
-      case 3201:   tw1=110; tw2=160; tw3=185; e_chan1=100;  e_chan2=130;  pi_chan1=e_chan1+1; pi_chan2=e_chan2;   break;   
-      case 3202:   tw1=110; tw2=160; tw3=185; e_chan1=100;  e_chan2=140;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;   
-      case 3216:   tw1=110; tw2=160; tw3=185; e_chan1=100;  e_chan2=185;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;   
-    //      case 3248:   tw1=110; tw2=160; tw3=185; e_chan1=170;  e_chan2=180;  pi_chan1=e_chan1; pi_chan2=e_chan2; break;   
-      case 3248:   tw1=110; tw2=160; tw3=185; e_chan1=112;  e_chan2=134;  pi_chan1=e_chan1;   pi_chan2=e_chan2;  break;   
+      case 3125:   tw1=110; tw2=160; tw3=185; e_chan1=80;   e_chan2=140;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Fleece (lrg)
+      case 3126:   tw1=110; tw2=160; tw3=185; e_chan1=80;   e_chan2=140;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Fleece (lrg)
+      case 3131:   tw1=110; tw2=160; tw3=185; e_chan1=80;   e_chan2=140;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Fleece (lrg)
+      
+      case 3132:   tw1=110; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (VU)
+      case 3133:   tw1=110; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (VU)
+      case 3134:   tw1=110; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (VU)
+      
+      case 3196:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3197:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3198:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3199:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3200:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      
+      case 3201:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=160;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
+      case 3202:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=160;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
+      
+      case 3203:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
+      case 3204:   tw1=108; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
+      
+      case 3287:   tw1=110; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
+      case 3288:   tw1=110; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
+      
+      case 3216:   tw1=110; tw2=160; tw3=185; e_chan1=100;  e_chan2=185;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;
+      case 3248:   tw1=110; tw2=160; tw3=185; e_chan1=112;  e_chan2=134;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;   
 
       default:  
       tw1=110;       
       tw2=160;       
       tw3=185;
-      //printf(" run %d not foud in the GEM list \n",runnum);
-      //exit(1);    
     }
 
   } else {  //-- Runnum ---
     printf(" run %d not found in the GEM range \n",runnum);
     exit(1);
   }
-
+  
   double dt=(tw3-tw1)/NDE;
   
   type=-1;
@@ -351,7 +365,6 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   } else { 
     type=0; ntrk_pi++;
   }
-  //disp->Reset();
   hNhits->Fill(gem_nhit);
   
   //=================== Loop to  calculate average and RMS  ========
@@ -373,11 +386,11 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
 
     if (dedx->at(i)>THR1) {
       if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl 
-      else         hits2d_p->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl 
+      else if (type==0) hits2d_p->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl 
       //hits2d->Fill(zpos->at(i),gemch,w2ahit[i]); //--- energy 
     }
 
-    if(dedx->at(i)>amax2 && tw1<zpos->at(i) && zpos->at(i)<tw3 ){
+    if(dedx->at(i)>amax2 && tw1<zpos->at(i) && zpos->at(i)<tw3) {
       amax2=dedx->at(i);
       tmax2=zpos->at(i);
     }
@@ -389,7 +402,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       if (tw1<zpos->at(i) && zpos->at(i)<tw3 && dedx->at(i)>THR1) { 
         khit++;
         etot+=dedx->at(i);
-        atot+=dedx->at(i); 
+        atot+=dedx->at(i);
         int ibin=(zpos->at(i)-tw1)/dt;  ibin=min(max(0,ibin),(NDE-1)); dEdx[ibin]+=dedx->at(i)/10; // w2ahit[i]/10.; w2mhit[i];
       }
       if (tw2 < zpos->at(i) && zpos->at(i) < tw3)  {  etrzon+=dedx->at(i); }
@@ -530,7 +543,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
      
   }//-- gemtrd hit loop
   
-  printf("----------------------------------------------------e_chan1=%d  e_chan2=%d\n",e_chan1,e_chan2);
+  //printf("----------------------------------------------------e_chan1=%d  e_chan2=%d\n",e_chan1,e_chan2);
 
   //------------ Plotter -------------------------------------
 
@@ -578,23 +591,30 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   //c1=NextPlot(nxd,nyd);    if  (WC) gem2d->Draw("colz"); else hscale(zrad2,znorad2,1.,NORM,2);
   //c1=NextPlot(nxd,nyd);   ampl->Draw("hist"); 
   //c1=NextPlot(nxd,nyd);   h2xdiff->Draw("colz"); gPad->SetLogz();
-  if  (WC) { 
+  //if  (WC) { 
     //c1=NextPlot(nxd,nyd);
     //hscale(rad,norad,0.,NORM,1);
+  //}
+  if (!WC) { 
+    c1=NextPlot(nxd,nyd);
+    hscale(e_amax,pi_amax,0.,NORM,2);
+    c1=NextPlot(nxd,nyd);
+    hscale(e_etot,pi_etot,0.,NORM,2);
   }
-  else   { c1=NextPlot(nxd,nyd);   hscale(e_amax,pi_amax,0.,NORM,2);  c1=NextPlot(nxd,nyd);  hscale(e_etot,pi_etot,0.,NORM,2); }
-  c1=NextPlot(nxd,nyd);   hscale(time_e,time_pi,escale_trk,NORM,2); //--- scale time hist here ---
+  c1=NextPlot(nxd,nyd);
+  hscale(time_e,time_pi,escale_trk,NORM,2); //--- scale time hist here ---
   //c1=NextPlot(nxd,nyd);   hbeamX->Draw();
 
   for (int ip=0; ip<NPF; ip++) {
-    c1=NextPlot(nxd,nyd);  if (NN_MODE==0 || (NN_MODE > 1 && ip>=NFixed))  gPad->SetLogy();
+    c1=NextPlot(nxd,nyd);
+    if (NN_MODE==0 || (NN_MODE > 1 && ip>=NFixed))  gPad->SetLogy();
     hscale(par_e[ip],par_pi[ip],escale_trk,1,2);  //-- scale no_trk 
   }
   c1=NextPlot(-1,-1);
   //------------------------------------------------------------
-  char pngname[120];
-  sprintf(pngname,"mlpOutput/%s_dqm_m%d.png",G_DIR,NN_MODE);
-  c1->Print(pngname);
+  //char pngname[120];
+  //sprintf(pngname,"mlpOutput/%s_dqm_m%d.png",G_DIR,NN_MODE);
+  //c1->Print(pngname);
   char pdfname[120];
   sprintf(pdfname,"mlpOutput/%s_dqm_m%d.pdf",G_DIR,NN_MODE);
   c1->Print(pdfname);
@@ -613,9 +633,9 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   printf("Draw Lines on c0: e1=%d e2=%d \n",e_chan1,e_chan2);
   c0->cd();
   c0->Modified(); c0->Update();
-  char pngname0[120];
-  sprintf(pngname0,"mlpOutput/%s_dqm_m%d_time.png",G_DIR,NN_MODE);
-  c0->Print(pngname0);
+  char pdfname0[120];
+  sprintf(pdfname0,"mlpOutput/%s_dqm_m%d_time.pdf",G_DIR,NN_MODE);
+  c0->Print(pdfname0);
 
   //------------------------------------------------------------
   return NN_MODE;
@@ -703,7 +723,6 @@ void trd_mlp_fermi(int runnum) {
    cout << " Get trees signal=" << signal << endl;
    int rtw1,rtw3;
    int nn_mode = fill_trees( gem_hits, signal, background, sig_tst, bg_tst , WC, runnum, &rtw1, &rtw3);
- 
    //signal->Print();
    //background->Print();
    //sig_tst->Print();
@@ -734,9 +753,9 @@ void trd_mlp_fermi(int runnum) {
      stringstream ss;  ss << il;  string si = ss.str();
      INL=INL+"@par"+si;   if (il<(NPAR-1)) INL=INL+",";
    }
-   cout<<" ILN="<<INL<<endl;
+   //cout<<" ILN="<<INL<<endl;
    NNcfg=INL+":25:8:type";
-   cout << " NNcfg=" << NNcfg << endl;
+   //cout << " NNcfg=" << NNcfg << endl;
    TMultiLayerPerceptron *mlp = 
      new TMultiLayerPerceptron(NNcfg.data(),simu,"Entry$%2","(Entry$+1)%2");
   
@@ -820,7 +839,7 @@ void trd_mlp_fermi(int runnum) {
      bg->Fill(out);
      if (tout1<out&&out<tout2) { 
        err->Fill(channel);
-       for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d  out=%f iev=%d \n",type,out,ievent);
+       //for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d  out=%f iev=%d \n",type,out,ievent);
      }
      if (out>0.7 && (DISP==1 || DISP==3 )) { 
        printf(" pi high : out=%f type=%d iev=%d par=%5.1f %5.0f  %5.1f %5.1f %5.1f  \n",out,type,ievent,Par[0],Par[1],Par[2],Par[3],Par[4]);
@@ -987,7 +1006,7 @@ void trd_mlp_fermi(int runnum) {
    double rej70m = Reject(bgm, sigm, 0.7);
    double rej90m = Reject(bgm, sigm, 0.9);
    cout << "Nmod=" << Nmod << " Nmod=" << Nmod << " e=70% , Eff pi = " << rej70m*100. << "% ,  Rejection =" << 1./rej70m << endl;
-   cout << " Nmod=" << Nmod << " pi=90%, Eff pi = " << rej90m*100. << "% ,  Rejection =" << 1./rej90m << endl;
+   cout << " Nmod=" << Nmod << " e=90%, Eff pi = " << rej90m*100. << "% ,  Rejection =" << 1./rej90m << endl;
    //---------------------------------------------
    mlpa_canvas->cd(1);
    stringstream ss;   ss << " Nmod=" << 1 << " e=70% , Eff #pi = " << rej70*100. << "% ,  Rej =" << 1./rej70 ;  string str = ss.str();
@@ -1015,7 +1034,7 @@ void trd_mlp_fermi(int runnum) {
    latex.DrawLatex(0.05,ypos-=ystep,str2.data());
 
    //---------------------------------------------
-   sprintf(text,"mlpOutput/%s_m%d.png",basename,nn_mode);
+   sprintf(text,"mlpOutput/%s_m%d.pdf",basename,nn_mode);
    mlpa_canvas->Print(text);
    mlpa_canvas->cd(0);
  
