@@ -633,10 +633,10 @@ void trdclass::Loop() {
       }
       //--GEM-TRKR & Cal. Correlation
       //for (int cc=0; cc<NCAL; cc++) {
-    	//	if (Ecal[cc]>0.8*Ebeam)  {
-      		//srs_cal_corr->Fill(gemtrk_x,gemtrk_y);
-      		//hCal_trk[cc]->Fill(gemtrk_x,gemtrk_y);
-    	//	}
+    		//if (Ecal[cc]>0.8*Ebeam) {
+      	  //srs_cal_corr->Fill(gemtrk_x,gemtrk_y);
+      	  //hCal_trk[cc]->Fill(gemtrk_x,gemtrk_y);
+    	  //}
       //}
 */
     } //-- End SRS Cluster Loop
@@ -651,8 +651,8 @@ void trdclass::Loop() {
         cal_el_evt->Reset();
         for (int cc=0; cc<NCAL; cc++) {
           int ix=cc%3; int iy=cc/3;
-    			if (cc<6) cal_el_evt->Fill(ix,iy,Ecal[cc]); else cal_el_evt->Fill(1,2,Ecal[cc]);
-    			//double c = cal_el_evt->GetBinContent(ix+1, iy+1); printf("Ecal[%d]=%f ix=%d iy =%d e=%f \n",cc,Ecal[cc],ix,iy,c);
+    		  if (cc<6) cal_el_evt->Fill(ix,iy,Ecal[cc]); else cal_el_evt->Fill(1,2,Ecal[cc]);
+    		  //double c = cal_el_evt->GetBinContent(ix+1, iy+1); printf("Ecal[%d]=%f ix=%d iy =%d e=%f \n",cc,Ecal[cc],ix,iy,c);
         }
       } else if (pion) {
         f125_pi_evt->Reset();
@@ -683,19 +683,19 @@ void trdclass::Loop() {
       mmg2_f125_pi_fit->Reset();
       mmg2_f125_pi_amp2d->Reset();
     }
-
+    
     //==================================================================================================
     //                    GEM-TRKR
     //==================================================================================================
-
+    
 // Duplicate from above ??? Except with scluster count == 1 condition... uh oh
-
+    
     double gemtrk_x=-999.,  gemtrk_y=-999.,  gemtrk_E=0,  delta_x=1000.,  dx_thresh=5.;
     if (gem_scluster_count==1) {                         //--- use (first or single ?? ----
       for (ULong64_t ic=0; ic<gem_scluster_count; ic++) {   // --- SRS cluster loop, actually only 0 ;
         double x=gem_scluster_x->at(ic); if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.;  gemtrk_x*=-1.;
         double y=gem_scluster_y->at(ic); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.;  gemtrk_y*=-1.;
-////				gemtrk_E=gem_scluster_energy->at(ic);
+        ////gemtrk_E=gem_scluster_energy->at(ic);
       }
     }
     
@@ -728,9 +728,9 @@ void trdclass::Loop() {
       if (gemChan>-1  && amp>THRESH && 100. < time && time < 185. ) {
         srs_etrd_beam->Fill(gemtrk_x,gemtrk_y,1.);
         if (electron) {
-    			srs_etrd_corr->Fill(gemtrk_x,gemtrk_y,amp);
+    		  srs_etrd_corr->Fill(gemtrk_x,gemtrk_y,amp);
         } else if (pion) {
-    			srs_etrd_pion->Fill(gemtrk_x,gemtrk_y,amp);
+    		  srs_etrd_pion->Fill(gemtrk_x,gemtrk_y,amp);
         }
       }
       
@@ -813,7 +813,7 @@ void trdclass::Loop() {
         }
       }
 /*
-      for (int cc=0; cc<NCAL; cc++) {   //--- Calorimeter cells ---
+      for (int cc=0; cc<NCAL; cc++) { //--- Calorimeter cells ---
         if (Ecal[cc]>0.8*Ebeam) {
     			//if (electron_ch) { hCal_cor[cc]->Fill(5.,x0);} else { hCal_cor[cc]->Fill(7.,x0); }
     			if (electron) { hCal_cor[cc]->Fill(5.,x0);} else if (pion) { hCal_cor[cc]->Fill(7.,x0); }
