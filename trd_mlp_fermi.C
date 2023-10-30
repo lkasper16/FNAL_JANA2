@@ -1,4 +1,4 @@
-// 
+//
 // .x   trd_mlp.C++("hd_rawdata_000554_000.evio.root",1);   //   1-WC,  0-GEM
 // .x   trd_mlp.C++(554,1);                                 // new
 // .x   trd_mlp_fermi.C++(3200);    // fermi
@@ -41,7 +41,7 @@ TH1D *hcount;
 const int NDEslices = 10;
 const int NFixed = 7;
 
-#if    NN_MODE == 0 
+#if    NN_MODE == 0
 const int MAXpar = NDEslices; //10; 17
 #elif  NN_MODE == 1
 const int MAXpar = NFixed; //10; 17
@@ -49,7 +49,7 @@ const int MAXpar = NFixed; //10; 17
 const int MAXpar = NFixed+NDEslices; //10; 17
 #elif  NN_MODE == 3
 const int MAXpar = NFixed+NDEslices; //10; 17
-#else 
+#else
   ne rabotaet !!!!
 #endif
 
@@ -66,35 +66,35 @@ int hgive1(TH1 *hp, int *nx, double *xmi, double *xma) {
   //double xmi=0., xma=0., sum=0.;
   
   *nx=hp->GetNbinsX();
-  *xmi=hp->GetBinLowEdge(1);  //h1.GetXaxis().GetBinLowEdge(bin) 
-  *xma=hp->GetBinLowEdge(*nx)+hp->GetBinWidth(*nx); // h1.GetXaxis().GetBinWidth(bin) 
-  //sum=hp->Integral(1,nx);     
+  *xmi=hp->GetBinLowEdge(1);  //h1.GetXaxis().GetBinLowEdge(bin)
+  *xma=hp->GetBinLowEdge(*nx)+hp->GetBinWidth(*nx); // h1.GetXaxis().GetBinWidth(bin)
+  //sum=hp->Integral(1,nx);
 
   //cout << " hist: nx=" << nx << " xmi=" << xmi << " xma=" << xma << "  sum=" << sum  << endl;
   
   //hp->GetBinContent(int i);
   //  GetEntries()
-  //  Integral(Int_t    binx1,  Int_t   binx2,  Option_t *      option = "" );  
-  //Double_t TH1::Interpolate ( Double_t  x ) 
+  //  Integral(Int_t    binx1,  Int_t   binx2,  Option_t *      option = "" );
+  //Double_t TH1::Interpolate ( Double_t  x )
   return hp->GetEntries();
 }
 
 //-------------------------------------------------------------------------------
 int hscale(TH1 *he, TH1 *hpi, double scale, int NORM, int DRAW) {
   int ret = 0;
-  int noent_e = he->GetEntries(); 
-  int noent_pi = hpi->GetEntries(); 
-  double escale = 1; 
+  int noent_e = he->GetEntries();
+  int noent_pi = hpi->GetEntries();
+  double escale = 1;
   if (scale>0) escale = scale;
-  else if (noent_e > 0) escale = (double)noent_pi/(double)noent_e; 
+  else if (noent_e > 0) escale = (double)noent_pi/(double)noent_e;
   else ret = 1; // -- 1 == error
 
   string name = hpi->GetName();
   printf("NORM :: hist=%s<<< noent e=%d pi=%d e-scale=%f \n", name.c_str(), noent_e, noent_pi, escale);
   if (NORM) he->Scale(escale);
   if (DRAW>0) {
-    double maxe = he->GetMaximum(); 
-    double maxpi = hpi->GetMaximum(); 
+    double maxe = he->GetMaximum();
+    double maxpi = hpi->GetMaximum();
     if (maxe>maxpi) {
       he->Draw("hist");  hpi->Draw("histsames");
     } else {
@@ -104,13 +104,13 @@ int hscale(TH1 *he, TH1 *hpi, double scale, int NORM, int DRAW) {
   }
   if (DRAW>1) {
      //--- 2 stat boxes
-     gPad->Update();  
-     TH1 *h1 = he;  TH1 *h0 = hpi; 
+     gPad->Update();
+     TH1 *h1 = he;  TH1 *h0 = hpi;
      TPaveStats *ps1 = (TPaveStats*)h1->GetListOfFunctions()->FindObject("stats");
      ps1->SetY1NDC(0.57);  ps1->SetY2NDC(0.75); ps1->SetTextColor(kRed);
      TPaveStats *ps0 = (TPaveStats*)h0->GetListOfFunctions()->FindObject("stats");
      ps0->SetTextColor(kBlue);
-     gPad->Modified(); gPad->Update(); 
+     gPad->Modified(); gPad->Update();
      //------
   }
   return ret;
@@ -128,17 +128,17 @@ double Reject(TH1 *hp, TH1 *he, double thr) {
   cout << "===> " << etitle << " <===  NX e = " << NX <<  " w = " << w <<  " i0 = " << i0 << endl;
   if (NX>200) { cout << "error NX e = " << NX << endl; exit(1); }
   if (noente>0) {
-    es=0;  for ( int i=0; i<=NX+1; i++)  {  es=es+he->GetBinContent(i); s[i][1]=es; };  
+    es=0;  for ( int i=0; i<=NX+1; i++)  {  es=es+he->GetBinContent(i); s[i][1]=es; };
     e2=0;
     cout << " es = " << es << " noente= " << noente << endl;
     if (es>0) {
-      for (int i=0; i<=NX+1; i++) { 
-        e1=e2; e2=s[i][1]/es;  
-        //printf(" i=%2d  x=%5.2f cont=%5.1f sum=%6.2f e2=%4.2f\n",i, he->GetBinLowEdge(i), he->GetBinContent(i), s[i][1], e2); 
-        if(e2>r1) { i0=i-1; break; } 
+      for (int i=0; i<=NX+1; i++) {
+        e1=e2; e2=s[i][1]/es;
+        //printf(" i=%2d  x=%5.2f cont=%5.1f sum=%6.2f e2=%4.2f\n",i, he->GetBinLowEdge(i), he->GetBinContent(i), s[i][1], e2);
+        if(e2>r1) { i0=i-1; break; }
       }
       w=(r1-e1)/(e2-e1);  Rej = i0+w;
-    } 
+    }
   }
 
   //............ now pions level at this threshold .......................
@@ -190,7 +190,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   TH1F *time_pi = new TH1F("time_pi","dEdx in Time ; Time (8ns)",330,0.5,330.5);
   //TH1F *ampl    = new TH1F("ampl","",500,0.5,500.5);
 
-  TH1F *par_e[MAXpar]; 
+  TH1F *par_e[MAXpar];
   TH1F *par_pi[MAXpar];
  
   for (int ip=0; ip<MAXpar; ip++) {
@@ -213,7 +213,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   //int ntest=nentries*0.25;
   //cout << " ntest=" << ntest << endl;
   //==============================================================================
-  //             
+  //
   //==============================================================================
   const int NDE=NDEslices; // MAXpar;
   double dEdx[NDE];
@@ -242,7 +242,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     for (int i=0; i<NDE; i++) dEdx[i]=0;
 
     //------------------------------------------------------------------------------
-    //                 W C 
+    //                 W C
     //------------------------------------------------------------------------------
     int w2ch=22;
     int wch=22;
@@ -253,7 +253,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     float zero_bin=0;
        
     //------------------------------------------------------------------------------
-    //                 G E M 
+    //                 G E M
     //------------------------------------------------------------------------------
        
     channel = w2ch;
@@ -284,17 +284,17 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     float THR1=100.;
     float THR2=500.;
     float Escale=400.;
-    float Ascale=40.;       
+    float Ascale=40.;
        
     float atot=0.;
     float etot=0.;
     float etrzon=0.;
 
-    pi_chan1=40;  //-- first pion (no-rad) channlel 
-    pi_chan2=220;  //-- last  pion (no-rad) channel  
+    pi_chan1=40;  //-- first pion (no-rad) channlel
+    pi_chan2=220;  //-- last  pion (no-rad) channel
     //
     e_chan1=43;  //-- first TR channlel
-    e_chan2=223;  //-- last  TR channel 
+    e_chan2=223;  //-- last  TR channel
 
     //---- run specific ---
     if ( 3000 < runnum && runnum <= 3999 ) { //------------------  FERMILAB   2023  ---------------------
@@ -302,20 +302,20 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       THR1=100.;
       THR2=350.;
       Escale=100.;
-      Ascale=10.;       
+      Ascale=10.;
 
       e_chan1=40;          //-- first TR channlel
-      e_chan2=220;         //-- last  TR channel 
-      pi_chan1=e_chan1+1;  //-- first pion (no-rad) channlel 
-      pi_chan2=e_chan2+1;  //-- last  pion (no-rad) channel  
+      e_chan2=220;         //-- last  TR channel
+      pi_chan1=e_chan1+1;  //-- first pion (no-rad) channlel
+      pi_chan2=e_chan2+1;  //-- last  pion (no-rad) channel
 
       //--- need hit from GEM TRK  and remove noisy channels!!!!
-      //if (abs(channel-trkch)>85 || abs(channel-trkch)<55 || trkch == 223 || channel == 169 || channel == 170 ) continue;   
-      //if ( (trkch<(channel+50)) ||  channel == 49 || channel == 54 || channel == 56  ) continue;   
+      //if (abs(channel-trkch)>85 || abs(channel-trkch)<55 || trkch == 223 || channel == 169 || channel == 170 ) continue;
+      //if ( (trkch<(channel+50)) ||  channel == 49 || channel == 54 || channel == 56  ) continue;
       //if ( USE_TRACK ) { if ( abs(13-channel/27-trkch)<3 ||  channel == 49 || channel == 54 || channel == 56  ) continue; }
 
-      tw1=110;     
-      tw2=160;     
+      tw1=110;
+      tw2=160;
       tw3=185;
 
       switch (runnum) {
@@ -344,11 +344,11 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       case 3288:   tw1=110; tw2=160; tw3=185; e_chan1=85;   e_chan2=165;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
       
       case 3216:   tw1=110; tw2=160; tw3=185; e_chan1=100;  e_chan2=185;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;
-      case 3248:   tw1=110; tw2=160; tw3=185; e_chan1=112;  e_chan2=134;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;   
+      case 3248:   tw1=110; tw2=160; tw3=185; e_chan1=112;  e_chan2=134;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break;
 
-      default:  
-      tw1=110;       
-      tw2=160;       
+      default:
+      tw1=110;
+      tw2=160;
       tw3=185;
     }
 
@@ -362,7 +362,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   type=-1;
   if(parID->at(0)){
     type=1; ntrk_e++;
-  } else { 
+  } else {
     type=0; ntrk_pi++;
   }
   hNhits->Fill(gem_nhit);
@@ -372,22 +372,22 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   int naver=0;
   for (int i=0;i<gem_nhit;i++) {
     if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-    xaver+=xpos->at(i); naver++; 
+    xaver+=xpos->at(i); naver++;
   }
   xaver=xaver/naver;
   
-  //====================================================================    
-  for (int i=0;i<gem_nhit;i++) { // count fixed parameters 
+  //====================================================================
+  for (int i=0;i<gem_nhit;i++) { // count fixed parameters
     
     Count("Hits");
     if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-    Count("zHits"); 
+    Count("zHits");
     xaver2+=((xpos->at(i)-xaver)*(xpos->at(i)-xaver));
 
     if (dedx->at(i)>THR1) {
-      if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl 
-      else if (type==0) hits2d_p->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl 
-      //hits2d->Fill(zpos->at(i),gemch,w2ahit[i]); //--- energy 
+      if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl
+      else if (type==0) hits2d_p->Fill(zpos->at(i),xpos->at(i),dedx->at(i));   //--- ampl
+      //hits2d->Fill(zpos->at(i),gemch,w2ahit[i]); //--- energy
     }
 
     if(dedx->at(i)>amax2 && tw1<zpos->at(i) && zpos->at(i)<tw3) {
@@ -399,7 +399,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     }
 
     if (type>=0 ) {  //-- rad.pos. window OK
-      if (tw1<zpos->at(i) && zpos->at(i)<tw3 && dedx->at(i)>THR1) { 
+      if (tw1<zpos->at(i) && zpos->at(i)<tw3 && dedx->at(i)>THR1) {
         khit++;
         etot+=dedx->at(i);
         atot+=dedx->at(i);
@@ -417,10 +417,10 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
 
   //=================================================================
 
-    xaver2=sqrt(xaver2/naver); 
-    if (type==1 ) { 
+    xaver2=sqrt(xaver2/naver);
+    if (type==1 ) {
       Count("el");
-      aver2d_e->Fill(xaver,xaver2); 
+      aver2d_e->Fill(xaver,xaver2);
     } else {
       Count("pi");
       aver2d_p->Fill(xaver,xaver2);
@@ -473,8 +473,8 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       Par[6]=atot/1000.;
       int np=NDE;
       double coef=Ascale*3.;  // Escale; Ascale;
-      for (int ip=0; ip<np; ip++) { 
-        Par[ip+NFixed]=dEdx[ip]/coef; 
+      for (int ip=0; ip<np; ip++) {
+        Par[ip+NFixed]=dEdx[ip]/coef;
         if ( dEdx[ip]<0.1 ) zero_bin++;
       }
     } else if (NN_MODE==3) {  //--  fermi dEdx(amp) + Par
@@ -488,14 +488,14 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
       Par[6]=atot/1000.;
       int np=NDE;
       double coef=Ascale*3.;  // Escale; Ascale;
-      for (int ip=0; ip<np; ip++) { 
-        Par[ip+NFixed]=dEdx[ip]/coef; 
+      for (int ip=0; ip<np; ip++) {
+        Par[ip+NFixed]=dEdx[ip]/coef;
         if ( dEdx[ip]<0.1 ) zero_bin++;
       }
     } else {   //-- dEdx only
       int np=min(MAXpar,NDE);
       double coef=Ascale*3.;  // Escale; Ascale;
-      for (int ip=0; ip<np; ip++) { 
+      for (int ip=0; ip<np; ip++) {
         Par[ip]=dEdx[ip]/coef;
         if ( dEdx[ip]<0.1 ) zero_bin++;
       }
@@ -525,7 +525,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
     if (type==1) {    //-- electron
       //zrad2->Fill(zero_bin);
       //Nfill++;
-      //if (Nfill>16000) break;  //-- Events LIMIT 
+      //if (Nfill>16000) break;  //-- Events LIMIT
       //if (iev<ntest)   sig_tst->Fill();
       if (rndm->Rndm()<0.1)   sig_tst->Fill();
       else  signal->Fill();
@@ -554,22 +554,22 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   int nxd=3;
   int nyd=5;
   int COMPACT=0;
-  TCanvas *c1,*c0; 
+  TCanvas *c1,*c0;
   char ctit[120];
-  sprintf(G_DIR,"hd_rawdata_%06d.root",runnum);    
+  sprintf(G_DIR,"hd_rawdata_%06d.root",runnum);
   sprintf(ctit,"File=%s",G_DIR);
   //sprintf(rootOut,"hd_rawdata_%06d.root",runnum);
   //sprintf(ctit,"File=%s",rootOut);
   htitle(ctit); //  if (!COMPACT) c1=NextPlot(0,0);
 
-  c1=NextPlot(nxd,nyd);   hits2d_e->Draw("colz"); 
-  TLine *lin1 = new TLine(0.,e_chan1,300.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,300.,e_chan2);    
-  lin1->SetLineColor(kRed);   lin2->SetLineColor(kRed);   lin1->Draw();  lin2->Draw();  
+  c1=NextPlot(nxd,nyd);   hits2d_e->Draw("colz");
+  TLine *lin1 = new TLine(0.,e_chan1,300.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,300.,e_chan2);
+  lin1->SetLineColor(kRed);   lin2->SetLineColor(kRed);   lin1->Draw();  lin2->Draw();
   gPad->Modified(); gPad->Update();
 
-  c1=NextPlot(nxd,nyd);   hits2d_p->Draw("colz"); 
-  TLine *lin1p = new TLine(0.,pi_chan1-1,300.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2-1,300.,pi_chan2); 
-  lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();  
+  c1=NextPlot(nxd,nyd);   hits2d_p->Draw("colz");
+  TLine *lin1p = new TLine(0.,pi_chan1-1,300.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2-1,300.,pi_chan2);
+  lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();
   gPad->Modified(); gPad->Update();
 
   printf(" Draw Lines :: %d %d %d %d \n",e_chan1,e_chan2, pi_chan1, pi_chan2);
@@ -579,7 +579,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   c1=NextPlot(nxd,nyd);  aver2d_p->Draw("colz");
   c1=NextPlot(nxd,nyd); hNhits->Draw("colz");
 
-  if  (!WC) { 
+  if  (!WC) {
     //---------------------------------------------------------------------
     cout << " ++++  Amplitude Rejection ++++" << endl;
     double rej70 = Reject(pi_amax, e_amax, 0.7);
@@ -589,13 +589,13 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   }
 
   //c1=NextPlot(nxd,nyd);    if  (WC) gem2d->Draw("colz"); else hscale(zrad2,znorad2,1.,NORM,2);
-  //c1=NextPlot(nxd,nyd);   ampl->Draw("hist"); 
+  //c1=NextPlot(nxd,nyd);   ampl->Draw("hist");
   //c1=NextPlot(nxd,nyd);   h2xdiff->Draw("colz"); gPad->SetLogz();
-  //if  (WC) { 
+  //if  (WC) {
     //c1=NextPlot(nxd,nyd);
     //hscale(rad,norad,0.,NORM,1);
   //}
-  if (!WC) { 
+  if (!WC) {
     c1=NextPlot(nxd,nyd);
     hscale(e_amax,pi_amax,0.,NORM,2);
     c1=NextPlot(nxd,nyd);
@@ -608,7 +608,7 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   for (int ip=0; ip<NPF; ip++) {
     c1=NextPlot(nxd,nyd);
     if (NN_MODE==0 || (NN_MODE > 1 && ip>=NFixed))  gPad->SetLogy();
-    hscale(par_e[ip],par_pi[ip],escale_trk,1,2);  //-- scale no_trk 
+    hscale(par_e[ip],par_pi[ip],escale_trk,1,2);  //-- scale no_trk
   }
   c1=NextPlot(-1,-1);
   //------------------------------------------------------------
@@ -620,13 +620,13 @@ int fill_trees( TTree *gem_hits, TTree *signal, TTree *background, TTree *sig_ts
   c1->Print(pdfname);
 
   c0 = new TCanvas("Plot","Plot",400,200,1200,900);     c0->Divide(2,2);
-  c0->cd(1);  hscale(time_e,time_pi,1.,0,2); // --- already scaled before 
+  c0->cd(1);  hscale(time_e,time_pi,1.,0,2); // --- already scaled before
   
-  c0->cd(3);  hits2d_e->Draw("colz"); // --- already scaled before 
-  lin1->Draw();  lin2->Draw();  
+  c0->cd(3);  hits2d_e->Draw("colz"); // --- already scaled before
+  lin1->Draw();  lin2->Draw();
   gPad->Modified(); gPad->Update();
   
-  c0->cd(4);  hits2d_p->Draw("colz"); // --- already scaled before 
+  c0->cd(4);  hits2d_p->Draw("colz"); // --- already scaled before
   lin1p->Draw(); lin2p->Draw();
   gPad->Modified(); gPad->Update();
   
@@ -649,7 +649,7 @@ void trd_mlp_fermi(int runnum) {
   
   int WC = 0;
   
-  hcount= new TH1D("hcount","Count",3,0,3); 
+  hcount= new TH1D("hcount","Count",3,0,3);
   hcount->SetStats(0);   hcount->SetFillColor(38);   hcount->SetMinimum(1.);
 #if ROOT_VERSION_CODE > ROOT_VERSION(6,0,0)
   hcount->SetCanExtend(TH1::kXaxis);
@@ -665,7 +665,7 @@ void trd_mlp_fermi(int runnum) {
   //sprintf(rootfile,"DATA/trd_singleTrackHits_Run_%06d.root",runnum);
   sprintf(rootfile,"RootOutput/trd_singleTrackHits_Run_%06d.root",runnum);
   char basename[120];
-  char *hd = strstr(rootfile,"/"); 
+  char *hd = strstr(rootfile,"/");
   strncpy(basename,&hd[1],120-1);   char *dot= strstr(basename,"."); *dot=0;
   printf("basename =%s \n",basename);
   
@@ -673,7 +673,7 @@ void trd_mlp_fermi(int runnum) {
   int Nmod=3;
 
   // Prepare inputs
-  // The 2 trees are merged into one, and a "type" branch, 
+  // The 2 trees are merged into one, and a "type" branch,
   // equal to 1 for the signal and 0 for the background is added.
   //const char *fname = "hd_rawdata_000554_000.evio.root";
   TFile *input = 0;
@@ -685,13 +685,13 @@ void trd_mlp_fermi(int runnum) {
   char mlpname[128];   sprintf(mlpname,"mlpOutput/mlp_run%06d.root",runnum);
   TFile* f = new TFile(mlpname,"RECREATE");
   
-  TTree *sig_tst = new TTree("sig_tst", "Filtered Events"); 
+  TTree *sig_tst = new TTree("sig_tst", "Filtered Events");
   TTree *bg_tst = new TTree("bg_tst", "Filtered Events");
-  TTree *signal = new TTree("signal", "Filtered Events"); 
+  TTree *signal = new TTree("signal", "Filtered Events");
   TTree *background = new TTree("background", "Filtered Events");
   TTree *simu = new TTree("simu", "Filtered Events");
   
-  char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",runnum);    
+  char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",runnum);
   dispe =  new TH2F("dispe","disp e ",300,-0.5,299.5,200,40.5,240.5);
   disppi = new TH2F("disppi","disp #pi; time ; X strip ",100,0.5,100.5,350,-0.5,349.5);
   dispe->SetStats(0);
@@ -743,7 +743,7 @@ void trd_mlp_fermi(int runnum) {
    }
    
    //-----------------------------------------------
-   // Build and train the NN par1 is used as a weight since we are primarly 
+   // Build and train the NN par1 is used as a weight since we are primarly
    // interested  by high pt events.
    // The datasets used here are the same as the default ones.
    //----------------------------
@@ -756,7 +756,7 @@ void trd_mlp_fermi(int runnum) {
    //cout<<" ILN="<<INL<<endl;
    NNcfg=INL+":25:8:type";
    //cout << " NNcfg=" << NNcfg << endl;
-   TMultiLayerPerceptron *mlp = 
+   TMultiLayerPerceptron *mlp =
      new TMultiLayerPerceptron(NNcfg.data(),simu,"Entry$%2","(Entry$+1)%2");
   
    //===========================================================================
@@ -799,7 +799,7 @@ void trd_mlp_fermi(int runnum) {
    ana.DrawNetwork(0,"type==1","type==0");
    // Use the NN to plot the results for each sample
    // This will give approx. the same result as DrawNetwork.
-   // All entries are used, while DrawNetwork focuses on 
+   // All entries are used, while DrawNetwork focuses on
    // the test sample. Also the xaxis range is manually set.
    TH1F *bg = new TH1F("bgh", "NN output, single mod", 100, -0.05, 1.1);
    TH1F *sig = new TH1F("sigh", "NN output,single mod",100, -0.05, 1.1);
@@ -837,11 +837,11 @@ void trd_mlp_fermi(int runnum) {
      if (GAUSS) out=rndm->Gaus(g_mean1,g_sigma1);
      sum+=out; if (!((i+1)%Nmod)) { bgm->Fill(sum/Nmod); sum=0; }
      bg->Fill(out);
-     if (tout1<out&&out<tout2) { 
+     if (tout1<out&&out<tout2) {
        err->Fill(channel);
        //for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d  out=%f iev=%d \n",type,out,ievent);
      }
-     if (out>0.7 && (DISP==1 || DISP==3 )) { 
+     if (out>0.7 && (DISP==1 || DISP==3 )) {
        printf(" pi high : out=%f type=%d iev=%d par=%5.1f %5.0f  %5.1f %5.1f %5.1f  \n",out,type,ievent,Par[0],Par[1],Par[2],Par[3],Par[4]);
        gem_hits->GetEntry(ievent);
        c2->cd(); disppi->Reset();
@@ -850,9 +850,9 @@ void trd_mlp_fermi(int runnum) {
      if (dedx->at(i)>DISP_THR) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
      //printf(" %d %f %f  \n",xpos->at(i),zpos->at(i),w2mhit[i]);
        }
-       disppi->Draw("colz"); 
-       TLine lin1(0.,rtw1,350.,rtw1);   TLine lin2(0.,rtw3,350.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();  
-       c2->Modified(); c2->Update(); // usleep(100);  sleep(1); 
+       disppi->Draw("colz");
+       TLine lin1(0.,rtw1,350.,rtw1);   TLine lin2(0.,rtw3,350.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();
+       c2->Modified(); c2->Update(); // usleep(100);  sleep(1);
      }
    }
    sum=0;
@@ -863,7 +863,7 @@ void trd_mlp_fermi(int runnum) {
      if (GAUSS) out=rndm->Gaus(g_mean2,g_sigma2);
      sum+=out; if (!((i+1)%Nmod)) { sigm->Fill(sum/Nmod); sum=0; }
      sig->Fill(out);
-     if (tout1<out&&out<tout2) { 
+     if (tout1<out&&out<tout2) {
        err->Fill(channel);
        for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d out=%f iev=%d \n",type,out,ievent);
      }
@@ -891,8 +891,8 @@ void trd_mlp_fermi(int runnum) {
            
        TGraphErrors grr(ii, x, y, 0, ey);   grr.SetMinimum(150);   grr.SetMaximum(250);
        Double_t p1=0,p0=0;
-       grr.Draw("ap");      
-       if (ii>2) { 
+       grr.Draw("ap");
+       if (ii>2) {
      grr.Fit(&ffit1);       grr.Fit(&ffit2, "+rob=0.75");
      p1=ffit2.GetParameter(1);
      p0=ffit2.GetParameter(0);
@@ -906,7 +906,7 @@ void trd_mlp_fermi(int runnum) {
        ffit1.Draw("same");
        ffit2.Draw("same");
        c2->Modified(); c2->Update();  //usleep(100);  sleep(1); getchar();
-       c2->WaitPrimitive(); 
+       c2->WaitPrimitive();
      }
    }
    //---------------------------------------------------------------------
@@ -950,7 +950,7 @@ void trd_mlp_fermi(int runnum) {
      double eeff=(i+1)*0.1;
      Xgr[i] = eeff;
      Ygr[i] = Reject(bg, sig, eeff);
-     cout << " i=" << i << " x=" << Xgr[i] << " y=" << Ygr[i] << endl;             
+     cout << " i=" << i << " x=" << Xgr[i] << " y=" << Ygr[i] << endl;
    }
    TGraph *gr = new TGraph(ngr,Xgr,Ygr); gr->SetName("e #pi efficiency");gr->SetTitle("Efficiency single module");
    /*
@@ -978,7 +978,7 @@ void trd_mlp_fermi(int runnum) {
      double eeff=0.5+(i+1)*0.05;
      Xgr2[i] = eeff;
      Ygr2[i] = Reject(bgm, sigm, eeff);
-     cout << " i=" << i << " x=" << Xgr2[i] << " y=" << Ygr2[i] << endl;               
+     cout << " i=" << i << " x=" << Xgr2[i] << " y=" << Ygr2[i] << endl;
    }
    TGraph *gr2 = new TGraph(ngr2,Xgr2,Ygr2); gr2->SetName("e #pi efficiency");
    char grtit[120]; sprintf(grtit," Efficiency %d modules ",Nmod);   gr2->SetTitle(grtit);
@@ -1012,24 +1012,24 @@ void trd_mlp_fermi(int runnum) {
    stringstream ss;   ss << " Nmod=" << 1 << " e=70% , Eff #pi = " << rej70*100. << "% ,  Rej =" << 1./rej70 ;  string str = ss.str();
    latex.DrawLatex(0.05,ypos-=ystep,str.data());
    //--
-   ss.str("");  ss.clear(); 
+   ss.str("");  ss.clear();
    ss << " Nmod=" << 1 << " e=80% , Eff #pi = " << rej80*100. << "% ,  Rej =" << 1./rej80 ;  string str0 = ss.str();
    latex.DrawLatex(0.05,ypos-=ystep,str0.data());
    //--
-   ss.str("");  ss.clear(); 
+   ss.str("");  ss.clear();
    ss << " Nmod=" << 1 << " e=85% , Eff #pi = " << rej85*100. << "% ,  Rej =" << 1./rej85 ;  string str1 = ss.str();
    latex.DrawLatex(0.05,ypos-=ystep,str1.data());
    //--
-   ss.str("");  ss.clear(); 
+   ss.str("");  ss.clear();
    ss << " Nmod=" << 1 << " e=90% , Eff #pi = " << rej90*100. << "% ,  Rej =" << 1./rej90 ;  string str2 = ss.str();
    latex.DrawLatex(0.05,ypos-=ystep,str2.data());
    latex.DrawLatex(0.05,ypos-=ystep,"--------------");
    //--
-   ss.str("");  ss.clear(); 
+   ss.str("");  ss.clear();
    ss << " Nmod=" << Nmod << " e=70% , Eff #pi = " << rej70m*100. << "% ,  Rej =" << 1./rej70m ;  str2 = ss.str();
    latex.DrawLatex(0.05,ypos-=ystep,str2.data());
    //--
-   ss.str("");  ss.clear(); 
+   ss.str("");  ss.clear();
    ss << " Nmod=" << Nmod << " e=90% , Eff #pi = " << rej90m*100. << "% ,  Rej =" << 1./rej90m ;  str2 = ss.str();
    latex.DrawLatex(0.05,ypos-=ystep,str2.data());
 

@@ -291,7 +291,7 @@ public :
    TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
    TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
    TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
-   TH2F *cal_el_evt, *cal_pi_evt; 
+   TH2F *cal_el_evt, *cal_pi_evt;
    const int NCHER=3;
    //TH1F *hCher_adc[3]; //-- FADC250 channels 13,14,15
    TH1F *hCher_u_adc;
@@ -711,13 +711,13 @@ double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
   Double_t Ndfx = fx.GetNDF();
   //Double_t p0x = fx.GetParameter(0);
   //Double_t p1x = fx.GetParameter(1);
-/*  
+/*
   int kfit = 0;
   //if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) {
   if (chi2x/Ndfx<100 && Ndfx>10) {
     kfit=1;
   }
-*/  
+*/
   double chi2=chi2x/Ndfx;  if (Ndfx<3) chi2=-chi2;
   return chi2;
 }
