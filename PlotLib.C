@@ -8,11 +8,11 @@
 TCanvas *NextPlot(int nx, int ny);
 void htitle(const char *tit);
 //---------------------------------------------------
-//        GLOBAL VARIABLEs
+//        GLOBAL VARIABLES
 //---------------------------------------------------
-int G_RUN1=0,  G_RUN2=0, G_VERS;
+int G_RUN1=0, G_RUN2=0, G_VERS;
 char G_DIR[128];
-#define USE_PDF 
+#define USE_PDF
 #ifdef USE_PDF
 TPDF *ps;
 #else
@@ -26,18 +26,18 @@ int NORM=1;
 //------------------------------------------------------------------------
 
 void Process(TFile * hfile,TH1 *hist) {
-  int noent= hist->GetEntries(); 
+  int noent= hist->GetEntries();
   if (noent>0 && NORM)  hist->Scale(1./noent);
 }
 
 //----------  ver 4.0 -------
 TCanvas *NextPlot(int nx, int ny) {
   
-  static int iplot,ipad, ican, LX,LY,FIRST,EXIT;
+  static int iplot, ipad, ican, LX, LY, FIRST, EXIT;
   static TCanvas *c1;
   static TPad *pad[50*50];
-  static char Cname[128], PSname[128];   
-  memset(Cname,0,sizeof(Cname)); 
+  static char Cname[128], PSname[128];
+  memset(Cname,0,sizeof(Cname));
   
   int run1=G_RUN1;
   int run2=G_RUN2;
@@ -46,23 +46,27 @@ TCanvas *NextPlot(int nx, int ny) {
   if (ican>0 && nx==0 && ny==0) { ipad=LX*LY; return c1; }
   if (ican>0 && nx<0 && ny<0) { EXIT=1; }
   
-  if (ipad==0 || ipad>=(LX*LY)  || EXIT ) {  //--- next canvas --
+  if (ipad==0 || ipad>=(LX*LY)  || EXIT ) { //--- next canvas --
     if (ican>0 && PS>0 ) c1->Update();
     if (EXIT && PS>0 ) {  //-- print and close previous ps  --
       ps->Close();
       char CMD[580]; sprintf(CMD,"evince  %s &",PSname);
       //printf("Exec PSname=%s  CMD=%s \n",PSname, CMD);
       gSystem->Exec(CMD);
-    } 
+    }
     if (EXIT) {  EXIT=0; iplot=0; ipad=0; ican=0; LX=0; LY=0;  FIRST=0;  return c1; }
     ican++; ipad=0;
     //----------------------------------------------------------
     char sltime[256];
-    struct tm *date; time_t  timer;   time(&timer);    //printf(" timer=%ld \n",timer);
-    strcpy(sltime,ctime(&timer));    //printf(" Date=%s",sltime);      
-    date=localtime(&timer);    strftime(sltime,80," %d-%b-%Y  %H:%M:%S ",date);
-    
-    sprintf(Cname,"%s  p.%d    %s",G_DIR,ican,sltime);
+    struct tm *date;
+    time_t  timer;
+    time(&timer);
+    //printf("timer=%ld \n",timer);
+    strcpy(sltime,ctime(&timer));
+    //printf("Time = %s",sltime);
+    date=localtime(&timer);
+    strftime(sltime,80," %d-%b-%Y  %H:%M:%S ",date);
+    sprintf(Cname,"%s    page %d    %s",G_DIR,ican,sltime);
     //printf("open next canvas:%s, plot=%d, pad=%d  ican=%d \n",Cname,iplot,ipad,ican);
     //----------------------------------------------------------
     if (iplot==0 || PS==0) { //------  Create Canvas --- Open PS file ---
@@ -79,8 +83,7 @@ TCanvas *NextPlot(int nx, int ny) {
         sprintf(PSname,"%s-v%d.ps",G_DIR,G_VERS);
         ps = new TPostScript(PSname,-100111);
 #endif
-  
-	      printf("Open new file PSname=%s \n",PSname);
+	      printf("Opening new file PSname=%s for histograms...\n",PSname);
       }
     } 
 #ifndef USE_PDF
@@ -127,6 +130,6 @@ TCanvas *NextPlot(int nx, int ny) {
 //---------------------------------------------------
 void htitle(const char *tit) {
   if (tit) { HTIT=1; sprintf(HTitle,"%s",tit);
-  } else   { HTIT=0; }
+  } else { HTIT=0; }
 }
 //---------------------------------------------------

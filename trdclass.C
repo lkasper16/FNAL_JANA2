@@ -424,7 +424,7 @@ void trdclass::Loop() {
   int N_trk_el=0;
   int N_trk_pi=0;
   int e_1trk=0;
-  int p_1trk=0;
+  int pi_1trk=0;
   int _1trk=0;
   int n_clSRS=0;
   int pi_CC=0;
@@ -438,7 +438,6 @@ void trdclass::Loop() {
   int THRESH=100;
   int MM_THR=60;
   if (RunNum>3250) MM_THR=80;
-  cout<<"RunNum="<<RunNum<<" MM_THR="<<MM_THR<<endl;
   int URW_THR=100;
   
   Long64_t nentries = fChain->GetEntriesFast();
@@ -576,8 +575,8 @@ void trdclass::Loop() {
       for (int si=0; si<fadc_window; si++) {
         int adc = f250_wraw_samples->at(f250_wraw_samples_index->at(i)+si);
         if (adc>amax) {
-    			amax=adc;
-    			tmax=si;
+          amax=adc;
+          tmax=si;
         }
       } // --  end of fadc samples loop
       
@@ -733,23 +732,23 @@ void trdclass::Loop() {
 /*      if (gemChan>-1  && amp>THRESH && 100. < time && time < 185. ) {
         srs_etrd_beam->Fill(gemtrk_x,gemtrk_y,1.);
         if (electron) {
-    		  srs_etrd_corr->Fill(gemtrk_x,gemtrk_y,amp);
+          srs_etrd_corr->Fill(gemtrk_x,gemtrk_y,amp);
         } else if (pion) {
-    		  srs_etrd_pion->Fill(gemtrk_x,gemtrk_y,amp);
+          srs_etrd_pion->Fill(gemtrk_x,gemtrk_y,amp);
         }
       }
 */      
       if (electron) {
         if (gemChan>-1 && amp>THRESH) {
-    			//if (!(jentry%NPRT)) {
-      			//f125_el_evt->Fill(time,gemChan,amp);
+          //if (!(jentry%NPRT)) {
+            //f125_el_evt->Fill(time,gemChan,amp);
             //gemtrk_x2ch=(ftrk.Eval(gemtrk_x)+50.)/0.4;
           //}
           if (100. < time && time < 185.) {
             srs_etrd_corr->Fill(gemtrk_x,gemtrk_y,amp);
           }
-    			f125_el_amp2d->Fill(time,gemChan,amp);
-    			f125_el_fit->Fill(time,gemChan,amp);
+          f125_el_amp2d->Fill(time,gemChan,amp);
+          f125_el_fit->Fill(time,gemChan,amp);
         }
         if (mmg1Chan>-1 && amp>MM_THR) {
           mmg1_f125_el_amp2d->Fill(time,mmg1Chan,amp);
@@ -763,16 +762,17 @@ void trdclass::Loop() {
           mmg2_f125_el_amp2d->Fill(time,mmg2Chan,amp);
           mmg2_f125_el_fit->Fill(time,mmg2Chan,amp);
         }
-      } else if (pion) {
+      
+        } else if (pion) {
         if (gemChan>-1 && amp>THRESH) {
-    			//if (!(jentry%NPRT)) {
-      			//f125_pi_evt->Fill(time,gemChan,amp);
-    			//}
-    			if (100. < time && time < 185.) {
+          //if (!(jentry%NPRT)) {
+            //f125_pi_evt->Fill(time,gemChan,amp);
+          //}
+          if (100. < time && time < 185.) {
             srs_etrd_pion->Fill(gemtrk_x,gemtrk_y,amp);
           }
-    			f125_pi_amp2d->Fill(time,gemChan,amp);
-    			f125_pi_fit->Fill(time,gemChan,amp);
+          f125_pi_amp2d->Fill(time,gemChan,amp);
+          f125_pi_fit->Fill(time,gemChan,amp);
         }
         if (mmg1Chan>-1 && amp>MM_THR) {
           mmg1_f125_pi_amp2d->Fill(time,mmg1Chan,amp);
@@ -786,8 +786,8 @@ void trdclass::Loop() {
           mmg2_f125_pi_amp2d->Fill(time,mmg2Chan,amp);
           mmg2_f125_pi_fit->Fill(time,mmg2Chan,amp);
         }
-     	}
-   	} //---- End Fadc125 Pulse Loop ----
+      }
+    } //---- End Fadc125 Pulse Loop ----
     
     //==============================================================
     //        Correlation with GEM-TRKR & TRD Prototypes
@@ -826,9 +826,9 @@ void trdclass::Loop() {
 /*
       for (int cc=0; cc<NCAL; cc++) { //--- Calorimeter cells ---
         if (Ecal[cc]>0.8*Ebeam) {
-    			//if (electron_ch) { hCal_cor[cc]->Fill(5.,x0);} else { hCal_cor[cc]->Fill(7.,x0); }
-    			if (electron) { hCal_cor[cc]->Fill(5.,x0);} else if (pion) { hCal_cor[cc]->Fill(7.,x0); }
-    		} else if (Ecal[cc]<0.1*Ebeam) {
+          //if (electron_ch) { hCal_cor[cc]->Fill(5.,x0);} else { hCal_cor[cc]->Fill(7.,x0); }
+          if (electron) { hCal_cor[cc]->Fill(5.,x0);} else if (pion) { hCal_cor[cc]->Fill(7.,x0); }
+          } else if (Ecal[cc]<0.1*Ebeam) {
             //if (electron_ch) { hCal_cor[cc]->Fill(10.,x0);}  else { hCal_cor[cc]->Fill(12.,x0); }
             if (electron) { hCal_cor[cc]->Fill(10.,x0);}  else if (pion) { hCal_cor[cc]->Fill(12.,x0); }
         }
@@ -898,9 +898,9 @@ void trdclass::Loop() {
         f125_el_amp2ds->Add(f125_el_amp2d);
         f125_el_fita->Fill(p1x);
         if ( -0.04 < p1x && p1x < 0.02) {
-    			Count("n_trk_el");
-    			N_trk_el++;
-    			isSingleTrack=true;
+          Count("n_trk_el");
+          N_trk_el++;
+          isSingleTrack=true;
         }
       }
       double chi2el_mmg1 = TrkFit(mmg1_f125_el_fit, fx_mmg1, "fx_mmg1", 0);
@@ -955,9 +955,9 @@ void trdclass::Loop() {
         f125_pi_amp2ds->Add(f125_pi_amp2d);
         f125_pi_fita->Fill(p1x);
         if ( -0.04 < p1x && p1x < 0.02) {
-    			Count("n_trk_pi");
-    			N_trk_pi++;
-    			isSingleTrack=true;
+          Count("n_trk_pi");
+          N_trk_pi++;
+          isSingleTrack=true;
         }
       }
       double chi2pi_mmg1 = TrkFit(mmg1_f125_pi_fit, fx_mmg1, "fx_mmg1", 0);
@@ -1005,36 +1005,37 @@ void trdclass::Loop() {
     }
 
     //----------------  GEM TRKR Fuducial Area (Y-Direction) Selection (Box Cut) ----------------------
-    delta_x=abs(ftrk.Eval(gemtrk_x)-x0_gem);
+    //delta_x=abs(ftrk.Eval(gemtrk_x)-x0_gem);
     int BoxCut=1;
     
-    if  (RunNum > 3200 && RunNum < 3203) { //-- GEMTRD Double Fleece
+    if (RunNum > 3200 && RunNum < 3203) { //-- GEMTRD Double Fleece
       //x_boxcut1=0., x_boxcut2=+22., y_boxcut1=-20., y_boxcut2=+10.;
       x_boxcut1=-45., x_boxcut2=45., y_boxcut1=-20., y_boxcut2=15.;
-      if (gem_scluster_count!=1 || delta_x>dx_thresh || x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;
+      //if (gem_scluster_count!=1 || delta_x>dx_thresh || x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;
+      if (x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;
     }
-    if  (RunNum > 3124 && RunNum < 3132) { //-- GEMTRD Single Fleece
+    if (RunNum > 3124 && RunNum < 3132) { //-- GEMTRD Single Fleece
       x_boxcut1=-45., x_boxcut2=45., y_boxcut1=-25., y_boxcut2=25.;
-      if (gem_scluster_count!=1 || delta_x>dx_thresh || x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;
+      if (x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;
     }
-    if  (RunNum > 3131 && RunNum < 3135) { //-- GEMTRD Single Foil (VU)
+    if (RunNum > 3131 && RunNum < 3135) { //-- GEMTRD Single Foil (VU)
       x_boxcut1=-45., x_boxcut2=45., y_boxcut1=-40., y_boxcut2=40.;
-      if (gem_scluster_count!=1 || delta_x>dx_thresh || x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;  
+      if (x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;  
     }
-    if  (RunNum > 3274 && RunNum < 3289) { //-- GEMTRD Single Foil (TU)
+    if (RunNum > 3274 && RunNum < 3289) { //-- GEMTRD Single Foil (TU)
       x_boxcut1=-45., x_boxcut2=45., y_boxcut1=-40., y_boxcut2=40.;
-      if (gem_scluster_count!=1 || delta_x>dx_thresh || x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;  
+      if (x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;  
     }
-    if  (RunNum >  3195 && RunNum < 3201) { //-- GEMTRD Double Foil
+    if (RunNum >  3195 && RunNum < 3201) { //-- GEMTRD Double Foil
       x_boxcut1=-45., x_boxcut2=45., y_boxcut1=-40., y_boxcut2=40.;
-      if (gem_scluster_count!=1 || delta_x>dx_thresh || x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;  
+      if (x_boxcut1>gemtrk_x || gemtrk_x>x_boxcut2 || y_boxcut1 > gemtrk_y || gemtrk_y > y_boxcut2) BoxCut=0;
     }
-
+    
     //============================================================================
     //                  Single Track Event Histogram Filling
     //============================================================================
-
-    if (isSingleTrack  && BoxCut) { //-- single track from TRDs & GEM TRKR Y-direction hit condition --
+    
+    if (isSingleTrack && BoxCut) { //-- single track from TRDs & GEM TRKR Y-direction hit condition --
 //    if (isSingleTrack) {
       
       Count("1_TRK");
@@ -1115,7 +1116,7 @@ void trdclass::Loop() {
         } else if (pion) {
           if (i==0) {
             Count("1piTRK");
-            p_1trk++;
+            pi_1trk++;
           }
           if (amp>THRESH && gemChan>-1) {
             f125_pi->Fill(amp);
@@ -1185,21 +1186,21 @@ void trdclass::Loop() {
         }
 */
       } //--- end Fa125 Pulse Loop ---
-    
+      
       for (int i=1; i<21; i++) {
         gem_zHist_vect.push_back(gem_zHist->GetBinContent(i));
         mmg1_zHist_vect.push_back(mmg1_zHist->GetBinContent(i));
         mmg2_zHist_vect.push_back(mmg2_zHist->GetBinContent(i));
         urw_zHist_vect.push_back(urw_zHist->GetBinContent(i));
       }
-    
+      
     } //-- End Single Track Condition Loop --
     //============== End Process Fa125 Pulse data =================
-
+    
     //==================================================================================================
     //                    Process   Fa125 RAW data
     //==================================================================================================
-
+    
 //#define USE_125_RAW
 //#ifdef USE_125_RAW
 //    if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
@@ -1267,7 +1268,7 @@ void trdclass::Loop() {
     }
 */
 //#endif
-  
+    
     //=====================================================================================
     //                        E v e n t    D i s p l a y
     //=====================================================================================
@@ -1280,7 +1281,6 @@ void trdclass::Loop() {
       printf("========================>>>  Chi2 e=%f p=%f \n",chi2e,chi2p);
       //c0->cd(3); f125_el_chi2->Draw("colz");
       //c0->cd(6); f125_pi_chi2->Draw("colz");
-      //
       
       if (electron) {
   c0->cd(3); f125_el_raw->Draw("colz");  f125_el_evt->Draw("same");
@@ -1310,13 +1310,12 @@ void trdclass::Loop() {
       }
       c0->cd(4); cal_el_evt->Draw("colz");
       c0->cd(8); cal_pi_evt->Draw("colz");
-
       c0->cd(9); srs_trk_el->Draw("colz");
       c0->cd(10); srs_gem_x->Draw("colz");  ftrk.Draw("same");
       c0->Modified();   c0->Update();
-
+      
       //---------- fiducial area ---
-
+      
       // srs_etrd_corr->Divide(srs_etrd_beam);
       srs_etrd_ratio = (TH2F*)srs_etrd_corr->Clone("srs_etrd_ratio");
       //srs_etrd_corr->Copy((TH2F*)srs_etrd_ratio);
@@ -1349,8 +1348,8 @@ void trdclass::Loop() {
     
   } // ================== End of Event Loop  ====================
    
-  cout<<" Total events= "<<jentry<< "  N_trk_el=" << N_trk_el << " N_trk_pi=" << N_trk_pi <<endl;
-  cout<<" hcount values: 1_TRK="<<_1trk<<" 1eTRK="<<e_1trk<<" 1piTRK="<<p_1trk<<" eCHR="<<e_CHR<<" elCC="<<el_CC<<" piCC="<<pi_CC<<" nclSRS="<<n_clSRS<<" CalSum="<<_calsum<<" CalSumEl="<<_calsum_ecut<<" CalSumPi="<<_calsum_pcut<<" eCHR_Up="<<e_CHR_Up<<endl;
+  cout<<"Total events= "<<jentry<< "  N_trk_el=" << N_trk_el << " N_trk_pi=" << N_trk_pi <<endl;
+  cout<<"hcount values: 1_TRK="<<_1trk<<" 1eTRK="<<e_1trk<<" 1piTRK="<<pi_1trk<<" eCHR="<<e_CHR<<" elCC="<<el_CC<<" piCC="<<pi_CC<<" nclSRS="<<n_clSRS<<" CalSum="<<_calsum<<" CalSumEl="<<_calsum_ecut<<" CalSumPi="<<_calsum_pcut<<" eCHR_Up="<<e_CHR_Up<<endl;
 
   //=====================================================================================
   //===                 S A V E   H I S T O G R A M S                                ====
@@ -1367,7 +1366,7 @@ void trdclass::Loop() {
   //=====================================================================================
   //===                 S A V E   T R A C K   H I T   T T R E E S                    ====
   //=====================================================================================
-
+  
   if (save_hits_root) {
     printf("Writing Hit Info TTree files... \n");
     fHits->cd();
@@ -1378,11 +1377,11 @@ void trdclass::Loop() {
     fHits->Close();
     printf("TTree files written & closed OK \n");
   }
-
+  
   //=====================================================================================
   //===                 P L O T     H I S T O G R A M S                               ===
   //=====================================================================================
-
+  
   const char *OutputDir="RootOutput";
   char ctit[120];
   sprintf(G_DIR,"%s/Run_%06d",OutputDir,RunNum);
@@ -1391,8 +1390,7 @@ void trdclass::Loop() {
   TCanvas *cc;
   int nxd=3;
   int nyd=5;
-
- 
+  
   //--  Plot Event Display --
   //char pngname[120];  sprintf(pngname,"%s_evdisp.png",G_DIR);  //c0->Print(pngname);
   char pdfname[120];  sprintf(pdfname,"%s_evdisp.pdf",G_DIR);  //c0->Print(pdfname);
