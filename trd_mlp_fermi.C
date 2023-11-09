@@ -1006,7 +1006,7 @@ void trd_mlp_fermi(int runnum) {
    double rej70m = Reject(bgm, sigm, 0.7);
    double rej90m = Reject(bgm, sigm, 0.9);
    cout << "Nmod=" << Nmod << " Nmod=" << Nmod << " e=70% , Eff pi = " << rej70m*100. << "% ,  Rejection =" << 1./rej70m << endl;
-   cout << " Nmod=" << Nmod << " e=90%, Eff pi = " << rej90m*100. << "% ,  Rejection =" << 1./rej90m << endl;
+   cout << " Nmod=" << Nmod << " pi=90%, Eff pi = " << rej90m*100. << "% ,  Rejection =" << 1./rej90m << endl;
    //---------------------------------------------
    mlpa_canvas->cd(1);
    stringstream ss;   ss << " Nmod=" << 1 << " e=70% , Eff #pi = " << rej70*100. << "% ,  Rej =" << 1./rej70 ;  string str = ss.str();
