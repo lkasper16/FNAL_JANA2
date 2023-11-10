@@ -219,15 +219,15 @@ void trdclass::Loop() {
   //srs_mmg2_y = new TH2F("srs_mmg2_y","Correlation MMG2TRD & GEMTRKR Y ; Y GEMtrkr; MMG-2 X Chan",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_y);
   
   //-- GEM-TRD & Prototype Correlations
-  gem_mmg1_x = new TH2F("gem_mmg1_x","Correlation GEMTRD-MMG1 X ; MMG-1 X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_mmg1_x);
-  gem_urw_x = new TH2F("gem_urw_x","Correlation GEMTRD-uRWell X ; uRWell X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_urw_x);
-  gem_mmg2_x = new TH2F("gem_mmg2_x","Correlation GEMTRD-MMG2 X ; MMG-2 X Chan; GEMTRD X Chan",100,-55.,55.,100,-55.,55.);    HistList->Add(gem_mmg2_x);
+  gem_mmg1_x = new TH2F("gem_mmg1_x","Correlation GEMTRD-MMG1 X ; MMG-1 X Chan; GEMTRD X Chan",110,-55.,55.,110,-55.,55.);    HistList->Add(gem_mmg1_x);
+  gem_urw_x = new TH2F("gem_urw_x","Correlation GEMTRD-uRWell X ; uRWell X Chan; GEMTRD X Chan",110,-55.,55.,110,-55.,55.);    HistList->Add(gem_urw_x);
+  gem_mmg2_x = new TH2F("gem_mmg2_x","Correlation GEMTRD-MMG2 X ; MMG-2 X Chan; GEMTRD X Chan",110,-55.,55.,110,-55.,55.);    HistList->Add(gem_mmg2_x);
   
   //-- GEM-TRKR & PID/Beam Correlations
   //srs_cal_corr = new TH2F("srs_cal_corr","Correlation GEMTRKR & CAL; X ; Y ",100,-55.,55.,100,-55.,55.);            HistList->Add(srs_cal_corr);
-  srs_etrd_corr = new TH2F("srs_etrd_corr","Correlation GEMTRKR & GEMTRD Electron Amp; X ; Y ",100,-55.,55.,100,-55.,55.);   HistList->Add(srs_etrd_corr);
+  srs_etrd_corr = new TH2F("srs_etrd_corr","Correlation GEMTRKR & GEMTRD Electron Amp; X ; Y ",110,-55.,55.,110,-55.,55.);   HistList->Add(srs_etrd_corr);
   //srs_etrd_beam = new TH2F("srs_etrd_beam","Correlation GEMTRKR & beam; X ; Y ",100,-55.,55.,100,-55.,55.);         HistList->Add(srs_etrd_beam);
-  srs_etrd_pion = new TH2F("srs_etrd_pion","Correlation GEMTRKR & GEMTRD Pion Amp; X ; Y ",100,-55.,55.,100,-55.,55.);         HistList->Add(srs_etrd_pion);
+  srs_etrd_pion = new TH2F("srs_etrd_pion","Correlation GEMTRKR & GEMTRD Pion Amp; X ; Y ",110,-55.,55.,110,-55.,55.);         HistList->Add(srs_etrd_pion);
   //srs_etrd_ratio = new TH2F("srs_etrd_ratio","Correlation TRK ratio; X ; Y ",100,-55.,55.,100,-55.,55.);         HistList->Add(srs_etrd_ratio);
   
   //=============== Track Fitting & chi^2 ==================
@@ -281,9 +281,11 @@ void trdclass::Loop() {
   
   //======== GEM-TRKR ========
   srs_ncl = new TH1F("srs_ncl"," Number SRS clusters per event",10,-0.5,9.5);                     HistList->Add(srs_ncl);
-  //srs_trk_el = new TH2F("srs_trk_el","GEM-TRKR , Electrons ; X ; Y ",100,-55.,55.,100,-55.,55.);    HistList->Add(srs_trk_el);
-  //srs_trk_pi = new TH2F("srs_trk_pi","GEM-TRKR , Pions ; X ; Y ",100,-55.,55.,100,-55.,55.);        HistList->Add(srs_trk_pi);
-
+  srs_trk_el = new TH2F("srs_trk_el","GEM-TRKR X-Y Correlation ; X ; Y ",110,-55.,55.,100,-55.,55.);    HistList->Add(srs_trk_el);
+  //srs_trk_pi = new TH2F("srs_trk_pi","GEM-TRKR , Pions ; X ; Y ",100,-55.,55.,110,-55.,55.);        HistList->Add(srs_trk_pi);
+  hgemtrkr_x = new TH1F("hgemtrkr_x"," GEM-TRKR X ",110,-55.,55.);                     HistList->Add(hgemtrkr_x);
+  hgemtrkr_y = new TH1F("hgemtrkr_y"," GEM-TRKR Y ",110,-55.,55.);                     HistList->Add(hgemtrkr_y);
+  
   //============= Prototype ADC Amplitude Distributions ============
   f125_el = new TH1F("f125_el","GEM-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);                  HistList->Add(f125_el);
   f125_pi = new TH1F("f125_pi","GEM-TRD f125 Peak Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);                      HistList->Add(f125_pi);
@@ -631,18 +633,19 @@ void trdclass::Loop() {
       if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.; gemtrk_x*=-1.;
       y=gem_scluster_y->at(i);
       if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
-/*      double gemtrk_E=gem_scluster_energy->at(i);
+      double gemtrk_E=gem_scluster_energy->at(i);
       //printf("SRS:clusters:  i=%lld  X=%f Y=%f E=%f  \n", i, gemtrk_x, gemtrk_y, gemtrk_E);
-      if (electron) {
-        srs_trk_el->Fill(gemtrk_x,gemtrk_y,gemtrk_E);
-      } else if (pion) {
-        srs_trk_pi->Fill(gemtrk_x,gemtrk_y,gemtrk_E);
-      }
+      //if (electron) {
+      srs_trk_el->Fill(gemtrk_x, gemtrk_y, gemtrk_E);
+      //} else if (pion) {
+      //  srs_trk_pi->Fill(gemtrk_x, gemtrk_y, gemtrk_E);
+      //}
+/*
       //--GEM-TRKR & Cal. Correlation
       //for (int cc=0; cc<NCAL; cc++) {
         //if (Ecal[cc]>0.8*Ebeam) {
-          //srs_cal_corr->Fill(gemtrk_x,gemtrk_y);
-          //hCal_trk[cc]->Fill(gemtrk_x,gemtrk_y);
+          //srs_cal_corr->Fill(gemtrk_x, gemtrk_y);
+          //hCal_trk[cc]->Fill(gemtrk_x, gemtrk_y);
         //}
       //}
 */
@@ -811,8 +814,10 @@ void trdclass::Loop() {
         //if (i==0) { Count("nclSRS"); n_clSRS++;}
         double gemtrk_x=0., gemtrk_y=0., x, y;
         x=gem_scluster_x->at(i); if (x<=0) gemtrk_x=x+50.; else gemtrk_x=x-50.; gemtrk_x*=-1.;
-        //y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
+        y=gem_scluster_y->at(i); if (y<=0) gemtrk_y=y+50.; else gemtrk_y=y-50.; gemtrk_y*=-1.;
         //double gemtrk_E=gem_scluster_energy->at(i);
+        hgemtrkr_x->Fill(gemtrk_x);
+        hgemtrkr_y->Fill(gemtrk_y);
         srs_gem_x->Fill(gemtrk_x, x0_gem);
         if(x0_mmg1!=0)gem_mmg1_x->Fill(x0_mmg1, x0_gem);
         //srs_gem_y->Fill(gemtrk_y, x0_gem);
@@ -1473,7 +1478,9 @@ void trdclass::Loop() {
   htitle(" GEM-TRKR (SRS) ");   if (!COMPACT) cc=NextPlot(0,0);
   
   cc=NextPlot(nxd,nyd);   gPad->SetLogy();  srs_ncl->Draw("");
-  //cc=NextPlot(nxd,nyd);  srs_trk_el->Draw("colz");
+  cc=NextPlot(nxd,nyd);  hgemtrkr_x->Draw();
+  cc=NextPlot(nxd,nyd);  hgemtrkr_y->Draw();
+  cc=NextPlot(nxd,nyd);  srs_trk_el->Draw("colz");
   //cc=NextPlot(nxd,nyd);  srs_trk_pi->Draw("colz");
   //cc=NextPlot(nxd,nyd);  srs_cal_corr->Draw("colz");
   cc=NextPlot(nxd,nyd);  srs_gem_dx->Draw("colz");
