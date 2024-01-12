@@ -309,7 +309,7 @@ public :
    TH1F *hgemtrkr_y;
    TH1F *hgemtrkr_peak_x;
    TH1F *hgemtrkr_peak_y;
-   TH2F *srs_trk_el, *srs_trk_pi, *srs_gem_dx, *srs_gem_dy, *srs_gem_x, *srs_gem_y, *srs_cal_corr, *srs_gemtrd_el, *srs_etrd_beam, *srs_gemtrd_pion, *srs_etrd_ratio, *srs_mmg1_dx, *srs_mmg1_dy, *srs_mmg1_x, *srs_mmg1_y, *srs_urw_dx, *srs_urw_dy, *srs_urw_x, *srs_urw_y, *srs_mmg2_dx, *srs_mmg2_dy, *srs_mmg2_x, *srs_mmg2_y;
+   TH2F *hgemtrkr_peak_xy, *srs_trk_pi, *srs_gem_dx, *srs_gem_dy, *srs_gem_x, *srs_cal_corr, *srs_gemtrd_el, *srs_etrd_beam, *srs_gemtrd_pion, *srs_etrd_ratio, *srs_mmg1_dx, *srs_mmg1_dy, *srs_mmg1_x, *srs_mmg1_y, *srs_urw_dx, *srs_urw_dy, *srs_urw_x, *srs_urw_y, *srs_mmg2_dx, *srs_mmg2_dy, *srs_mmg2_x, *srs_mmg2_y;
 
    TH1F *f125_el, *f125_el_chi2, *f125_el_fita, *mmg1_f125_el_chi2, *mmg1_f125_el_fita, *urw_f125_el_chi2, *urw_f125_el_fita, *mmg2_f125_el_chi2, *mmg2_f125_el_fita;
    TH1F *f125_pi, *f125_pi_chi2, *f125_pi_fita, *mmg1_f125_pi_chi2, *mmg1_f125_pi_fita, *urw_f125_pi_chi2, *urw_f125_pi_fita, *mmg2_f125_pi_chi2, *mmg2_f125_pi_fita;
@@ -347,6 +347,13 @@ public :
    TH2F *gem_mmg1_x;
    TH2F *gem_urw_x;
    TH2F *gem_mmg2_x;
+   TH2F *gem_mmg1_y;
+   TH2F *gem_urw_y;
+   TH2F *gem_mmg2_y;
+   TH2F * mmg1_urw_y;
+   TH2F *mmg1_xy;
+   TH2F *urw_xy;
+   TH2F *mmg2_xy;
    
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
