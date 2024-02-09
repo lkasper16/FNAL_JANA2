@@ -211,9 +211,9 @@ void trdclass::Loop() {
   hCCor_ud = new TH2F("hCCor_ud"," Cherenkov Upstr./Downstr. Corr ; Upstream ; Downstream (out) ",400,-0.5,4095.5,400,0.5,4095.5);   HistList->Add(hCCor_ud);
   
   //-- GEM-TRKR & Prototype Correlations
-  srs_gem_dx = new TH2F("srs_gem_dx","Correlation GEMTRD X & GEMTRKR X (Peaks) ; GEMTRD X [mm] GEMTRKR Peak X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_gem_dx);
-  srs_gem_dy = new TH2F("srs_gem_dy","Correlation GEMTRD X & GEMTRKR Y (Peaks) ; GEMTRD X [mm] ; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_gem_dy);
-  tmp_rad_shadow = new TH2F("tmp_rad_shadow","Correlation GEMTRD X & GEMTRKR Y (Max Energy Dep.) ; GEMTRD X [mm] ; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);  HistList->Add(tmp_rad_shadow);
+  srs_gem_dx = new TH2F("srs_gem_dx","Correlation GEMTRD X & GEMTRKR X (Peaks) ; GEMTRD X [mm]; GEMTRKR Peak X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_gem_dx);
+  srs_gem_dy = new TH2F("srs_gem_dy","Correlation GEMTRD X & GEMTRKR Y (Peaks) ; GEMTRD X [mm]; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_gem_dy);
+  tmp_rad_shadow = new TH2F("tmp_rad_shadow","Correlation GEMTRD X & GEMTRKR Y (Max Energy Dep.); GEMTRD X [mm] ; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);  HistList->Add(tmp_rad_shadow);
   //srs_gem_x = new TH2F("srs_gem_x","Correlation GEMTRD & GEMTRKR Clusters (X) ; GEMTRKR Cluster X [mm] ; GEMTRD X [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_gem_x);
   srs_mmg1_x = new TH2F("srs_mmg1_x","Correlation MMG1TRD Y & GEMTRKR X (Peaks); GEMTRKR Peak X [mm] ; MMG-1 Peak(SRS) Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_x);
   srs_mmg1_dx = new TH2F("srs_mmg1_dx","Correlation MMG1TRD & GEMTRKR X (Peaks); GEMTRKR Peak X [mm] ; MMG-1 X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_dx);
@@ -235,7 +235,7 @@ void trdclass::Loop() {
   gem_mmg1_y = new TH2F("gem_mmg1_y","Correlation GEMTRD X & MMG1 Y ; GEMTRD X [mm] ; MMG-1 Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(gem_mmg1_y);
   gem_urw_y = new TH2F("gem_urw_y","Correlation GEMTRD X & uRWell Y ; GEMTRD X [mm] ; uRWell Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(gem_urw_y);
   gem_mmg2_y = new TH2F("gem_mmg2_y","Correlation GEMTRD X & MMG2 Y ; GEMTRD X [mm] ; MMG-2 Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(gem_mmg2_y);
-  mmg1_urw_y = new TH2F("mmg1_urw_y","Correlation MMG1 & uRWell Y ; MMG-1 Y(SRS) [mm] ; uRWell Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(mmg1_urw_y);
+  mmg1_urw_y = new TH2F("mmg1_urw_y","Correlation MMG1 & uRWell Y ; uRWell Y(SRS) [mm]; MMG-1 Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(mmg1_urw_y);
   mmg1_xy = new TH2F("mmg1_xy","Correlation MMG1TRD X&Y ; MMG-1 X [mm] ; MMG-1 Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(mmg1_xy);
   urw_xy = new TH2F("urw_xy","Correlation uRWellTRD X&Y ; uRWell X [mm] ; uRWell Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(urw_xy);
   mmg2_xy = new TH2F("mmg2_xy","Correlation MMG2TRD X&Y ; MMG-2 X [mm] ; MMG-2 Y(SRS) [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(mmg2_xy);
@@ -757,10 +757,10 @@ void trdclass::Loop() {
       mmg2_f125_pi_amp2d->Reset();
     }
     
-    double x0_urw=-1000;
-    double x0_mmg1=-1000;
-    double x0_mmg2=-1000;
-    double x0_gem=-1000;
+    double x0_urw=-999;
+    double x0_mmg1=-999;
+    double x0_mmg2=-999;
+    double x0_gem=-999;
     double chi2_max=20000;
     
     for (ULong64_t i=0;i<f125_pulse_count; i++) {
@@ -1164,7 +1164,7 @@ void trdclass::Loop() {
       srs_mmg1_y->Fill(gemtrkr_peak_pos_y, mmg1_peak_pos_y);
       srs_urw_y->Fill(gemtrkr_peak_pos_y, urw_peak_pos_y);
       srs_mmg2_y->Fill(gemtrkr_peak_pos_y, mmg2_peak_pos_y);
-      mmg1_urw_y->Fill(mmg1_peak_pos_y, urw_peak_pos_y);
+      mmg1_urw_y->Fill(urw_peak_pos_y, mmg1_peak_pos_y);
       
       srs_mmg1_x->Fill(gemtrkr_peak_pos_x, mmg1_peak_pos_y);
       srs_urw_x->Fill(gemtrkr_peak_pos_x, urw_peak_pos_y);
@@ -1174,8 +1174,10 @@ void trdclass::Loop() {
       //if (gem_peak_height->at(i)>1000 && gem_peak_plane_name->at(i) =="GEMTRKX") tmp_rad_shadow->Fill(x0_gem, gemtrkr_peak_pos_y);
       
       if (chi2cc_gem>0. && chi2cc_gem<chi2_max) {
-        srs_gem_dx->Fill(x0_gem, gemtrkr_peak_pos_x);
-        srs_gem_dy->Fill(x0_gem, gemtrkr_peak_pos_y);
+        if (gemtrkr_peak_pos_x >-55. && gemtrkr_peak_pos_y>-55.) {
+          srs_gem_dx->Fill(x0_gem, gemtrkr_peak_pos_x);
+          srs_gem_dy->Fill(x0_gem, gemtrkr_peak_pos_y);
+        }
         gem_mmg1_y->Fill(x0_gem, mmg1_peak_pos_y);
         gem_urw_y->Fill(x0_gem, urw_peak_pos_y);
         gem_mmg2_y->Fill(x0_gem, mmg2_peak_pos_y);
