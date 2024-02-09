@@ -216,15 +216,15 @@ void trdclass::Loop() {
   tmp_rad_shadow = new TH2F("tmp_rad_shadow","Correlation GEMTRD X & GEMTRKR Y (Max Energy Dep.); GEMTRD X [mm] ; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);  HistList->Add(tmp_rad_shadow);
   //srs_gem_x = new TH2F("srs_gem_x","Correlation GEMTRD & GEMTRKR Clusters (X) ; GEMTRKR Cluster X [mm] ; GEMTRD X [mm] ",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_gem_x);
   srs_mmg1_x = new TH2F("srs_mmg1_x","Correlation MMG1TRD Y & GEMTRKR X (Peaks); GEMTRKR Peak X [mm] ; MMG-1 Peak(SRS) Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_x);
-  srs_mmg1_dx = new TH2F("srs_mmg1_dx","Correlation MMG1TRD & GEMTRKR X (Peaks); GEMTRKR Peak X [mm] ; MMG-1 X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_dx);
+  srs_mmg1_dx = new TH2F("srs_mmg1_dx","Correlation MMG1TRD & GEMTRKR X (Peaks); MMG-1 X [mm]; GEMTRKR Peak X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_dx);
   srs_mmg1_dy = new TH2F("srs_mmg1_dy","Correlation MMG1TRD X&Y ; MMG-1 X [mm]; MMG-1 Peak(SRS) Y [mm] ;",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_dy);
   srs_mmg1_y = new TH2F("srs_mmg1_y","Correlation MMG1TRD Y & GEMTRKR X (Peaks); GEMTKR Peak X [mm]; MMG-1 Peak(SRS) Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg1_y);
   srs_urw_x = new TH2F("srs_urw_x","Correlation uRWellTRD Y & GEMTRKR X (Peaks); GEMTRKR Peak X; uRWell Peak(SRS) Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_urw_x);
-  srs_urw_dx = new TH2F("srs_urw_dx","Correlation uRWellTRD & GEMTRKR X (Peaks); GEMTRKR Peak X [mm] ; uRWell X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_urw_dx);
+  srs_urw_dx = new TH2F("srs_urw_dx","Correlation uRWellTRD & GEMTRKR X (Peaks); uRWell X [mm]; GEMTRKR Peak X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_urw_dx);
   srs_urw_dy = new TH2F("srs_urw_dy","Correlation uRWellTRD & GEMTRKR X&Y ; uRWell X [mm] ; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_urw_dy);
   srs_urw_y = new TH2F("srs_urw_y","Correlation uRWellTRD & GEMTRKR Y (Peaks); GEMTRKR Peak Y [mm]; uRWell Peak(SRS) Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_urw_y);
   srs_mmg2_x = new TH2F("srs_mmg2_x","Correlation MMG2TRD Y & GEMTRKR X (Peaks); GEMTRKR Peak X [mm]; MMG-2 Peak(SRS) Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_x);
-  srs_mmg2_dx = new TH2F("srs_mmg2_dx","Correlation MMG2TRD & GEMTRKR X (Peaks) ; GEMTRKR Peak X [mm] ; MMG-2 X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_dx);
+  srs_mmg2_dx = new TH2F("srs_mmg2_dx","Correlation MMG2TRD & GEMTRKR X (Peaks) ; MMG-2 X [mm]; GEMTRKR Peak X [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_dx);
   srs_mmg2_dy = new TH2F("srs_mmg2_dy","Correlation MMG2TRD & GEMTRKR X&Y; MMG-2 X [mm] ; GEMTRKR Peak Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_dy);
   srs_mmg2_y = new TH2F("srs_mmg2_y","Correlation MMG2TRD & GEMTRKR Y (Peaks); GEMTRKR Peak Y [mm]; MMG-2 Y [mm]",110,-55.,55.,110,-55.,55.);    HistList->Add(srs_mmg2_y);
   
@@ -1174,8 +1174,10 @@ void trdclass::Loop() {
       //if (gem_peak_height->at(i)>1000 && gem_peak_plane_name->at(i) =="GEMTRKX") tmp_rad_shadow->Fill(x0_gem, gemtrkr_peak_pos_y);
       
       if (chi2cc_gem>0. && chi2cc_gem<chi2_max) {
-        if (gemtrkr_peak_pos_x >-55. && gemtrkr_peak_pos_y>-55.) {
+        if (gemtrkr_peak_pos_x >-55.) {
           srs_gem_dx->Fill(x0_gem, gemtrkr_peak_pos_x);
+        }
+        if (gemtrkr_peak_pos_y >-55.) {
           srs_gem_dy->Fill(x0_gem, gemtrkr_peak_pos_y);
         }
         gem_mmg1_y->Fill(x0_gem, mmg1_peak_pos_y);
@@ -1183,17 +1185,17 @@ void trdclass::Loop() {
         gem_mmg2_y->Fill(x0_gem, mmg2_peak_pos_y);
       }
       if (chi2cc_mmg1>0. && chi2cc_mmg1<chi2_max) {
-        srs_mmg1_dx->Fill(gemtrkr_peak_pos_x, x0_mmg1);
+        srs_mmg1_dx->Fill(x0_mmg1, gemtrkr_peak_pos_x);
         srs_mmg1_dy->Fill(x0_mmg1, gemtrkr_peak_pos_y);
         mmg1_xy->Fill(x0_mmg1, mmg1_peak_pos_y);
       }
       if (chi2cc_urw>0. && chi2cc_urw<chi2_max) {
-        srs_urw_dx->Fill(gemtrkr_peak_pos_x, x0_urw);
+        srs_urw_dx->Fill(x0_urw, gemtrkr_peak_pos_x);
         srs_urw_dy->Fill(x0_urw, gemtrkr_peak_pos_y);
         urw_xy->Fill(x0_urw, urw_peak_pos_y);
       }
       if (chi2cc_mmg2>0. && chi2cc_mmg2<chi2_max) {
-        srs_mmg2_dx->Fill(gemtrkr_peak_pos_x, x0_mmg2);
+        srs_mmg2_dx->Fill(x0_mmg2, gemtrkr_peak_pos_x);
         srs_mmg2_dy->Fill(x0_mmg2, gemtrkr_peak_pos_y);
         mmg2_xy->Fill(x0_mmg2, mmg2_peak_pos_y);
       }
