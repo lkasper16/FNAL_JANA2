@@ -270,7 +270,7 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   double   TrkFit(TH2F *h2, TF1 &fx, const char *cfx, int rob);
+   std::pair<Double_t, Double_t>   TrkFit(TH2F *h2, TF1 &fx, const char *cfx, int rob);
    void Count(const char *tit);
    void Count(const char *tit, double cut1);
    void Count(const char *tit, double cut1, double cut2);
@@ -300,6 +300,7 @@ public :
    TH1F *hCher_u_time;
    TH1F *hCher_din_time;
    TH1F *hCher_dout_time;
+   TH1F *gem_trk_fit_integral;
 
    TH2F *hCCor_ud;
    TH2F *hCCCor_u;
@@ -690,7 +691,7 @@ Int_t trdclass::Cut(Long64_t entry)
    return 1;
 }
 
-double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
+std::pair<Double_t, Double_t> trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
 {
   //----------  SF fit ---------------------------
   /*
@@ -720,17 +721,18 @@ double trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char *cfx, int rob )
   }
   Double_t chi2x = fx.GetChisquare();
   Double_t Ndfx = fx.GetNDF();
+  Double_t integral = profx->Integral(profx->GetXaxis()->FindBin(100.), profx->GetXaxis()->FindBin(190.));
   //Double_t p0x = fx.GetParameter(0);
   //Double_t p1x = fx.GetParameter(1);
-/*
-  int kfit = 0;
-  //if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) {
-  if (chi2x/Ndfx<100 && Ndfx>10) {
-    kfit=1;
-  }
-*/
-  double chi2=chi2x/Ndfx;  if (Ndfx<3) chi2=-chi2;
-  return chi2;
+  
+  //int kfit = 0;
+  ////if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) {
+  //if (chi2x/Ndfx<100 && Ndfx>10) {
+  //  kfit=1;
+  //}
+  double chi2=chi2x/Ndfx; if (Ndfx<3) chi2=-chi2;
+  //return chi2;
+  return std::make_pair(chi2, integral);
 }
 
 

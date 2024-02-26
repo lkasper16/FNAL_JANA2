@@ -268,6 +268,7 @@ void trdclass::Loop() {
   mmg2_f125_pi_chi2 = new  TH1F("mmg2_f125_pi_chi2","MMG2 Pion Chi2 Values",100,0.,10000.);                            HistList->Add(mmg2_f125_pi_chi2);
   mmg2_f125_el_fita = new  TH1F("mmg2_f125_el_fita","MMG2 Electron Track (Linear Fit Coefficient)",100,-0.1,+0.1);                            HistList->Add(mmg2_f125_el_fita);
   mmg2_f125_pi_fita = new  TH1F("mmg2_f125_pi_fita","MMG2 Pion Track (Linear Fit Coefficient)",100,-0.1,+0.1);                            HistList->Add(mmg2_f125_pi_fita);
+  gem_trk_fit_integral = new  TH1F("gem_trk_fit_integral","GEMTRD Track Fitting Integral; Integral Value",20000,-0.5,19999.5);     HistList->Add(gem_trk_fit_integral);
   
   //======== GEM-TRKR ========
   singleTrackIndex = new TH2F("singleTrackIndex","GEMTracker Correlated Hits with Chi^2; GEMTRKR X Num Hits; GEMTRKR Y Num Hits",10,-0.5,9.5,10,-0.5,9.5);      HistList->Add(singleTrackIndex);
@@ -714,22 +715,29 @@ void trdclass::Loop() {
     //        TRD Prototypes - Chi^2 Calculation
     //==============================================================
     
-    double chi2cc_gem = TrkFit(f125_fit,fx,"fx",1);
-    // ?? What does the 0 or 1 mean in the TrkFit argument?
-    double a_gem = fx.GetParameter(1);
-    double chi2cc_mmg1 = TrkFit(mmg1_f125_fit,fx_mmg1,"fx_mmg1",1);
-    double a_mmg1 = fx_mmg1.GetParameter(1);
-    double chi2cc_urw = -999.;
-    double a_urw = -999.;
-    if (RunNum<3262 && RunNum>3147) {
-      chi2cc_urw = TrkFit(urw_f125_fit,fx_urw,"fx_urw",1);
-      a_urw = fx_urw.GetParameter(1);
+    Double_t chi2cc_gem = 0.;
+    Double_t chi2cc_mmg1 = 0.;
+    Double_t chi2cc_urw = 0.;
+    Double_t chi2cc_mmg2 = 0.;
+    
+    Double_t gem_integral = 0.;
+    
+    if (f125_fit->GetEntries()!=0) {
+      std::pair<Double_t, Double_t> fitResult = TrkFit(f125_fit,fx,"fx",1);
+      chi2cc_gem = fitResult.first;
+      gem_integral = fitResult.second;
     }
-    double chi2cc_mmg2 = -999.;
-    double a_mmg2 = -999.;
-    if (RunNum>3261) {
-      chi2cc_mmg2 = TrkFit(mmg2_f125_fit,fx_mmg2,"fx_mmg2",1);
-      a_mmg2 = fx_mmg2.GetParameter(1);
+    if (mmg1_f125_fit->GetEntries()!=0) {
+      std::pair<Double_t, Double_t> fitResult = TrkFit(mmg1_f125_fit,fx_mmg1,"fx",1);
+      chi2cc_mmg1 = fitResult.first;
+    }
+    if (RunNum<3262 && RunNum>3147 && urw_f125_fit->GetEntries()!=0) {
+      std::pair<Double_t, Double_t> fitResult = TrkFit(urw_f125_fit,fx_urw,"fx",1);
+      chi2cc_urw = fitResult.first;
+    }
+    if (RunNum>3261 && mmg2_f125_fit->GetEntries()!=0) {
+      std::pair<Double_t, Double_t> fitResult = TrkFit(mmg2_f125_fit,fx_mmg2,"fx",1);
+      chi2cc_mmg2 = fitResult.first;
     }
     
     if (chi2cc_gem>0. && chi2cc_gem<chi2_max) x0_gem=fx.Eval(100.)*0.4-50.;         //-- Convert channels (strips) to [mm] -- 400u pitch
@@ -743,21 +751,38 @@ void trdclass::Loop() {
       if(x0_mmg2>-55 && x0_mmg2<55.) gem_mmg2_x->Fill(x0_gem, x0_mmg2);
     }
     
+    if (gem_integral!=0.) gem_trk_fit_integral->Fill(gem_integral);
+    
     //==============================================================
     //  Chi^2 Track Fitting for TRDs : Determine Single-Track Evts
     //==============================================================
     bool isSingleTrack=false;
+    Double_t chi2el_gem = 0.;
+    Double_t chi2pi_gem = 0.;
+    Double_t ax_gem = -999.;
+    Double_t chi2el_mmg1 = 0.;
+    Double_t chi2pi_mmg1 = 0.;
+    Double_t ax_mmg1 = -999.;
+    Double_t chi2el_urw = 0.;
+    Double_t chi2pi_urw = 0.;
+    Double_t ax_urw = -999.;
+    Double_t chi2el_mmg2 = 0.;
+    Double_t chi2pi_mmg2 = 0.;
+    Double_t ax_mmg2 = -999.;
     
     if (electron) {
-      f125_el_chi2->Fill(chi2cc_gem);
-      mmg1_f125_el_chi2->Fill(chi2cc_mmg1);
-      if (RunNum<3262 && RunNum>3147) {urw_f125_el_chi2->Fill(chi2cc_urw);} else if (RunNum>3261) {mmg2_f125_el_chi2->Fill(chi2cc_mmg2);}
+      //f125_el_chi2->Fill(chi2cc_gem);
+      //mmg1_f125_el_chi2->Fill(chi2cc_mmg1);
+      //if (RunNum<3262 && RunNum>3147) {urw_f125_el_chi2->Fill(chi2cc_urw);} else if (RunNum>3261) {mmg2_f125_el_chi2->Fill(chi2cc_mmg2);}
       
-      double chi2el_gem = TrkFit(f125_el_amp2d, fx, "fx", 0);
-      Double_t ax_gem = fx.GetParameter(1);
+      if (f125_el_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(f125_el_amp2d, fx, "fx", 0);
+        chi2el_gem = fitResult.first;
+        ax_gem = fx.GetParameter(1);
+      }
       if (chi2el_gem>0. && chi2el_gem<chi2_max) {
         f125_el_amp2ds->Add(f125_el_amp2d);
-        f125_el_fita->Fill(ax_gem);
+        //f125_el_fita->Fill(ax_gem);
         Count("pre_n_trk_el");
         pre_n_trk_el++;
         if ( -0.04 < ax_gem && ax_gem < 0.02) {
@@ -767,46 +792,58 @@ void trdclass::Loop() {
         }
       }
       
-      double chi2el_mmg1 = TrkFit(mmg1_f125_el_amp2d, fx_mmg1, "fx_mmg1", 0);
-      Double_t ax_mmg1 = fx_mmg1.GetParameter(1);
+      if (mmg1_f125_el_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(mmg1_f125_el_amp2d, fx_mmg1, "fx_mmg1", 0);
+        chi2el_mmg1 = fitResult.first;
+        ax_mmg1 = fx_mmg1.GetParameter(1);
+      }
       if (chi2el_mmg1>0. && chi2el_mmg1<chi2_max) {
         mmg1_f125_el_amp2ds->Add(mmg1_f125_el_amp2d);
-        mmg1_f125_el_fita->Fill(ax_mmg1);
+        //mmg1_f125_el_fita->Fill(ax_mmg1);
         if ( -0.04 < ax_mmg1 && ax_mmg1 < 0.02) {
           isSingleTrack=true;
         }
       }
       
-      double chi2el_urw = TrkFit(urw_f125_el_amp2d, fx_urw, "fx_urw", 0);
-      Double_t ax_urw = fx_urw.GetParameter(1);
+      if (urw_f125_el_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(urw_f125_el_amp2d, fx_urw, "fx_urw", 0);
+        chi2el_urw = fitResult.first;
+        ax_urw = fx_urw.GetParameter(1);
+      }
       if (chi2el_urw>0. && chi2el_urw<chi2_max) {
         urw_f125_el_amp2ds->Add(urw_f125_el_amp2d);
-        urw_f125_el_fita->Fill(ax_urw);
+        //urw_f125_el_fita->Fill(ax_urw);
         if ( -0.04 < ax_urw && ax_urw < 0.02) {
           isSingleTrack=true;
         }
       }
       
-      double chi2el_mmg2 = TrkFit(mmg2_f125_el_amp2d, fx_mmg2, "fx_mmg2", 0);
-      Double_t ax_mmg2 = fx_mmg2.GetParameter(1);
+      if (mmg2_f125_el_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(mmg2_f125_el_amp2d, fx_mmg2, "fx_mmg2", 0);
+        chi2el_mmg2 = fitResult.first;
+        ax_mmg2 = fx_mmg2.GetParameter(1);
+      }
       if (chi2el_mmg2>0. && chi2el_mmg2<chi2_max) {
         mmg2_f125_el_amp2ds->Add(mmg2_f125_el_amp2d);
-        mmg2_f125_el_fita->Fill(ax_mmg2);
+        //mmg2_f125_el_fita->Fill(ax_mmg2);
         if ( -0.04 < ax_mmg2 && ax_mmg2 < 0.02) {
           isSingleTrack=true;
         }
       }
       
     } else if (pion) {
-      f125_pi_chi2->Fill(chi2cc_gem);
-      mmg1_f125_pi_chi2->Fill(chi2cc_mmg1);
-      if (RunNum<3262 && RunNum>3147) {urw_f125_pi_chi2->Fill(chi2cc_urw);} else if (RunNum>3261) {mmg2_f125_pi_chi2->Fill(chi2cc_mmg2);}
+      //f125_pi_chi2->Fill(chi2cc_gem);
+      //mmg1_f125_pi_chi2->Fill(chi2cc_mmg1);
+      //if (RunNum<3262 && RunNum>3147) {urw_f125_pi_chi2->Fill(chi2cc_urw);} else if (RunNum>3261) {mmg2_f125_pi_chi2->Fill(chi2cc_mmg2);}
       
-      double chi2pi_gem = TrkFit(f125_pi_amp2d, fx, "fx", 0);
-      Double_t ax_gem = fx.GetParameter(1);
+      if (f125_pi_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(f125_pi_amp2d, fx, "fx", 0);
+        chi2pi_gem = fitResult.first;
+        ax_gem = fx.GetParameter(1);
+      }
       if (chi2pi_gem>0. && chi2pi_gem<chi2_max) {
         f125_pi_amp2ds->Add(f125_pi_amp2d);
-        f125_pi_fita->Fill(ax_gem);
+        //f125_pi_fita->Fill(ax_gem);
         Count("pre_n_trk_pi");
         pre_n_trk_pi++;
         if ( -0.04 < ax_gem && ax_gem < 0.02) {
@@ -816,31 +853,41 @@ void trdclass::Loop() {
         }
       }
       
-      double chi2pi_mmg1 = TrkFit(mmg1_f125_pi_amp2d, fx_mmg1, "fx_mmg1", 0);
-      Double_t ax_mmg1 = fx_mmg1.GetParameter(1);
+      if (mmg1_f125_pi_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(mmg1_f125_pi_amp2d, fx_mmg1, "fx_mmg1", 0);
+        chi2pi_mmg1 = fitResult.first;
+        ax_mmg1 = fx_mmg1.GetParameter(1);
+      }
       if (chi2pi_mmg1>0. && chi2pi_mmg1<chi2_max) {
         mmg1_f125_pi_amp2ds->Add(mmg1_f125_pi_amp2d);
-        mmg1_f125_pi_fita->Fill(ax_mmg1);
+        //mmg1_f125_pi_fita->Fill(ax_mmg1);
         if ( -0.04 < ax_mmg1 && ax_mmg1 < 0.02) {
           isSingleTrack=true;
         }
       }
       
-      double chi2pi_urw = TrkFit(urw_f125_pi_amp2d, fx_urw, "fx_urw", 0);
-      Double_t ax_urw = fx_urw.GetParameter(1);
+      if (urw_f125_pi_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(urw_f125_pi_amp2d, fx_urw, "fx_urw", 0);
+        chi2pi_urw = fitResult.first;
+        ax_urw = fx_urw.GetParameter(1);
+      }
       if (chi2pi_urw>0. && chi2pi_urw<chi2_max) {
         urw_f125_pi_amp2ds->Add(urw_f125_pi_amp2d);
-        urw_f125_pi_fita->Fill(ax_urw);
+        //urw_f125_pi_fita->Fill(ax_urw);
         if ( -0.04 < ax_urw && ax_urw < 0.02) {
           isSingleTrack=true;
         }
       }
       
-      double chi2pi_mmg2 = TrkFit(mmg2_f125_pi_amp2d, fx_mmg2, "fx_mmg2", 0);
-      Double_t ax_mmg2 = fx_mmg2.GetParameter(1);
+      if (mmg2_f125_pi_amp2d->GetEntries()!=0) {
+        std::pair<Double_t, Double_t> fitResult = TrkFit(mmg2_f125_pi_amp2d, fx_mmg2, "fx_mmg2", 0);
+        chi2pi_mmg2 = fitResult.first;
+        ax_mmg2 = fx_mmg2.GetParameter(1);
+      }
+
       if (chi2pi_mmg2>0. && chi2pi_mmg2<chi2_max) {
         mmg2_f125_pi_amp2ds->Add(mmg2_f125_pi_amp2d);
-        mmg2_f125_pi_fita->Fill(ax_mmg2);
+        //mmg2_f125_pi_fita->Fill(ax_mmg2);
         if ( -0.04 < ax_mmg2 && ax_mmg2 < 0.02) {
           isSingleTrack=true;
         }
@@ -900,7 +947,8 @@ void trdclass::Loop() {
           srs_mmg1_dy->Fill(x0_mmg1, gemtrkr_peak_pos_y[j]);
           srs_urw_dx->Fill(x0_urw, gemtrkr_peak_pos_x[k]);
           srs_urw_dy->Fill(x0_urw, gemtrkr_peak_pos_y[j]);
-          if (chi2cc_gem>chi2_max) {multiTrackIndex->Fill(gt_idx_x, gt_idx_y);}
+          //if (chi2cc_gem>chi2_max || chi2cc_gem<=0) {multiTrackIndex->Fill(gt_idx_x, gt_idx_y);}
+          if (chi2cc_gem>chi2_max ) {multiTrackIndex->Fill(gt_idx_x, gt_idx_y);}
           if (chi2cc_gem>0. && chi2cc_gem<chi2_max) {
             hgemtrkr_peak_xy_chi2->Fill(x0_gem, gemtrkr_peak_pos_y[j]);
             singleTrackIndex->Fill(gt_idx_x, gt_idx_y);
@@ -1372,6 +1420,7 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);  srs_mmg2_x->Draw("colz");
   cc=NextPlot(nxd,nyd);  srs_mmg2_y->Draw("colz"); ftrk.Draw("same");
   }
+  cc=NextPlot(nxd,nyd);  gem_trk_fit_integral->Draw();
   //--- close PDF file ----
   cc=NextPlot(-1,-1);
 }
