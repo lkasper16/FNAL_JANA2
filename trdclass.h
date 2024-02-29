@@ -261,7 +261,7 @@ public :
    TBranch        *b_gem_peak_area;   //!
    TBranch        *b_gem_peak_real_pos;   //!
 
-   trdclass(int RunNum, int MaxEvt);
+   trdclass(int RunNum, int MaxEvt, int FirstEvt);
    virtual ~trdclass();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -279,6 +279,7 @@ public :
 
    int RunNum;
    Long64_t MaxEvt;
+   Long64_t FirstEvt;
    TH1F *h250_size;
    TH1D *hcount;
    TH1F *hCal_occ;
@@ -312,8 +313,8 @@ public :
    TH1F *hgemtrkr_peak_y;
    TH2F *hgemtrkr_peak_xy, *hgemtrkr_ch_xy, *singleTrackIndex, *srs_trk_pi, *srs_gem_dx, *srs_gem_dy, *hgemtrkr_peak_xy_chi2, *srs_gem_x, *srs_cal_corr, *srs_gemtrd_el, *srs_etrd_beam, *srs_gemtrd_pion, *srs_etrd_ratio, *srs_mmg1_dx, *srs_mmg1_dy, *srs_mmg1_x, *srs_mmg1_y, *srs_urw_dx, *srs_urw_dy, *srs_urw_x, *srs_urw_y, *srs_mmg2_dx, *srs_mmg2_dy, *srs_mmg2_x, *srs_mmg2_y;
 
-   TH1F *f125_el, *f125_el_chi2, *f125_el_fita, *mmg1_f125_el_chi2, *mmg1_f125_el_fita, *urw_f125_el_chi2, *urw_f125_el_fita, *mmg2_f125_el_chi2, *mmg2_f125_el_fita;
-   TH1F *f125_pi, *f125_pi_chi2, *f125_pi_fita, *mmg1_f125_pi_chi2, *mmg1_f125_pi_fita, *urw_f125_pi_chi2, *urw_f125_pi_fita, *mmg2_f125_pi_chi2, *mmg2_f125_pi_fita;
+   TH1F *f125_el, *f125_el_max, *f125_el_chi2, *f125_el_fita, *mmg1_f125_el_chi2, *mmg1_f125_el_fita, *urw_f125_el_chi2, *urw_f125_el_fita, *mmg2_f125_el_chi2, *mmg2_f125_el_fita;
+   TH1F *f125_pi, *f125_pi_max, *f125_pi_chi2, *f125_pi_fita, *mmg1_f125_pi_chi2, *mmg1_f125_pi_fita, *urw_f125_pi_chi2, *urw_f125_pi_fita, *mmg2_f125_pi_chi2, *mmg2_f125_pi_fita;
    TH2F *f125_el_amp2d, *f125_el_amp2ds, *f125_el_evt_display, *f125_el_raw, *f125_el_fit, *f125_fit, *mmg1_f125_el_fit, *mmg1_f125_fit, *urw_f125_el_fit, *urw_f125_fit, *mmg2_f125_el_fit, *mmg2_f125_fit, *mmg1_f125_el_amp2ds, *urw_f125_el_amp2ds, *mmg2_f125_el_amp2ds;
    TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt_display, *f125_pi_raw, *f125_pi_fit, *mmg1_f125_pi_fit, *urw_f125_pi_fit, *mmg2_f125_pi_fit, *mmg1_f125_pi_amp2ds, *urw_f125_pi_amp2ds, *mmg2_f125_pi_amp2ds;
    TH2F *f125_el_clu2d;
@@ -339,6 +340,8 @@ public :
    TH2F *urw_f125_pi_amp2d;
    TH2F *urw_f125_el_clu2d;
    TH2F *urw_f125_pi_clu2d;
+   
+   TH2F *hevt, *hevtc, *hevti, *hevtf;
    
    TH2F *ch_gem_mmg1;
    TH2F *ch_gem_urw;
@@ -408,10 +411,11 @@ public :
 #endif
 
 #ifdef trdclass_cxx
-trdclass::trdclass(int RunNum_in, int MaxEvt_in=0 ) : fChain(0)
+trdclass::trdclass(int RunNum_in, int MaxEvt_in=0, int FirstEvt_in=0) : fChain(0)
 {
   RunNum=RunNum_in;
   MaxEvt=MaxEvt_in;
+  FirstEvt=FirstEvt_in;
   TTree *tree=NULL;
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.

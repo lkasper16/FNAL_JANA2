@@ -3,14 +3,27 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include "TSocket.h"
+#include "TMarker.h"
+#include "TMultiGraph.h"
 #include "PlotLib.C"
 #include <TError.h>
+#include "GNN/gnn_model.h"
+#include "GNN/gnn_model.cpp"
+#include "GNN/toGraph.cpp"
 
 #define NPRT 1000
+#define USE_TRK
 #define MAX_PRINT 1
-//#define SHOW_EVT_DISPLAY
+#define SHOW_EVT_DISPLAY
 //#define USE_250_PULSE
-//#define USE_125_RAW
+#define USE_125_RAW
+#define BUFSIZE 128000
+#define MAX_CLUST 500
+#define MAX_NODES 100
+#define USE_GNN  1
+#define USE_TCP  0
+#define USE_FIT  0
 
 //=================================================
 //            Prototype DAQ Mapping
@@ -122,27 +135,60 @@ void trdclass::Loop() {
   
   if (fChain == 0) return;
   
+  //==================== TCP ===================
+  #if  (USE_TCP==1)  //--  tcp send
+
+	// Open connection to server
+	TSocket *sock = new TSocket("localhost", 20250);
+
+	// Wait till we get the start message
+	char str[32];
+	//sock->Recv(str, 32);
+
+	// server tells us who we are
+	//int idx = !strcmp(str, "go 0") ? 0 : 1;
+
+	//printf("recv: %d %s \n",idx,str);
+	Float_t messlen  = 0;
+	Float_t cmesslen = 0;
+  
+  static unsigned int BUFFER[BUFSIZE];
+  float* FBUFFER = (float*) BUFFER;
+  int LENEVENT;
+  int nmod=1,hdr,itrg=0;
+  unsigned int EVT_Type_BOR=(0x0&0x3)<<22;   //--  BOR=0x0
+  unsigned int EVT_Type_EOR=(0x1&0x3)<<22;   //--  EOR=0x1
+  unsigned int EVT_Type_DATA=(0x2&0x3)<<22;  //--  DATA=0x2
+  static int HEADER[10];
+  int modID=4;
+#endif
+  
   //==================================================================================================
   //            B o o k    H i s t o g r a m s
   //==================================================================================================
 
   TList *HistList = new TList();
+  int THRESH=0;
 
 //============= Event Display (canvas 0) =============
 #ifdef SHOW_EVT_DISPLAY
   char c0Title[256];
   sprintf(c0Title,"Event_Display_Run=%d",RunNum);
-  TCanvas *c0 = new TCanvas("DISP",c0Title,200,200,1500,1300);
+  TCanvas *c0 = new TCanvas("DISP",c0Title,1100,200,1500,1300);
   c0->Divide(4,3); c0->cd(1);
   TLine peak_line[100];
+//============== FPGA Display (canvas 1) ==========
+  char c2Title[256]; sprintf(c2Title,"Event_Display_Run=%d",RunNum);
+  TCanvas *c2 = new TCanvas("FPGA",c2Title,100,100,1000,1300);
+  c2->Divide(1,3); c2->cd(1);
   
-  f125_el_evt_display = new TH2F("f125_el_evt_display","GEM-TRD Track for Electrons;Time Response (8ns);GEMTRD Channel (X)",100,100.5,200.5,200,20.5,220.5);      HistList->Add(f125_el_evt_display);
-  f125_el_evt_display->SetStats(0); f125_el_evt_display->SetMinimum(THRESH); f125_el_evt_display->SetMaximum(1000.);
-  f125_pi_evt_display = new TH2F("f125_pi_evt_display","GEM-TRD Track for Pions;Time Response (8ns);GEMTRD Channel (X)",100,100.5,200.5,200,20.5,220.5);      HistList->Add(f125_pi_evt_display);
+   f125_el_evt_display = new TH2F("f125_el_evt_display","GEM-TRD track for Electrons ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);  HistList->Add(f125_el_evt_display);
+  f125_el_evt_display->SetStats(0);  f125_el_evt_display->SetMinimum(THRESH);  f125_el_evt_display->SetMaximum(1000.);
+  f125_pi_evt_display = new TH2F("f125_pi_evt_display","GEM-TRD track for Pions ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);      HistList->Add(f125_pi_evt_display);
   f125_pi_evt_display->SetStats(0); f125_pi_evt_display->SetMinimum(THRESH); f125_pi_evt_display->SetMaximum(1000.);
-  f125_el_raw = new TH2F("f125_el_raw","GEM-TRD Raw fADC Response for Electrons;Time Response (8ns);GEMTRD Channel (X)",100,100.5,200.5,200,20.5,220.5);      HistList->Add(f125_el_raw);
-  f125_el_raw->SetStats(0); f125_el_raw->SetMinimum(THRESH); f125_el_raw->SetMaximum(1000.);
-  f125_pi_raw = new TH2F("f125_pi_raw","GEM-TRD Raw fADC Response for Pions;Time Response (8ns);GEMTRD Channel (X)",100,100.5,200.5,200,20.5,220.5);        HistList->Add(f125_pi_raw);
+  f125_el_raw = new TH2F("f125_el_raw","GEM-TRD raw for Electrons ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);    HistList->Add(f125_el_raw);
+  f125_el_raw->SetStats(0);  f125_el_raw->SetMinimum(THRESH);   f125_el_raw->SetMaximum(1000.);
+  f125_pi_raw = new TH2F("f125_pi_raw","GEM-TRD raw for Pions ; Time Response (8ns) ; Channel ",100,100.5,200.5,200,-0.5,249.5);        HistList->Add(f125_pi_raw);
   f125_pi_raw->SetStats(0); f125_pi_raw->SetMinimum(THRESH); f125_pi_raw->SetMaximum(1000.);
 #endif
 
@@ -229,12 +275,13 @@ void trdclass::Loop() {
   //=============== Track Fitting & chi^2 ==================
   gErrorIgnoreLevel = kBreak; // Suppress warning messages from empty chi^2 fit data
   TF1 fx("fx","pol1",100,190); //-- Linear function fit (ax+b) over time response window
+  TF1 fx1("fx1","pol1",100,190);
+  TF1 fx2("fx2","pol1",100,190);
   TF1 fx_mmg1("fx_mmg1","pol1",80,190);
   TF1 fx_urw("fx_urw","pol1",80,190);
   TF1 fx_mmg2("fx_mmg2","pol1",80,190);
   
   //-- GEMTRD & GEMTRKR alignment
-  //double gemtrkr_x2ch=-999.;
   double x_1=-48., y_1=-55., x_2=54., y_2=51.;
   double a_slope=(y_2-y_1)/(x_2-x_1);
   double b_intercept=y_1-a_slope*x_1;
@@ -245,6 +292,7 @@ void trdclass::Loop() {
   ////TF1 ftrkr("ftrk","(x-[1])/[0]",0.,255.);
   ////ftrkr.SetParameter(0,a_slope);
   ////ftrkr.SetParameter(1,b_intercept);
+  double gemtrkr_x2ch=-999.;
   
   //-- Prototype Chi^2 Fits
   f125_fit = new TH2F("f125_fit","GEM-TRD Track Fit; Time Response (8ns) ; Channel ",250,0.5,250.5,240,0.5,240.5);     HistList->Add(f125_fit);
@@ -282,6 +330,8 @@ void trdclass::Loop() {
   //============= Prototype ADC Amplitude Distributions ============
   f125_el = new TH1F("f125_el","GEM-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);                  HistList->Add(f125_el);
   f125_pi = new TH1F("f125_pi","GEM-TRD f125 Peak Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);                      HistList->Add(f125_pi);
+  f125_el_max = new TH1F("f125_el_max","GEM-TRD f125 Max Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(f125_el_max);
+  f125_pi_max = new TH1F("f125_pi_max","GEM-TRD f125 Max Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);               HistList->Add(f125_pi_max);
   mmg1_f125_el = new TH1F("mmg1_f125_el","MMG1-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);       HistList->Add(mmg1_f125_el);
   mmg1_f125_pi = new TH1F("mmg1_f125_pi","MMG1-TRD f125 Peak Amp for Pions ; ADC Amplitude ; Counts ",100,0.,4096);           HistList->Add(mmg1_f125_pi);
   urw_f125_el = new TH1F("urw_f125_el","uRWell-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);          HistList->Add(urw_f125_el);
@@ -314,6 +364,14 @@ void trdclass::Loop() {
   mmg1_zHist = new  TH1F("mmg1_zHist", "mmg1_zHist", 20, 80., 200.);
   mmg2_zHist = new  TH1F("mmg2_zHist", "mmg2_zHist", 20, 80., 200.);
   urw_zHist = new  TH1F("urw_zHist", "urw_zHist", 20, 80., 200.);
+  
+  //---  Clustering Histograms (Track-Finding NN) ---
+    int nx0=100;    int ny0=250;
+    hevt  = new TH2F("hevt"," Event display; z pos,mm; y pos,mm ",nx0,0.,+30.,ny0,-50.,+50.); hevt->SetStats( 0 ); hevt->SetMaximum(10.);         HistList->Add(hevt);
+    hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);                                 HistList->Add(hevtc);
+    hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
+    hevti = new TH2F("hevti"," ML-FPGA response; z pos,mm; y pos,mm ",nx0,0.,+30.,ny0,-50.,+50.);  hevti->SetStats( 0 ); hevti->SetMaximum(10.);  HistList->Add(hevti);
+    hevtf = new TH2F("hevtf"," Clusters for FPGA ; z pos,mm; y pos,mm ",nx0,0.,+30.,ny0,-50.,+50.);  hevtf->SetStats( 0 ); hevtf->SetMaximum(10.);  HistList->Add(hevtf);
   
   // ============================ End Histogram Booking =====================================
   
@@ -419,7 +477,7 @@ void trdclass::Loop() {
   int _calsum_ecut=0.0;
   int _calsum_pcut=0.0;
   
-  int THRESH=100;
+  //int THRESH=100;
   int MM_THR=65;
   if (RunNum>3250) MM_THR=80;
   int URW_THR=105;
@@ -428,8 +486,9 @@ void trdclass::Loop() {
   Long64_t nbytes = 0, nb = 0;
   if (MaxEvt>0) nentries=MaxEvt;  //-- limit number of events for test
   Long64_t jentry=0;
+  printf("***>>>  Begin Event Loop 1st evt=%lld, MaxEvt=%lld \n",FirstEvt,MaxEvt);
   
-  for (jentry=0; jentry<nentries; jentry++) {
+  for (jentry=FirstEvt; jentry<nentries; jentry++) {
     
     event_num = jentry;
     Count("EVT");
@@ -487,7 +546,7 @@ void trdclass::Loop() {
       }
       printf("-------------------- Pulse  250  n=%lld ---------------------------\n",f250_pulse_count);
       for (ULong64_t i=0;i<f250_pulse_count; i++) {
-        printf("F250:: i=%lld  sl=%d, ch=%d,  npk=%d  time=%d amp=%d ped=%f \n"
+        printf("F250:pulse: i=%lld  sl=%d, ch=%d,  npk=%d  time=%d amp=%d ped=%f \n"
          ,i,f250_pulse_slot->at(i),f250_pulse_channel->at(i),f250_pulse_pulse_number->at(i)
          ,f250_pulse_course_time->at(i),f250_pulse_pulse_peak->at(i),f250_pulse_pedestal->at(i)/4.);
       }
@@ -498,20 +557,21 @@ void trdclass::Loop() {
          ,f125_wraw_samples_index->at(i),f125_wraw_samples_count->at(i));
       }
       printf("-------------------- SRS   ev=%lld   ---------------------------\n",jentry);
-      printf("SRS:: gem_scluster:  cnt=%lld \n",gem_scluster_count);
+      printf("SRS:gem_scluster:  cnt=%lld \n",gem_scluster_count);
       for (ULong64_t i=0;i<gem_scluster_count; i++) { // --- SRS cluster loop
         printf("SRS:clusters:  i=%lld  X=%f Y=%f  \n",i,gem_scluster_x->at(i), gem_scluster_y->at(i));
       }
-      printf("SRS:: srs_prerecon:  cnt=%lld cnt_x=%ld cnt_y=%ld \n",srs_prerecon_count, srs_prerecon_x->size(), srs_prerecon_y->size() );
+      printf("SRS:srs_prerecon:  cnt=%lld cnt_x=%ld cnt_y=%ld \n",srs_prerecon_count, srs_prerecon_x->size(), srs_prerecon_y->size() );
       for (ULong64_t i=0;i<srs_prerecon_count; i++) {
-        printf("SRS:: srs_prerecon: i=%lld %f %f \n",i,srs_prerecon_x->at(i),srs_prerecon_y->at(i));
+        printf("SRS:srs_prerecon: i=%lld %f %f \n",i,srs_prerecon_x->at(i),srs_prerecon_y->at(i));
       }
-      printf("SRS:0: srs_peak:  cnt=%lld \n",gem_peak_count);
-      for (ULong64_t i=0;i<gem_peak_count; i++) {
-  	    printf("SRS:: srs_peak: i=%lld id=%d name=%s idx=%d apv=%d Amp=%f wid=%f E=%f Pos=%f \n"
+      printf("SRS:srs_peak:  cnt=%lld \n",gem_peak_count);
+/*      for (ULong64_t i=0;i<gem_peak_count; i++) {
+  	    printf("SRS:srs_peak: i=%lld id=%d name=%s idx=%d apv=%d Amp=%f wid=%f E=%f Pos=%f \n"
          ,i,gem_peak_plane_id->at(i),gem_peak_plane_name->at(i).c_str(),gem_peak_index->at(i), gem_peak_apv_id->at(i), gem_peak_height->at(i)
          ,gem_peak_width->at(i), gem_peak_area->at(i), gem_peak_real_pos->at(i));
       }
+*/
     }
 #endif
     
@@ -541,7 +601,6 @@ void trdclass::Loop() {
     //==================================================================================================
     //                FADC250 Channel Loop (Cal. & Cher.)
     //==================================================================================================
-    
     for (ULong64_t i=0; i<f250_wraw_count; i++) {
       int fadc_chan = f250_wraw_channel->at(i);
       int fadc_window = f250_wraw_samples_count->at(i);
@@ -571,7 +630,6 @@ void trdclass::Loop() {
     //=======================================================
     //                   S e t    P I D
     //=======================================================
-    
     if (CalSum>0.) {Count("calSum"); _calsum++;}
     if (CalSum>Ebeam_el) {Count("calSumEl"); _calsum_ecut++;}
     if (CalSum<Ebeam_pi && CalSum>0.) {Count("calSumPi"); _calsum_pcut++;}
@@ -595,6 +653,7 @@ void trdclass::Loop() {
     //                    Process  Fa125 Pulse Data (TRDs)
     //==================================================================================================
 #ifdef SHOW_EVT_DISPLAY
+    cout<<"Start SHOW_EVT_DISPLAY loop"<<endl;
     if (!(jentry%NPRT)) {
       if(electron) {
         f125_el_evt_display->Reset();
@@ -745,7 +804,7 @@ void trdclass::Loop() {
     if (chi2cc_urw>0. && chi2cc_urw<chi2_max) x0_urw=fx_urw.Eval(80.)*0.8-50.;      //-- Convert channels (strips) to [mm] -- 800u pitch
     if (chi2cc_mmg2>0. && chi2cc_mmg2<chi2_max) x0_mmg2=fx_mmg2.Eval(80.)*1.6-50.;  //-- Convert channels (strips) to [mm] -- 1600u pitch
     
-    if (x0_gem>-55 && x0_gem<55.) {  
+    if (x0_gem>-55 && x0_gem<55.) {
       if(x0_mmg1>-55 && x0_mmg1<55.) gem_mmg1_x->Fill(x0_gem, x0_mmg1);
       if(x0_urw>-55 && x0_urw<55.) gem_urw_x->Fill(x0_gem, x0_urw);
       if(x0_mmg2>-55 && x0_mmg2<55.) gem_mmg2_x->Fill(x0_gem, x0_mmg2);
@@ -891,7 +950,7 @@ void trdclass::Loop() {
         if ( -0.04 < ax_mmg2 && ax_mmg2 < 0.02) {
           isSingleTrack=true;
         }
-      }  
+      }
     }
     
     //===========================================================
@@ -912,7 +971,7 @@ void trdclass::Loop() {
           gemtrkr_peak_pos_x[gt_idx_x] = gem_peak_real_pos->at(i);
           if (gemtrkr_peak_pos_x[gt_idx_x]<=0) gemtrkr_peak_pos_x[gt_idx_x]+=50.; else gemtrkr_peak_pos_x[gt_idx_x]-=50.;  gemtrkr_peak_pos_x[gt_idx_x]*=-1.;
         gemtrkr_peak_ch_x[gt_idx_x] = gem_peak_index->at(i);
-        if (gemtrkr_peak_ch_x[gt_idx_x]<128) gemtrkr_peak_ch_x[gt_idx_x]+=128; else gemtrkr_peak_ch_x[gt_idx_x]-=128;  
+        if (gemtrkr_peak_ch_x[gt_idx_x]<128) gemtrkr_peak_ch_x[gt_idx_x]+=128; else gemtrkr_peak_ch_x[gt_idx_x]-=128;
         gt_idx_x++;
       } if (gem_peak_plane_name->at(i) == "MMG1Y") {
           mmg1_peak_pos_y[mmg1_idx_y] = gem_peak_real_pos->at(i);
@@ -929,7 +988,7 @@ void trdclass::Loop() {
       }
     } //-- End SRS Peak Loop
     
-    if (gt_idx_x>0 && gt_idx_y>0) {  
+    if (gt_idx_x>0 && gt_idx_y>0) {
       for (ULong64_t j=0; j<sizeof(gemtrkr_peak_pos_y)/sizeof(gemtrkr_peak_pos_y[0]); j++) {
         hgemtrkr_peak_y->Fill(gemtrkr_peak_pos_y[j]);
         for (ULong64_t i=0; i<sizeof(mmg1_peak_pos_y)/sizeof(mmg1_peak_pos_y[0]); i++) {
@@ -996,7 +1055,7 @@ void trdclass::Loop() {
 
     //delta_x=abs(ftrk.Eval(gemtrkr_x)-x0_gem);
     int BoxCut=1;
-/*        
+/*
         if (RunNum > 3200 && RunNum < 3203) { //-- GEMTRD Double Fleece
           //if (x_boxcut1>gemtrkr_peak_x || gemtrkr_peak_x>x_boxcut2 || y_boxcut1 > gemtrkr_peak_y || gemtrkr_peak_y > y_boxcut2) BoxCut=0;)
           x_boxcut1=-50., x_boxcut2=50., y_boxcut1=-20., y_boxcut2=15.;
@@ -1027,15 +1086,15 @@ void trdclass::Loop() {
           //if (x_boxcut1>gemtrkr_peak_x || gemtrkr_peak_x>x_boxcut2 || y_boxcut1 > gemtrkr_peak_y || gemtrkr_peak_y > y_boxcut2) BoxCut=0;
           if (x_boxcut1>x0_gem || x0_gem>x_boxcut2 || y_boxcut1>gemtrkr_peak_pos_y || gemtrkr_peak_pos_y>y_boxcut2) BoxCut=0;
         }
-*/    
+*/
     //============================================================================
     //                  Single Track Event fADC Processing
     //============================================================================
     
     //if (isSingleTrack && BoxCut) { //-- single track from TRDs & GEM TRKR Y-direction hit condition --
-    if (isSingleTrack) {  
+    if (isSingleTrack) {
       
-      float gem_amp_max = -1000.;
+      double gem_amp_max = 0.;
       Count("_1TRK");
       _1TRK++;
       for (ULong64_t i=0;i<f125_pulse_count; i++) { //-- Fadc125 Pulse Loop
@@ -1060,7 +1119,10 @@ void trdclass::Loop() {
             e_1trk++;
           }
           if (amp>THRESH && gemChan>-1) {
-            f125_el->Fill(amp);
+            
+            if (gem_amp_max<amp) gem_amp_max=amp; //Move out of electron loop??
+            
+            if (amp>0) f125_el->Fill(amp);
             gem_xpos.push_back(gemChan);
             gem_dedx.push_back(amp);
             gem_zpos.push_back(time);
@@ -1105,7 +1167,8 @@ void trdclass::Loop() {
             pi_1trk++;
           }
           if (amp>THRESH && gemChan>-1) {
-            f125_pi->Fill(amp);
+            if (gem_amp_max<amp) gem_amp_max=amp;
+            if (amp>0) f125_pi->Fill(amp);
             gem_xpos.push_back(gemChan);
             gem_dedx.push_back(amp);
             gem_zpos.push_back(time);
@@ -1144,6 +1207,9 @@ void trdclass::Loop() {
         hCCor_ud->Fill(Ch_u,Ch_out);
       } //--- end Fa125 Pulse Loop ---
       
+      if (electron) f125_el_max->Fill(gem_amp_max);
+      else if (pion) f125_pi_max->Fill(gem_amp_max);
+      
       for (int i=1; i<21; i++) {
         gem_zHist_vect.push_back(gem_zHist->GetBinContent(i));
         mmg1_zHist_vect.push_back(mmg1_zHist->GetBinContent(i));
@@ -1159,6 +1225,11 @@ void trdclass::Loop() {
     
 #ifdef USE_125_RAW
 //  if (jentry<MAX_PRINT) printf("------------------ Fadc125  wraw_count = %llu ---------\n", f125_wraw_count);
+    hevt->Reset();
+    hevtc->Reset();
+    hevti->Reset();
+    hevtf->Reset();
+    
     for (ULong64_t i=0;i<f125_wraw_count; i++) { // --- fadc125 channels loop
       //  if (jentry<MAX_PRINT) printf("F125:RAW: i=%lld  sl=%d, ch=%d, idx=%d, cnt=%d \n"
       //			   ,i,f125_wraw_slot->at(i),f125_wraw_channel->at(i)
@@ -1170,47 +1241,552 @@ void trdclass::Loop() {
       int gemChan = GetGEMChan(fADCChan, fADCSlot);
       int amax=0;
       int tmax=0;
+      if (gemChan<0) continue; ///TODO:IMPLEMENT IN OTHER LOOPS
+      double DEDX_THR = 100;
+      int TimeWindowStart = 95;
       
       for (int si=0; si<fadc_window; si++) {
         int time=si;
         int adc = f125_wraw_samples->at(f125_wraw_samples_index->at(i)+si);
+        if (adc>4090) printf("!!!!!!!!!!!!!!!!!!!!!! ADC 125 overflow: %d \n",adc);
         if (adc>amax) {
           amax=adc;
           tmax=si;
         }
-        if (!(jentry%NPRT)) {
+        if (adc>DEDX_THR) {
+          double adc_fill=adc;
           if (electron) {
             f125_el_raw->Fill(time,gemChan,adc);
           } else if (pion) {
             f125_pi_raw->Fill(time,gemChan,adc);
           }
+          time-=TimeWindowStart;
+      	  if ( 0 > time || time > 100 ) continue; // --- drop early and late hits ---
+	        //hevtc->Fill(time-100,gemChan,adc/100.);
+	        hevtc->SetBinContent(100-time,gemChan,adc/100.);
+          
+	        double xp = gemChan/250.*100-50.;
+	        double zp = (time)/(100.)*30;
+	        double ap = adc/100.;
+	        //hevt->Fill(zp,xp,ap);
+	        hevt->SetBinContent(100-time,gemChan,adc/100.);
         }
       } // --  end of samples loop
     } // -- end of fadc125 channels loop
     
-    if (!(jentry%NPRT)) {
+    //if (!(jentry%NPRT)) {
+      #if (USE_GNN==0)
       int nx = f125_el_raw->GetNbinsX();
       int ny = f125_el_raw->GetNbinsY();
       double pedestal=100.;
+      printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+      printf("+++                           RAW TRD DATA                                                         +++\n");
+      printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
       for (int ii=0; ii<nx; ii++) {
         for (int jj=0; jj<ny; jj++) {
           if (electron) {
             double cc = f125_el_raw->GetBinContent(ii, jj);
-            if (cc == 0.) f125_el_raw->Fill(ii,jj,pedestal);
+            //if (cc == 0.) f125_el_raw->Fill(ii,jj,pedestal);
           } else if (pion) {
             double cc = f125_pi_raw->GetBinContent(ii, jj);
-            if (cc == 0.) f125_pi_raw->Fill(ii,jj,pedestal);
+            //if (cc == 0.) f125_pi_raw->Fill(ii,jj,pedestal);
           }
         }
       }
-    }
-    //=============  End Fa125 RAW  process Loop  =================
-    if(electron) {
-      f125_el->Fill(gem_amp_max);
-    } else if (pion) {
-      f125_pi->Fill(gem_amp_max);
-    }
 #endif
+      //=================================================================================================================
+#if (USE_GNN>0)
+      // -------------------------------   hist dist clustering         ------------------------
+      float clust_Xpos[MAX_CLUST];
+      float clust_Ypos[MAX_CLUST];
+      float clust_Zpos[MAX_CLUST];
+      float clust_dEdx[MAX_CLUST];
+      float clust_Size[MAX_CLUST];
+      float clust_Width[MAX_CLUST][3];  // y1, y2, dy ; strips
+      float clust_Length[MAX_CLUST][3]; // x1, x2, dx ; time
+      
+      float hits_Xpos[500];
+      float hits_Ypos[500];
+      float hits_Zpos[500];
+      float hits_dEdx[500];
+      
+      for (int k=0; k<MAX_CLUST; k++) {
+	      clust_Xpos[k]=0; clust_Ypos[k]=0; clust_Zpos[k]=0; clust_dEdx[k]=0;  clust_Size[k]=0;
+	      clust_Width[k][0]=999999;   	clust_Width[k][1]=-999999;   	clust_Width[k][2]=0;
+	      clust_Length[k][0]=999999;  	clust_Length[k][1]=-999999;  	clust_Length[k][2]=0;
+      }
+      float CL_DIST=2.7; // mm
+      int nclust=0;
+
+      //hevti->Reset();
+      //for (int i=0; i<EVENT_SIZE; i++) {
+
+      TH2F* hp = hevt; // -- hevt and hevtc should be same bin size
+      TH2F* hpc = hevtc;
+
+      int nx=hp->GetNbinsX();    int ny=hp->GetNbinsY();
+      double xmi=hp->GetXaxis()->GetBinLowEdge(1);     double xma=hp->GetXaxis()->GetBinUpEdge(nx);
+      double ymi=hp->GetYaxis()->GetBinLowEdge(1);     double yma=hp->GetYaxis()->GetBinUpEdge(ny);
+      double binx = (xma-xmi)/nx;      double biny = (yma-ymi)/ny;
+      printf("nx=%d,ny=%d,xmi=%f,xma=%f,ymi=%f,yma=%f\n",nx,ny,xmi,xma,ymi,yma);
+
+      double THR2 = 1.2;
+      for (int ix=0; ix<nx; ix++) {  //-------------------- clustering loop ------------------------------------
+	      for (int iy=0; iy<ny; iy++) {
+	        double c1 = hpc->GetBinContent(ix,iy);   // hpc->SetBinContent(ix,iy,5.);         // energy
+	        double x1=double(ix)/double(nx)*(xma-xmi)+xmi-binx/2.;    // drift time
+	        double y1=double(iy)/double(ny)*(yma-ymi)+ymi-biny/2.;    // X strip
+	        if (c1<THR2) continue;
+	        if (nclust==0) {
+	          clust_Xpos[nclust]=y1; clust_Ypos[nclust]=0; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
+	          clust_Width[nclust][0]=y1;   	clust_Width[nclust][1]=y1;   	clust_Width[nclust][2]=0;
+	          clust_Length[nclust][0]=x1;  	clust_Length[nclust][1]=x1;  	clust_Length[nclust][2]=0;
+	          nclust++; continue;
+	        }
+	        int added=0;
+	        for (int k=0; k<nclust; k++) {
+	          double dist=sqrt(pow((y1-clust_Xpos[k]),2.)+pow((x1-clust_Zpos[k]),2.)); //--- dist hit to clusters
+	          if (dist<CL_DIST) {
+	            clust_Xpos[k]=(y1*c1+clust_Xpos[k]*clust_dEdx[k])/(c1+clust_dEdx[k]);  //--  new X pos
+	            clust_Zpos[k]=(x1*c1+clust_Zpos[k]*clust_dEdx[k])/(c1+clust_dEdx[k]);  //--  new Z pos
+	            clust_dEdx[k]=c1+clust_dEdx[k];  // new dEdx
+	            clust_Size[k]=1+clust_Size[k];  // clust size in pixels
+	            //if (k==9) printf("L:1: k=%d y1=%f min=%f max=%f \n",k,y1, clust_Width[k][0], clust_Width[k][1] );
+	            if (y1<clust_Width[k][0]) clust_Width[k][0]=y1; if (y1>clust_Width[k][1]) clust_Width[k][1]=y1; clust_Width[k][2]=clust_Width[k][1]-clust_Width[k][0];
+	            if (x1<clust_Length[k][0]) clust_Length[k][0]=x1;if (x1>clust_Length[k][1]) clust_Length[k][1]=x1;clust_Length[k][2]=clust_Length[k][1]-clust_Length[k][0];
+	            //if (k==9) printf("L:2: k=%d y1=%f min=%f max=%f \n",k,y1, clust_Width[k][0], clust_Width[k][1] );
+	            // Var(X_n) = Var(X_{n-1}) + \frac{(X_n - \bar{X_{n-1}})^2}{n}
+	            hpc->SetBinContent(ix,iy,k+1.);
+	            added=1; break;
+	          }
+	        }
+	        if (added==0) {
+	          if (nclust+1>=MAX_CLUST) continue;
+	          clust_Xpos[nclust]=y1; clust_Ypos[nclust]=0; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
+	          clust_Width[nclust][0]=y1;   	clust_Width[nclust][1]=y1;   	clust_Width[nclust][2]=0;
+	          clust_Length[nclust][0]=x1;  	clust_Length[nclust][1]=x1;  	clust_Length[nclust][2]=0;
+	          nclust++;
+	        }
+	      }
+      } //----------------------------------- end  clustering loop -----------------------------------------------
+      
+      int MinClustSize=10;
+      double MinClustWidth=0.001;
+      double MinClustLength=0.01;
+      double zStart =  5.; // mm
+      double zEnd   = 29.; // mm
+      //int ihit=0;
+      int ii=0;
+      printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+      printf("                Xpos   Ypos   Zpos       E    Width  Length   Size \n");
+      //       0 Clust( 1):   43.8    0.0    3.9      5.3    0.0    0.0      4.0
+      for (int k=0; k<nclust; k++) {
+	      //hevt->Fill(clust_Zpos[k],clust_Xpos[k],clust_dEdx[k]);
+	      //hevti->Fill(hits_Zpos[k],hits_Xpos[k],dEdx[k]);
+	      //printf("%d Clust: X,Y,Z,E = %f %f %f %f \n",k,hits_Xpos[k],hits_Ypos[k],hits_Zpos[k],hits_dEdx[k]);
+	      printf("%2d Clust(%2d): %6.1f %6.1f %6.1f %8.1f %6.2f %6.2f %8.1f  ",k,k+1,clust_Xpos[k],clust_Ypos[k],clust_Zpos[k],clust_dEdx[k],clust_Width[k][2],clust_Length[k][2],clust_Size[k]);
+	      //printf("                                  %6.1f %6.1f %6.1f %6.1f \n",clust_Width[k][0],clust_Width[k][1], clust_Length[k][0], clust_Length[k][1]);
+        
+	      //-------------  Cluster Filter -----------------
+        
+	      if (clust_Size[k] >= MinClustSize && zStart < clust_Zpos[k] && clust_Zpos[k] < zEnd && clust_Width[k][2]>MinClustWidth ) {
+	        hits_Xpos[ii]=clust_Xpos[k];
+	        hits_Ypos[ii]=clust_Ypos[k];
+	        hits_Zpos[ii]=clust_Zpos[k];
+	        hits_dEdx[ii]=clust_dEdx[k];
+	        ii++;
+	        printf("\n");
+	      } else {
+	        printf(" <--- skip \n");
+	      }
+      }
+      int nhits=ii;
+      // -----------------------         end hist dist clustering          ----------------------------------------
+      
+      //=================================== Draw HITS and CLUST  ============================================
+      
+      char hevtTitle[80]; sprintf(hevtTitle," Display Event: %lld   Run: %d; z pos,mm; y pos,mm ",jentry,RunNum);
+      hevt->SetTitle(hevtTitle);
+      printf("hits_SIZE=%d  Clust size = %d \n",nhits,nclust);
+      if (jentry<1000) {
+	      c2->cd(1);   hevt->Draw("colz");
+	      c2->cd(2);   hevtf->Draw("text");
+  	    c2->cd(3);   hevti->Draw("colz");
+	      //c0->cd(10);   hevti->Draw("colz");
+	      c2->Modified(); c2->Update();
+	      c2->cd(1); gPad->Modified(); gPad->Update();
+  	    int COLMAP[]={1,2,3,4,6,5};
+  	    int pmt=22 ,pmt0 = 20; // PM type
+  	    for(int i = 0; i < nclust; i++) {
+  	      //printf("i=%d trk=%d |  %8.2f,%8.2f\n",i, tracks[i], Xcl[i], Zcl[i]);
+  	      TMarker m = TMarker(clust_Zpos[i],clust_Xpos[i],pmt);
+  	      int tcol=2; //min(tracks[i],6);
+  	      if (clust_Size[i]<MinClustSize) pmt=22; else pmt=pmt0;
+  	      int mcol = COLMAP[tcol-1];   m.SetMarkerColor(mcol);   m.SetMarkerStyle(pmt);
+  	      //m.SetMarkerSize(0.5+clust_Size[i]/100);
+  	      m.SetMarkerSize(0.7+clust_dEdx[i]/300);
+  	      m.DrawClone();  gPad->Modified(); gPad->Update();
+  	    }
+  	    c2->Modified(); c2->Update();
+      }
+      
+#if (USE_GNN==1)   // GNN MC
+      //----------------------------------------------------------
+      //--   Send to Model simulation
+      //----------------------------------------------------------
+      
+    /*
+      if (jentry==0) {
+	      printf("++++++++++++++  test event from FPGA ++++++++++++");
+	      nclust=nodes_tst.size();
+	      for (int nt=0; nt<nclust; nt++) {
+	      hits_Xpos[nt]=nodes_tst[nt][0];
+  	    hits_Zpos[nt]=nodes_tst[nt][1];
+	      clust_Xpos[nt]=hits_Xpos[nt];
+	      clust_Zpos[nt]=hits_Zpos[nt];
+	    }
+    }
+  */
+    printf("**> Start Model simulation nclust=%d nhits=%d \n",nclust,nhits);
+    std::vector<int> tracks(nhits, 0);
+    std::vector<float> Xcl;
+    std::vector<float> Zcl;
+    Xcl.clear();
+    Zcl.clear();
+    for (int n=0; n<nhits; n++) {
+	    Xcl.push_back(hits_Xpos[n]);
+	    Zcl.push_back(hits_Zpos[n]);
+    }
+    doPattern(Xcl, Zcl, tracks);  //---- call GNN ---
+    
+    // printVector("tracks", tracks);
+    printf("**> End Model simulation \n"); //===================================================
+    
+    c2->cd(2); gPad->Modified(); gPad->Update();
+    int COLMAP[]={1,2,3,4,6,5};
+    for(int i = 0; i < tracks.size(); i++) {
+  	  printf("i=%d trk=%d |  %8.2f,%8.2f\n",i, tracks[i], Xcl[i], Zcl[i]);
+	    TMarker m = TMarker(hits_Zpos[i],hits_Xpos[i],24);
+	    int tcol=min(tracks[i],6);
+  	  int mcol = COLMAP[tcol-1];   m.SetMarkerColor(mcol);   m.SetMarkerStyle(41);     m.SetMarkerSize(1.5);
+	    m.DrawClone();  gPad->Modified(); gPad->Update();
+    }
+    printf("\n\n");
+    printf("**> End Cluster Plot \n");
+    
+    //--------------------------------------------------
+    //----           Track fitting                 -----
+    //--------------------------------------------------
+    
+    printf("==> GNN: tracks sort  : trk_siz=%ld \r\n", tracks.size());
+  
+  //-----------------   tracks sorting -------------
+  // typedef std::vector<std::vector<float>> f2vec;
+  //#define f2vec(X,Y) hls::vector<hls::vector<t_data,Y>,X>
+  
+  //float TRACKS[N_NODES_MAX][N_NODES_MAX*N_FEATURES];
+  //std::vector<std::vector<std::vector<float>>> TRACKS;  // -- [Nnodes][N_params]
+  std::vector<std::vector<float>> TRACKS;  // -- [Nnodes][N_params]
+  TRACKS.resize(nhits);
+  
+  std::vector<float> hit_coord(2,0);
+  
+  //int TRACKS_N[N_NODES_MAX];
+  std::vector<int>  TRACKS_N(nhits, 0); // [Nnodes]
+  for (int i = 0; i < nhits; i++)  { TRACKS_N[i] = 0;  }
+  std::vector<float> xz(2,0);
+  
+  for (int i2 = 0; i2 < nhits; i2++) {
+	  int num =  tracks[i2];
+	  int num2 = std::max(0, std::min(num, nhits - 1));
+	  printf("==> lstm3:track sort i=%d  : num=%d(%d) x=%f z=%f \n", i2, num, num2,  Xcl[i2],Zcl[i2]);
+	  xz[0]=Xcl[i2]; 	xz[1]=Zcl[i2];
+	  //TRACKS[num2].push_back(xz);
+	  TRACKS[num2].push_back(Xcl[i2]); TRACKS[num2].push_back(Zcl[i2]);
+	  TRACKS_N[num2]++;
+  }
+      
+#if (DEBUG > 1)
+  for (int i2 = 0; i2 < nhits; i2++) {
+	  printf(" trdID=%d n_hits=%d v_size=%d \n",i2,TRACKS_N[i2],TRACKS[i2].size());
+	  for (int i3 = 0; i3 < TRACKS[i2].size(); i3+=2) {
+	    //printf(" i2=%d  i3=%d nhits-on-track=%d sz2=%d\n",i2,i3,TRACKS_N[i2], TRACKS[i2].size());
+	    printf(" trkID=%d  hit=%d x=%f z=%f \n",i2,i3/2,TRACKS[i2].at(i3),TRACKS[i2].at(i3+1));
+	  }
+	  if ( TRACKS_N[i2]>0) printf("\n");
+  }
+#endif
+  //--- end tracks sorting ---
+      
+
+  //-----------------------------------
+  //---       LSTM fitting          ---
+  //-----------------------------------
+  /*
+  TGraph *gr1 = new TGraph(...
+  TGraphErrors *gr2 = new TGraphErrors(...
+  TMultiGraph *mg = new TMultiGraph();
+  mg->Add(gr1,"lp");
+  mg->Add(gr2,"cp");
+  mg->Draw("a");
+  */
+  //float TRACKS_fit[N_NODES_MAX][LSTM_FEA+1];
+  
+  static TMultiGraph *mg;
+  if (mg != NULL ) delete mg;
+  //printf("!!!!!!!!!!!>>>>>>  mg pointer1 = %p ",mg);
+  mg = new TMultiGraph();
+  //printf(">>>>>>  pointer2 = %p \n ",mg);
+  
+  int NTRACKS=0;
+  for (int i2 = 1; i2 < nhits; i2++) {  // tracks loop; zero track -> noise
+    
+	  if (TRACKS_N[i2]<2) continue;   //---- select 2 (x,z) and more hits on track ----
+	  printf("==> fit: start trk: %d \r\n", i2);
+    
+	  std::vector<Double_t> x;
+	  std::vector<Double_t> y;
+    
+	  for (int i3 = 0; i3 < TRACKS[i2].size(); i3+=2) {
+	    printf(" trkID=%d  hit=%d x=%f z=%f \n",i2,i3/2,TRACKS[i2].at(i3),TRACKS[i2].at(i3+1));
+	    x.push_back(TRACKS[i2].at(i3+1));
+	    y.push_back(TRACKS[i2].at(i3));
+	  }
+
+	  c2->cd(3);   hevt->Draw("colz");
+    
+	  TGraph *g = new TGraph(TRACKS_N[i2], &x[0], &y[0]);  g->SetMarkerStyle(21); g->SetMarkerColor(i2);
+	/*
+	  TMarker *m = new TMarker(nx[j], 0.5*ny[j], 22);
+	  m->SetMarkerSize(2);
+	  m->SetMarkerColor(31+j);
+	  m->Draw();
+	*/
+    
+	  //c2->cd(3);  g->Draw("AC*");
+	  //TF1 *f = new TF1("f", "[2] * x * x + [1] * x + [0]");
+	  TF1 *f = new TF1("f", "[1] * x + [0]");
+	  g->Fit(f);
+	  //c2->cd(3); g->Draw("AC*");
+    
+	  mg->Add(g,"p");
+    
+	  NTRACKS++;
+    
+  }  //  end tracks loop
+      
+  c2->cd(3); mg->Draw("APsame");
+  mg->GetXaxis()->SetLimits(0.,30);
+  mg->SetMinimum(-50.);
+  mg->SetMaximum(+50.);
+  gPad->Modified(); gPad->Update();
+  
+#endif // USE_GNN MC
+  
+#if (USE_TCP==1)
+      //----------------------------------------------------------
+      //---                 Send to FPGA                      ----
+      //----------------------------------------------------------
+
+      //-----------------  send DATA  ----------------
+      //printf(" send DATA  \n");
+      int DC_NROC=4;
+
+      int LEN_HITS=nhits; //-- floats X,Y,Z,E
+      if (LEN_HITS>50) LEN_HITS=50; //--- max hits to fpga
+      int k=3; //-- start data 3 words header;
+      printf("-- BUFFER:: \n");
+      for (int n=0; n<LEN_HITS; n++) {
+	FBUFFER[k++]= hits_Xpos[n];
+	printf("%2d,0x%08x,f:%f ",(k-1),BUFFER[k-1],FBUFFER[k-1]);
+	//FBUFFER[k++]= hits_Ypos[n];
+	//printf("%2d,0x%08x,f:%f ",(k-1),BUFFER[k-1],FBUFFER[k-1]);
+	FBUFFER[k++]= hits_Zpos[n];
+	printf("%2d,0x%08x,f:%f ",(k-1),BUFFER[k-1],FBUFFER[k-1]);
+	//FBUFFER[k++]= hits_dEdx[n];
+	//printf("%2d,0x%08x,f:%f ",(k-1),BUFFER[k-1],FBUFFER[k-1]);
+	printf("=====>  Clust data: X,Y,Z,E=%f %f %f %f \n",hits_Xpos[n],hits_Ypos[n],hits_Zpos[n],hits_dEdx[n]);
+      }
+
+      printf("Filled bufer size=%d , data = %d hits =%d \n",k,k-3,(k-3)/2);
+
+     itrg++;
+      for (int i=0;i<nmod;i++) {
+	LENEVENT=k;
+	hdr=(i & 0xF) << 24;
+              
+	BUFFER[0]=DC_NROC; // DC_NROC if send to EVB, or
+	BUFFER[0] |= EVT_Type_DATA;
+	BUFFER[1]=itrg;
+	BUFFER[2]=LENEVENT;  //--
+              
+	BUFFER[0]&= ~(0xff << 24);             // --  clear ModID
+	unsigned int MODIDx=((modID+i)&0xff)<<24;   //-- ModID=modID+i
+	BUFFER[0] |= MODIDx;
+              
+              
+	unsigned int evtTrigID=BUFFER[1];
+	int evtModID=(BUFFER[0]>>24)&0xff;
+	int evtSize=BUFFER[2];
+              
+	if ( itrg<200) {
+	  printf("==> SEND:: Trg=%d(%d,%d) Mod=%d(%d) siz=%d(%d)\n"
+		 ,evtTrigID,itrg,BUFFER[1],evtModID,i,evtSize,LENEVENT);
+	}
+              
+	//rc=tcp_event_snd(BUFFER,LENEVENT,nmod,i,hdr,itrg);
+	//if (rc<0) { printf(" ERROR send \n"); sleep(1); }
+	//--------------------------------------------------
+	//int tcp_event_snd( unsigned int *DATA, int lenDATA,int n,int k, unsigned int evtHDR, unsigned int TriggerID )
+
+	unsigned int *DATA = BUFFER;
+	int lenDATA=LENEVENT;
+	int n = nmod;
+	int k = i;
+	unsigned int evtHDR = hdr;
+	unsigned int TriggerID = itrg;
+
+	HEADER[0]=0x5;  //---  buffered for evb
+	HEADER[1]=0xAABBCCDD;
+	HEADER[2]=lenDATA;
+	HEADER[3]=evtHDR;
+	HEADER[4]=TriggerID;
+	HEADER[5]=n;
+	HEADER[6]=k;
+	HEADER[7]=k;
+
+	sock->SendRaw((char*) HEADER, sizeof(HEADER), kDefault);
+	sock->SendRaw((char*) DATA, lenDATA*4, kDefault);
+
+	printf("read GNN out, wait for FPGA data ... \n");  //=======================================================
+
+	unsigned int NDATA[MAX_NODES+10];
+	int RHEADER[10];
+	int COLMAP[]={1,2,3,4,6,5};
+	
+	sock->RecvRaw((char*) RHEADER, sizeof(RHEADER), kDefault);
+	int lenNODES=RHEADER[2];
+	printf("RHEADER::"); for (int ih=0; ih<5; ih++) printf(" %d \n",HEADER[ih]);  printf(" LenDATA=%d \n",HEADER[2]);
+	sock->RecvRaw((char*) NDATA, lenNODES*4, kDefault);
+	
+	int nnodes=lenNODES-3;
+	printf("nodes return: %d (nclust=%d), TRKS: \n", nnodes,nclust);
+
+
+	unsigned int TDATA[2048];
+	float *FTDATA = (float*) TDATA;
+#if (USE_FIT==1)
+	printf("read FIT out, wait for FPGA data ... \n");  //=======================================================
+	//RHEADER[10];
+	
+	sock->RecvRaw((char*) RHEADER, sizeof(RHEADER), kDefault);
+	int lenFITS=RHEADER[2];
+	printf("RHEADER::"); for (int ih=0; ih<5; ih++) printf(" %d \n",RHEADER[ih]);  printf(" LenDATA=%d \n",RHEADER[2]);
+	sock->RecvRaw((char*) TDATA, lenFITS*4, kDefault);
+	
+	for (int i=0; i<lenFITS; i++) {
+
+	  printf("tracks fit return: i=%d  data=0x%x (%f)  \n", i,TDATA[i],FTDATA[i]);
+
+	}
+
+
+	int nfits=lenFITS-3;
+	printf("tracks fit return: %d  \n", nfits);
+
+#else
+	int nfits=nnodes;
+	printf("tracks fit return: %d  \n", nfits);
+#endif  // --- end  if USE_FIT  ---
+
+	if (nfits>0) {
+
+	  //=============== Draw FPGA Clust =============
+
+	  for (int nd=0; nd<min(nnodes,nhits); nd++) {
+	    int trknum=NDATA[nd+3];
+	    printf(" %u, ",trknum);
+	    c2->cd(3);	gPad->Modified(); gPad->Update();
+ 	    if (trknum>0) {
+	      //DrawPolyMarker (1, &hits_Xpos[nd], &hits_Zpos[n], Option_t *option="")
+	      //TMarker* m = new TMarker(hits_Xpos[nd],hits_Zpos[n],24);  // memory leak !!!!!
+	      TMarker m = TMarker(hits_Zpos[nd],hits_Xpos[nd],24);
+	      int tcol=min(trknum,6);
+	      int mcol = COLMAP[tcol-1];   m.SetMarkerColor(mcol);   m.SetMarkerStyle(20);     m.SetMarkerSize(1.5);
+	      m.DrawClone();  gPad->Modified(); gPad->Update();
+	      printf("=====>  Draw:%d X,Y,Z,E=%f %f %f %f \n",nd,hits_Xpos[nd],hits_Ypos[nd],hits_Zpos[nd],hits_dEdx[nd]);
+	    }
+	  }
+	  c2->Modified(); c2->Update();
+	  printf("\n");
+
+
+#if (USE_FIT==1)
+	  //=============== Draw Tracks lines =============
+
+	  int ntracks = nfits/3;
+	  int cs = nfits % 3;
+	  if (cs != 0)  { printf("==========>>>>   Error FIT results : %d %d %d \n",nfits, ntracks,cs);  break; };
+	
+	  int cnt = 3; // word counter in data buffer
+	  c2->cd(3);  gPad->Modified(); gPad->Update();
+	  for (int i=0; i<ntracks; i++) {
+	  
+	    int trknum = TDATA[cnt++];	  float aa = FTDATA[cnt++];	  float bb = FTDATA[cnt++];
+	    printf(" Fit Track=%d aa=%f bb=%f \n",trknum,aa,bb);
+
+	    TF1 ftrk("ftrk","[0]*x+[1]",zStart,zEnd);	  ftrk.SetParameter(0,aa);	  ftrk.SetParameter(1,bb);
+	     ftrk.DrawClone("same");  gPad->Modified(); gPad->Update();
+	  }
+	  c2->Modified(); c2->Update();
+#endif  // --- end  if USE_FIT  ---
+
+	} else {    //  if (nfits>0)
+	  printf(" No tracks to draw \n");
+	}
+
+	//=============== Draw All Clust ================
+	//----------------------  To FPGA ------------------
+	c2->cd(2); gPad->Modified(); gPad->Update();
+	printf(" Draw clusters  \n");
+	for (int k=0; k<nhits; k++) {
+	  TMarker mh = TMarker(hits_Zpos[k],hits_Xpos[k],24);
+	  int mhcol = 1;   mh.SetMarkerColor(mhcol);  mh.SetMarkerSize(1.5);
+	  mh.DrawClone();  gPad->Modified(); gPad->Update();
+	}
+	c2->Modified(); c2->Update();
+	//----------------------  from FPGA ------------------
+	c2->cd(3); gPad->Modified(); gPad->Update();
+	printf(" Draw clusters  \n");
+	for (int k=0; k<nhits; k++) {
+	  TMarker mh = TMarker(hits_Zpos[k],hits_Xpos[k],24);
+	  int mhcol = 1;   mh.SetMarkerColor(mhcol);  mh.SetMarkerSize(1.5);
+	  //c2->cd(2); mh.DrawClone();  c2->Modified(); c2->Update();
+	  mh.DrawClone();  gPad->Modified(); gPad->Update();
+	}
+	c2->Modified(); c2->Update();
+	
+      } // -- end nmod  ---
+#endif  // --- end  if USE_TCP  -------------------------------------------------------------------------------------------
+
+      printf(" all done, click low right pad ...  \n");
+      //c2->cd(2); gPad->WaitPrimitive();
+      //if (jentry<35) sleep(5); else sleep(1);
+      
+      
+      //-------------------------------------------------------
+ 
+#endif   // (USE_GNN>0)
+    
+    //=============  End Fa125 RAW  process Loop  =================
+/*
+    if(electron) {
+      f125_el_max->Fill(f125_amp_max); //??? What about mapping here???
+    } else if (pion) {
+      f125_pi_max->Fill(f125_amp_max);
+    }
+*/
+#endif  // USE F125 RAW
     
     //=====================================================================================
     //                        E v e n t    D i s p l a y
@@ -1220,42 +1796,50 @@ void trdclass::Loop() {
     if (jentry<MAX_PRINT || !(jentry%NPRT)) {
       c0->cd(1); f125_el_amp2d->Draw("colz");
       c0->cd(5); f125_pi_amp2d->Draw("colz");
-      c0->cd(2); f125_el_evt_display->Draw("colz");         double chi2e = TrkFit(f125_el_evt_display,fx1,"fx1",0); if (chi2e>0. && chi2e < chi2_max ) fx1.Draw("same");
-      c0->cd(6); f125_pi_evt_display->Draw("colz");         double chi2p = TrkFit(f125_pi_evt_display,fx2,"fx2",0); if (chi2p>0. && chi2p < chi2_max ) fx2.Draw("same");
+      c0->cd(2); f125_el_evt_display->Draw("colz");
+      std::pair<Double_t, Double_t> eTrackResult = TrkFit(f125_el_evt_display,fx1,"fx1",0);
+      Double_t chi2e = eTrackResult.first;
+      if (chi2e>0. && chi2e < chi2_max ) fx1.Draw("same");
+      c0->cd(6); f125_pi_evt_display->Draw("colz");
+      std::pair<Double_t, Double_t> pTrackResult = TrkFit(f125_pi_evt_display,fx2,"fx2",0);
+      Double_t chi2p = pTrackResult.first;
+      if (chi2p>0. && chi2p < chi2_max ) fx2.Draw("same");
       printf("========================>>>  Chi2 e=%f p=%f \n",chi2e,chi2p);
       //c0->cd(3); f125_el_chi2->Draw("colz");
       //c0->cd(6); f125_pi_chi2->Draw("colz");
       
-      if (electron) {
+      //if (electron) {
         c0->cd(3); f125_el_raw->Draw("colz");  f125_el_evt_display->Draw("same");
         TLine lin1(110.,gemtrkr_x2ch,190.,gemtrkr_x2ch); lin1.Draw("same");   //--- draw  gemtrkr x
-        printf("++++++++++++ Draw GEMTRK:: %f %f %f  \n",gemtrkr_x,ftrk.Eval(gemtrkr_x),gemtrkr_x2ch);
-      }
-      if (pion) {
+        ///////////////////////////////////////////////////////printf("++++++++++++ Draw GEMTRK:: %f %f %f  \n",gemtrkr_x,ftrk.Eval(gemtrkr_x),gemtrkr_x2ch);
+      //}
+      //if (pion) {
         c0->cd(7); f125_pi_raw->Draw("colz");  f125_pi_evt_display->Draw("same");
         TLine lin2(110.,gemtrkr_x2ch,190.,gemtrkr_x2ch); lin2.SetLineColor(kRed); lin2.Draw("same");   //--- draw  gemtrkr x
         //c0->cd(12); gPad->WaitPrimitive();
-      }
+      //}
       if (electron || pion ) {
-        printf("--------------->  SRS:: srs_peak:  cnt=%lld evt=%llu \n",gem_peak_count,jentry);
+        //printf("--------------->  SRS:: srs_peak:  cnt=%lld evt=%llu \n",gem_peak_count,jentry);
         int lc=0;
         for (int k=0; k<100; k++) {  peak_line[k].SetX1 (100.);	    peak_line[lc].SetY1 (-10.);	    peak_line[lc].SetX2 (101.);	    peak_line[lc].SetY2 (-10.); }
         for (ULong64_t i=0;i<gem_peak_count; i++) {
-          printf("SRS:: srs_peak: i=%lld id=%d name=%s idx=%d apv=%d Amp=%f wid=%f E=%f Pos=%f \n"
-     ,i,gem_peak_plane_id->at(i),gem_peak_plane_name->at(i).c_str(),gem_peak_index->at(i), gem_peak_apv_id->at(i), gem_peak_height->at(i)
-     ,gem_peak_width->at(i), gem_peak_area->at(i), gem_peak_real_pos->at(i));
+          //printf("SRS:: srs_peak: i=%lld id=%d name=%s idx=%d apv=%d Amp=%f wid=%f E=%f Pos=%f \n"
+          //  ,i,gem_peak_plane_id->at(i),gem_peak_plane_name->at(i).c_str(),gem_peak_index->at(i), gem_peak_apv_id->at(i), gem_peak_height->at(i)
+          //  ,gem_peak_width->at(i), gem_peak_area->at(i), gem_peak_real_pos->at(i));
           double pos = gem_peak_real_pos->at(i);
           if (pos<=0) pos=pos+50.; else pos=pos-50.;  pos*=-1.;
           double pos2ch=(ftrk.Eval(pos)+50.)/0.4;  // -- to gemtrd coordinate system
           peak_line[lc].SetX1 (110.);	    peak_line[lc].SetY1 (pos2ch);	    peak_line[lc].SetX2 (190.);	    peak_line[lc].SetY2 (pos2ch);
-          printf(" i=%llu pos=%f pos2ch=%f \n ",i,pos,pos2ch);
+          //printf(" i=%llu pos=%f pos2ch=%f \n ",i,pos,pos2ch);
           if (gem_peak_plane_name->at(i) == "GEMTRKY" ) { if (lc<100) {  peak_line[lc].SetLineColor(kGreen);  peak_line[lc].Draw("same");  lc++;   }   }
         }  //--- peak Loop --
       }
       c0->cd(4); cal_el_evt->Draw("colz");
       c0->cd(8); cal_pi_evt->Draw("colz");
-      c0->cd(9); hgemtrkr_peak_xy->Draw("colz");
-      c0->cd(10); srs_gem_x->Draw("colz");  ftrk.Draw("same");
+      //c0->cd(9); srs_trk_el->Draw("colz");
+      //c0->cd(10); srs_gem_x->Draw("colz");  ftrk.Draw("same");
+      //c0->cd(9); hevt->Draw("colz");
+      //c0->cd(10); hevtc->Draw("colz");
       c0->Modified();   c0->Update();
       
       //---------- fiducial area ---
@@ -1270,6 +1854,7 @@ void trdclass::Loop() {
 #else
       srs_etrd_ratio->Add(srs_etrd_beam,-1.);
 #endif
+      /*
       c0->cd(11); srs_etrd_ratio->DrawCopy("colz");
       c0->Modified();   c0->Update();
       //c0->cd(11); srs_gemtrd_el->Draw("colz");
@@ -1278,10 +1863,12 @@ void trdclass::Loop() {
       fbox.SetFillStyle(0);
       fbox.SetLineWidth(2);
       fbox.DrawClone();
+      */
      //---------
       c0->cd(12); srs_gem_dx->Draw("colz");
       c0->Modified();   c0->Update();
-      if (NPRT<1000) sleep(1);
+      //if (NPRT<1000) sleep(1);
+      c0->cd(12); gPad->WaitPrimitive();
     }
 #endif
     //==== Fill Track Hit Info Trees ====
@@ -1338,19 +1925,19 @@ void trdclass::Loop() {
   //======= Plot & Save Event Display ========
   //char pngname[120];  sprintf(pngname,"%s_evdisp.png",G_DIR);  //c0->Print(pngname);
   char pdfname[120];  sprintf(pdfname,"%s_evdisp.pdf",G_DIR);  //c0->Print(pdfname);
+  cout<<"_evdisp.pdf OK"<<endl;
   
   //--------------------- new page --------------------
   htitle(" Cherenkov (Fadc250)  ");   //if (!COMPACT) cc=NextPlot(0,0);
-  
   nxd=2; nyd=3;
   cc=NextPlot(nxd,nyd);  gPad->SetLogy(); hcount->Draw();
   cc=NextPlot(nxd,nyd);  gPad->SetLogy();  hCher_u_adc->Draw();
   cc=NextPlot(nxd,nyd);  gPad->SetLogy();  hCher_dout_adc->Draw();
   cc=NextPlot(nxd,nyd);  hCCor_ud->Draw("colz");
-
+  cout<<"Cherenkov htitle Draw plots OK"<<endl;
   //--------------------- new page --------------------
   htitle(" GEM-Tracker (SRS) ");   if (!COMPACT) cc=NextPlot(0,0);
-  
+  cout<<"GEM-Tracker htitle..."<<endl;
   cc=NextPlot(nxd,nyd);  hgemtrkr_peak_xy->Draw("colz");
   cc=NextPlot(nxd,nyd);  hgemtrkr_ch_xy->Draw("colz");
   cc=NextPlot(nxd,nyd);  hgemtrkr_peak_x->Draw();
@@ -1366,16 +1953,25 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);  srs_etrd_beam->Draw("colz");
   cc=NextPlot(nxd,nyd);  srs_etrd_ratio->Draw("colz");
 */
+  cout<<"GEM-Tracker htitle Draw OK"<<endl;
  //--------------------- new page --------------------
+  /*
   htitle("  TRD Prototype (Fadc125) Amplitudes ");    if (!COMPACT) cc=NextPlot(0,0);
-  nxd=2; nyd=3;
-  cc=NextPlot(nxd,nyd);   gPad->SetLogy();   f125_el->Draw();
+  cout<<"Amplitudes htitle..."<<endl;
+  nxd=2; nyd=4;
+  cout<<"Amplitudes nxd nyd OK"<<endl;
+  cc=NextPlot(nxd,nyd); cout<<"NextPlot OK"<<endl;   gPad->SetLogy(); cout<<"SetLogY OK"<<endl;  f125_el->Draw(); cout<<"Draw _el OK"<<endl;
   cc=NextPlot(nxd,nyd);   gPad->SetLogy();   f125_pi->Draw();
+  cout<<"Amplitudes htitle _el OK"<<endl;
+  cc=NextPlot(nxd,nyd);   f125_el_max->Draw();
+  cc=NextPlot(nxd,nyd);   f125_pi_max->Draw();
+  cout<<"Amplitudes htitle _max OK"<<endl;
   cc=NextPlot(nxd,nyd);   gPad->SetLogy();   mmg1_f125_el->Draw();
   cc=NextPlot(nxd,nyd);   gPad->SetLogy();   mmg1_f125_pi->Draw();
+  cout<<"Amplitudes htitle _el mmg OK"<<endl;
   cc=NextPlot(nxd,nyd);   gPad->SetLogy();   if (RunNum<3262 && RunNum>3147) {urw_f125_el->Draw();} else if (RunNum>3261) {mmg2_f125_el->Draw();}
   cc=NextPlot(nxd,nyd);   gPad->SetLogy();  if (RunNum<3262 && RunNum>3147) {urw_f125_pi->Draw();} else if (RunNum>3261) {mmg2_f125_pi->Draw();}
-
+  cout<<"Amplitudes htitle Draw OK"<<endl;
  //--------------------- new page --------------------
   htitle("  TRD Prototype (Fadc125) Amplitudes - 2D");    if (!COMPACT) cc=NextPlot(0,0);
   nxd=2; nyd=3;
@@ -1385,7 +1981,7 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);   mmg1_f125_pi_amp2ds->Draw("colz");
   cc=NextPlot(nxd,nyd);   if (RunNum<3262 && RunNum>3147) {urw_f125_el_amp2ds->Draw("colz");} else if (RunNum>3261) {mmg2_f125_el_amp2ds->Draw("colz");}
   cc=NextPlot(nxd,nyd);   if (RunNum<3262 && RunNum>3147) {urw_f125_pi_amp2ds->Draw("colz");} else if (RunNum>3261) {mmg2_f125_pi_amp2ds->Draw("colz");}
-  
+  cout<<"2D Amplitudes htitle OK"<<endl;
   //--------------------- new page --------------------
   htitle(" SRS & TRD Prototypes - GEMTRD Correlations");    if (!COMPACT) cc=NextPlot(0,0);
   
@@ -1395,7 +1991,7 @@ void trdclass::Loop() {
   if (RunNum<3262 && RunNum>3147) { cc=NextPlot(nxd,nyd);  gem_urw_y->Draw("colz");} else if (RunNum>3261) { cc=NextPlot(nxd,nyd);  gem_mmg2_y->Draw("colz");}
   cc=NextPlot(nxd,nyd);  hgemtrkr_peak_xy_chi2->Draw("colz");
   cc=NextPlot(nxd,nyd);  srs_gem_dy->Draw("colz");
-  
+  cout<<"SRS&TRD GEMTRD Correlations htitle OK"<<endl;
   //--------------------- new page --------------------
   htitle(" SRS & TRD Prototypes - Tracking");   if (!COMPACT) cc=NextPlot(0,0);
   cc=NextPlot(nxd,nyd);  singleTrackIndex->Draw("colz text");
@@ -1405,7 +2001,7 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);  srs_mmg1_dy->Draw("colz");
   if (RunNum<3262 && RunNum>3147) { cc=NextPlot(nxd,nyd); srs_urw_dx->Draw("colz"); ftrk.Draw("same"); cc=NextPlot(nxd,nyd); srs_urw_dy->Draw("colz");}
   else if (RunNum>3261) { cc=NextPlot(nxd,nyd); srs_mmg2_dx->Draw("colz"); ftrk.Draw("same"); cc=NextPlot(nxd,nyd); srs_mmg2_dy->Draw("colz");}
-  
+  cout<<"SRS&TRD Tracking htitle OK"<<endl;
   //--------------------- new page --------------------
   htitle(" SRS & TRD Prototypes - Y Correlations");   if (!COMPACT) cc=NextPlot(0,0);
   
@@ -1421,7 +2017,10 @@ void trdclass::Loop() {
   cc=NextPlot(nxd,nyd);  srs_mmg2_y->Draw("colz"); ftrk.Draw("same");
   }
   cc=NextPlot(nxd,nyd);  gem_trk_fit_integral->Draw();
+  */
   //--- close PDF file ----
+  cout<<"SRS&TRD Corrleations htitle OK"<<endl;
   cc=NextPlot(-1,-1);
+  cout<<"Close PDF OK"<<endl;
 }
 //=========== The End ===================
