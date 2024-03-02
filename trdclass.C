@@ -12,7 +12,7 @@
 #include "GNN/gnn_model.cpp"
 #include "GNN/toGraph.cpp"
 
-#define NPRT 1000
+#define NPRT 100000000
 #define USE_TRK
 #define MAX_PRINT 1
 #define SHOW_EVT_DISPLAY
@@ -200,7 +200,9 @@ void trdclass::Loop() {
 #else
   hcount->SetBit(TH1::kCanRebin);
 #endif
-  hNTracks = new TH1D("hNTracks","Number of Tracks in GEMTRD",20,-0.5,19.5);    HistList->Add(hNTracks);
+  hNTracks = new TH1D("hNTracks","Number of Tracks in GEMTRD",12,-0.5,11.5);    HistList->Add(hNTracks);
+  hNTracks_e = new TH1D("hNTracks_e","Number of Electron Tracks in GEMTRD",12,-0.5,11.5);    HistList->Add(hNTracks_e);
+  hNTracks_pi = new TH1D("hNTracks_pi","Number of Pion Tracks in GEMTRD",12,-0.5,11.5);    HistList->Add(hNTracks_pi);
   //h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5);      HistList->Add(h250_size);
   
   //============ Calorimeter & Cherenkovs Plots ===============
@@ -501,7 +503,7 @@ void trdclass::Loop() {
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);
     nbytes += nb;
-    if (jentry<MAX_PRINT || !(jentry%NPRT)) {
+    if (jentry<MAX_PRINT || !(jentry%1000)) {
       printf("------- evt=%llu  f125_raw_count=%llu f125_pulse_count=%llu f250_wraw_count=%llu, srs_raw_count=%llu, gem_scluster_count=%llu, srs_prerecon_count=%llu, gem_peak_count=%llu \n", jentry, f125_wraw_count, f125_pulse_count, f250_wraw_count, srs_raw_count, gem_scluster_count, srs_prerecon_count, gem_peak_count);
     }
     
@@ -1381,8 +1383,8 @@ void trdclass::Loop() {
       double zEnd   = 29.; // mm
       //int ihit=0;
       int ii=0;
-      printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-      printf("                Xpos   Ypos   Zpos       E    Width  Length   Size \n");
+      //printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+      //printf("                Xpos   Ypos   Zpos       E    Width  Length   Size \n");
       //       0 Clust( 1):   43.8    0.0    3.9      5.3    0.0    0.0      4.0
       for (int k=0; k<nclust; k++) {
 	      //hevt->Fill(clust_Zpos[k],clust_Xpos[k],clust_dEdx[k]);
@@ -1399,7 +1401,7 @@ void trdclass::Loop() {
 	        hits_Zpos[ii]=clust_Zpos[k];
 	        hits_dEdx[ii]=clust_dEdx[k];
 	        ii++;
-	        printf("\n");
+	        //printf("\n");
 	      } else {
 	        //printf(" <--- skip \n");
 	      }
@@ -1560,7 +1562,6 @@ void trdclass::Loop() {
 	  }
 #ifdef SHOW_EVTbyEVT
 	  c2->cd(3);   hevt->Draw("colz");
-#endif
 	  TGraph *g = new TGraph(TRACKS_N[i2], &x[0], &y[0]);  g->SetMarkerStyle(21); g->SetMarkerColor(i2);
 	/*
 	  TMarker *m = new TMarker(nx[j], 0.5*ny[j], 22);
@@ -1576,7 +1577,7 @@ void trdclass::Loop() {
 	  //c2->cd(3); g->Draw("AC*");
     
 	  mg->Add(g,"p");
-    
+#endif
 	  NTRACKS++;
     
   }  //  end tracks loop
@@ -1610,8 +1611,8 @@ void trdclass::Loop() {
   }
   //for (ULong64_t j=0; j<sizeof(gemtrkr_peak_pos_y)/sizeof(gemtrkr_peak_pos_y[0]); j++) {
     //for (ULong64_t k=0; k<sizeof(gemtrkr_peak_pos_x)/sizeof(gemtrkr_peak_pos_x[0]); k++) {
-    for (ULong64_t j=0; j<gt_idx_y; j++) {
-      for (ULong64_t k=0; k<gt_idx_x; k++) {
+    for (ULong64_t j=0; j<=gt_idx_y; j++) {
+      for (ULong64_t k=0; k<=gt_idx_x; k++) {
       if (NTRACKS==1) {
         singleTrackIndex->Fill(gt_idx_x, gt_idx_y);
         if (electron) singleTrackIndex_e->Fill(gt_idx_x, gt_idx_y);
@@ -1625,7 +1626,8 @@ void trdclass::Loop() {
     }
   }
   hNTracks->Fill(NTRACKS);
-  
+  if (electron) hNTracks_e->Fill(NTRACKS);
+  if (pion) hNTracks_pi->Fill(NTRACKS);
 #endif // USE_GNN MC
   
 #if (USE_TCP==1)
@@ -1817,7 +1819,7 @@ void trdclass::Loop() {
 
 #endif  // --- end  if USE_TCP  -------------------------------------------------------------------------------------------
 
-      printf(" all done, click low right pad ...  \n");
+//      printf(" all done, click low right pad ...  \n");
       //c2->cd(2); gPad->WaitPrimitive();
       //if (jentry<35) sleep(5); else sleep(1);
       

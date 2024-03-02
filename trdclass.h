@@ -282,7 +282,7 @@ public :
    Long64_t FirstEvt;
    TH1F *h250_size;
    TH1D *hcount;
-   TH1D *hNTracks;
+   TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
    TH1F *hCal_occ;
    TH1F *hCal_sum;
    TH1F *hCal_sum_el;
