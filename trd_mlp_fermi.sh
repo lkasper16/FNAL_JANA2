@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-source setup_env.sh
+#source setup_env.sh
 # only root needed
 
 RUNNUM=${1-none}
