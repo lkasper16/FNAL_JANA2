@@ -9,10 +9,10 @@
 #define trdclass_h
 
 #include "TSystem.h"
-#include <TROOT.h>
+//#include <TROOT.h>
 #include <TChain.h>
-#include <TFile.h>
-#include <TH2.h>
+//#include <TFile.h>
+//#include <TH2.h>
 #include <sstream>
 
 #include "TROOT.h"
@@ -24,17 +24,20 @@
 #include <iostream>
 #include "TRandom3.h"
 #include "TCanvas.h"
+//#include "TSocket.h"
+#include "TMarker.h"
+#include "TMultiGraph.h"
 #include "TMultiLayerPerceptron.h"
 #include "TMLPAnalyzer.h"
 #include "TLegend.h"
 #include "TGraph.h"
 #include "TString.h"
 #include "TLatex.h"
-#include "TStyle.h"
+//#include "TStyle.h"
 #include "TLine.h"
 #include "TLinearFitter.h"
 #include "TGraphErrors.h"
-#include <TError.h>
+//#include <TError.h>
 #include "TF1.h"
 #include "TPaveStats.h"
 #include "TCutG.h"
@@ -46,9 +49,9 @@
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
-#include "vector"
-#include "vector"
-#include "vector"
+//#include "vector"
+//#include "vector"
+//#include "vector"
 
 class trdclass {
 public :
@@ -289,95 +292,78 @@ public :
    TH1F *hCal_sum_pi;
    #define  NCAL 7
    TH1F *hCal_adc[7];  //---  FADC250 channles 0 - 8
-   TH2F *hCal_cor[7];      //---  FADC250 channles 0 - 8
-   TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
+   //TH2F *hCal_cor[7];      //---  FADC250 channles 0 - 8
+   //TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
    TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
-   TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
+   //TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
    TH2F *cal_el_evt, *cal_pi_evt;
    const int NCHER=3;
    //TH1F *hCher_adc[3]; //-- FADC250 channels 13,14,15
    TH1F *hCher_u_adc;
-   TH1F *hCher_din_adc;
+   //TH1F *hCher_din_adc;
    TH1F *hCher_dout_adc;
    TH1F *hCher_u_time;
-   TH1F *hCher_din_time;
+   //TH1F *hCher_din_time;
    TH1F *hCher_dout_time;
    //TH1F *gem_trk_fit_integral;
    
    TH2F *hCCor_ud;
-   TH2F *hCCCor_u;
-   TH2F *hCCCor_dout;
-   TH2F *srs_cal_corr, *srs_gemtrd_el, *srs_etrd_beam, *srs_gemtrd_pion, *srs_etrd_ratio;
+   //TH2F *hCCCor_u;
+   //TH2F *hCCCor_dout;
+   //TH2F *srs_cal_corr, *srs_gemtrd_el, *srs_etrd_beam, *srs_gemtrd_pion, *srs_etrd_ratio;
    TH2F *multiTrackIndex, *multiTrackIndex_e, *multiTrackIndex_pi;
    TH2F *singleTrackIndex, *singleTrackIndex_e, *singleTrackIndex_pi;
-   TH1F *hgemtrkr_peak_x;
-   TH1F *hgemtrkr_peak_y;
-   TH2F *hgemtrkr_peak_xy, *hgemtrkr_ch_xy, *hgemtrkr_peak_xy_chi2;
-   TH2F *srs_gem_x, *srs_gem_dx, *srs_gem_dy;
-   TH2F *srs_mmg1_dx, *srs_mmg1_dy, *srs_mmg1_x, *srs_mmg1_y;
-   TH2F *srs_urw_dx, *srs_urw_dy, *srs_urw_x, *srs_urw_y;
-   TH2F *srs_mmg2_dx, *srs_mmg2_dy, *srs_mmg2_x, *srs_mmg2_y;
+   TH1F *hgemtrkr_peak_x, *hgemtrkr_peak_x_height, *hmmg1_peak_y, *hmmg1_peak_y_height, *hurw_peak_y, *hurw_peak_y_height, *hgemtrkr_peak_y, *hgemtrkr_peak_y_height;
+   TH2F *hgemtrkr_peak_xy;
+   //TH2F *srs_gem_x, *srs_gem_dx, *srs_gem_dy;
+   TH2F *srs_mmg1_x, *srs_mmg1_y;
+   TH2F *srs_urw_x, *srs_urw_y;
+   TH1F *hgemtrkr_max_xch, *hgemtrkr_max_ych, *hgemtrkr_max_xamp, *hgemtrkr_max_yamp;
+   TH2F *hgemtrkr_max_xy;
    
    TH1F *f125_el, *f125_el_max;
-   TH1F *f125_el_chi2, *f125_el_fita, *mmg1_f125_el_chi2, *mmg1_f125_el_fita, *urw_f125_el_chi2, *urw_f125_el_fita, *mmg2_f125_el_chi2, *mmg2_f125_el_fita;
+   TH1F *hClusterMaxdEdx_e, *hClusterTotaldEdx_e;
+   //TH1F *f125_el_chi2, *f125_el_fita, *mmg1_f125_el_chi2, *mmg1_f125_el_fita, *urw_f125_el_chi2, *urw_f125_el_fita, *mmg2_f125_el_chi2, *mmg2_f125_el_fita;
    TH1F *f125_pi, *f125_pi_max;
-   TH1F *f125_pi_chi2, *f125_pi_fita, *mmg1_f125_pi_chi2, *mmg1_f125_pi_fita, *urw_f125_pi_chi2, *urw_f125_pi_fita, *mmg2_f125_pi_chi2, *mmg2_f125_pi_fita;
-   TH2F *f125_el_amp2d, *f125_el_amp2ds, *f125_el_evt_display, *f125_el_raw;
-   TH2F *f125_el_fit, *f125_fit, *mmg1_f125_el_fit, *mmg1_f125_fit, *urw_f125_el_fit, *urw_f125_fit, *mmg2_f125_el_fit, *mmg2_f125_fit;
-   TH2F *mmg1_f125_el_amp2ds, *urw_f125_el_amp2ds, *mmg2_f125_el_amp2ds;
-   TH2F *f125_pi_amp2d, *f125_pi_amp2ds, *f125_pi_evt_display, *f125_pi_raw;
-   TH2F *f125_pi_fit, *mmg1_f125_pi_fit, *urw_f125_pi_fit, *mmg2_f125_pi_fit;
+   TH1F *hClusterMaxdEdx_pi, *hClusterTotaldEdx_pi;
+   //TH1F *f125_pi_chi2, *f125_pi_fita, *mmg1_f125_pi_chi2, *mmg1_f125_pi_fita, *urw_f125_pi_chi2, *urw_f125_pi_fita, *mmg2_f125_pi_chi2, *mmg2_f125_pi_fita;
+   TH2F *f125_el_amp2ds, *f125_el_raw;
+   TH2F *f125_fit, *mmg1_f125_fit, *urw_f125_fit;
+   TH2F *mmg1_f125_el_amp2ds, *urw_f125_el_amp2ds;
+   TH2F *f125_pi_amp2ds, *f125_pi_raw;
+   //TH2F *f125_pi_fit, *mmg1_f125_pi_fit, *urw_f125_pi_fit, *mmg2_f125_pi_fit;
    TH2F *mmg1_f125_pi_amp2ds, *urw_f125_pi_amp2ds, *mmg2_f125_pi_amp2ds;
    //TH2F *f125_el_clu2d;
    //TH2F *f125_pi_clu2d;
    
    TH1F *mmg1_f125_el, *mmg1_f125_el_max;
    TH1F *mmg1_f125_pi, *mmg1_f125_pi_max;
-   TH2F *mmg1_f125_el_amp2d;
-   TH2F *mmg1_f125_pi_amp2d;
    //TH2F *mmg1_f125_el_clu2d;
    //TH2F *mmg1_f125_pi_clu2d;
    
-   TH1F *mmg2_f125_el, *mmg2_f125_el_max;
-   TH1F *mmg2_f125_pi, *mmg2_f125_pi_max;
-   TH2F *mmg2_f125_el_amp2d;
-   TH2F *mmg2_f125_pi_amp2d;
-   //TH2F *mmg2_f125_el_clu2d;
-   //TH2F *mmg2_f125_pi_clu2d;
-   
    TH1F *urw_f125_el, *urw_f125_el_max;
    TH1F *urw_f125_pi, *urw_f125_pi_max;
-   TH2F *urw_f125_el_amp2d;
-   TH2F *urw_f125_pi_amp2d;
    //TH2F *urw_f125_el_clu2d;
    //TH2F *urw_f125_pi_clu2d;
    
    TH2F *hevt, *hevtc, *hevti, *hevtf;
    
-   //TH2F *ch_gem_mmg1;
-   //TH2F *ch_gem_urw;
-   //TH2F *ch_gem_mmg2;
-   //TH2F *ch_mmg1_urw;
-   
    TH2F *gem_mmg1_x;
    TH2F *gem_urw_x;
-   TH2F *gem_mmg2_x;
-   TH2F *gem_mmg1_y;
-   TH2F *gem_urw_y;
-   TH2F *gem_mmg2_y;
-   TH2F * mmg1_urw_y;
+   //TH2F *gem_mmg1_y;
+   //TH2F *gem_urw_y;
+   TH2F *mmg1_urw_y;
    TH2F *mmg1_xy;
    TH2F *urw_xy;
-   TH2F *mmg2_xy;
    
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
    TTree *EVENT_VECT_MMG1;
-   TTree *EVENT_VECT_MMG2;
    TTree *EVENT_VECT_URW;
    //---------------------------
    int event_num;
    int gem_nhit;
+   int gem_nclu;
    std::vector <int> gem_xpos;
    std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
@@ -385,6 +371,14 @@ public :
    std::vector <int> gem_trackID;
    std::vector <bool> gem_parID;
    std::vector <float> gem_zHist_vect;
+   std::vector <float> clu_xpos;
+   std::vector <float> clu_zpos;
+   std::vector <float> clu_dedx;
+   std::vector <float> clu_width;
+   float clu_xpos_max;
+   float clu_zpos_max;
+   float clu_dedx_max;
+   float clu_width_max;
    TH1F *gem_zHist;
    
    int mmg1_nhit;
@@ -396,16 +390,6 @@ public :
    std::vector <bool> mmg1_parID;
    std::vector <float> mmg1_zHist_vect;
    TH1F *mmg1_zHist;
-   
-   int mmg2_nhit;
-   std::vector <int> mmg2_xpos;
-   std::vector <int> mmg2_ypos;
-   std::vector <float> mmg2_zpos;
-   std::vector <float> mmg2_dedx;
-   std::vector <int> mmg2_trackID;
-   std::vector <bool> mmg2_parID;
-   std::vector <float> mmg2_zHist_vect;
-   TH1F *mmg2_zHist;
    
    int urw_nhit;
    std::vector <int> urw_xpos;

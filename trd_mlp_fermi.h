@@ -13,21 +13,39 @@
 // Header file for the classes stored in the TTree if any.
 #include "vector"
 
-   // Declaration of leaf types
-   Int_t           event_num;
-   Int_t           gem_nhit;
-   vector<int>     *xpos;
-   vector<float>   *zpos;
-   vector<float>   *dedx;
-   vector<bool>    *parID;
-   vector<float>   *zHist;
+ // Declaration of leaf types
+ Int_t           event_num;
+ Int_t           gem_nhit;
+ Int_t           gem_nclu;
+ vector<int>     *xpos;
+ vector<float>   *zpos;
+ vector<float>   *dedx;
+ vector<bool>    *parID;
+ vector<float>   *zHist;
+ vector<float>   *xposc;
+ vector<float>   *zposc;
+ vector<float>   *dedxc;
+ vector<float>   *widthc;
 
-   // List of branches
-   TBranch        *b_event_num;   //!
-   TBranch        *b_gem_nhit;   //!
-   TBranch        *b_xpos;   //!
-   TBranch        *b_zpos;   //!
-   TBranch        *b_dedx;   //!
-   TBranch        *b_parID;   //!
-   TBranch        *b_zHist;   //!
+float     xposc_max;
+float     zposc_max;
+float     dedxc_max;
+float     widthc_max;
 
+// List of branches
+TBranch        *b_event_num;   //!
+TBranch        *b_gem_nhit;   //!
+TBranch        *b_gem_nclu;
+TBranch        *b_xpos;   //!
+TBranch        *b_zpos;   //!
+TBranch        *b_dedx;   //!
+TBranch        *b_parID;   //!
+TBranch        *b_zHist;   //!
+TBranch        *b_xposc;   //!
+TBranch        *b_zposc;   //!
+TBranch        *b_dedxc;   //!
+TBranch        *b_widthc;   //!
+TBranch        *b_xposc_max;
+TBranch        *b_zposc_max;
+TBranch        *b_dedxc_max;
+TBranch        *b_widthc_max;
