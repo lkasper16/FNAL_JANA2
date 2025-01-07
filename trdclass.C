@@ -9,9 +9,7 @@
 //#define VERBOSE
 #define SAVE_TRACK_HITS
 #define MAX_PRINT 10
-//#define SHOW_EVT_DISPLAY
 #define SAVE_PDF
-//#define SHOW_EVTbyEVT
 //#define USE_250_PULSE
 #define USE_125_RAW
 #define MAX_CLUST 500
@@ -20,6 +18,11 @@
 #define USE_GNN  1
 #define USE_FIT  1
 #define USE_CLUST 1
+
+//#define ANALYZE_MERGED 0
+//-- For single evt clustering display, uncomment BOTH:
+//#define SHOW_EVTbyEVT
+//#define SHOW_EVT_DISPLAY
 
 //=================================================
 //            TRD Prototype DAQ Mapping
@@ -349,9 +352,13 @@ void trdclass::Loop() {
   //     Create TTrees of Single Track Evt Info for NN
   //=======================================================
   
+  TFile* fHits;
   #ifdef SAVE_TRACK_HITS
-    TFile* fHits;
-    char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/trd_singleTrackHits_Run_%06d.root", RunNum);
+    #if ANALYZE_MERGED
+      char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/fermiMerged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #else
+      char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/trd_singleTrackHits_Run_%06d.root", RunNum);
+    #endif
     fHits = new TFile(hitsFileName, "RECREATE");
     //-- GEM-TRD
     EVENT_VECT_GEM = new TTree("gem_hits","GEM TTree with single track hit info");
@@ -397,21 +404,20 @@ void trdclass::Loop() {
     }
   #endif
   
-//===================================================================================
-//                      E v e n t    L o o p
-//===================================================================================
-  
-  int e_1TRK=0;
-  int pi_1TRK=0;
-  int _1TRK=0;
-  int pi_CC=0;
-  int el_CC=0;
-  
+  TStopwatch timer;
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes=0, nb=0;
   if (MaxEvt>0) nentries=MaxEvt;  //-- limit number of events for test
   Long64_t jentry=0;
-  printf("=============== Begin Event Loop: 1st Evt=%lld, MaxEvt=%lld ================ \n",FirstEvt,MaxEvt);
+  
+  //===================================================================================
+  //                      E v e n t    L o o p
+  //===================================================================================
+  
+  int e_1TRK=0, pi_1TRK=0, _1TRK=0, pi_CC=0, el_CC=0;
+  
+  printf("=============== Begin Event Loop: 1st Evt=%lld, Last Evt=%lld ================ \n",FirstEvt,MaxEvt);
+  timer.Start();
   
   for (jentry=FirstEvt; jentry<nentries; jentry++) {
     
@@ -1478,9 +1484,9 @@ void trdclass::Loop() {
       if (mmg1_nhit>0) EVENT_VECT_MMG1->Fill();
       if (urw_nhit>0 && RunNum<3262 && RunNum>3147) EVENT_VECT_URW->Fill();
     #endif
-  }
-  //=================================== End of Event Loop  ======================================
-  cout<<"========== End of Event Loop Reached - Last Evt:"<<event_num<<" =========="<<endl;
+  } //=================================== End of Event Loop  ======================================
+   timer.Stop();
+  cout<<"***>>> End Event Loop, Elapsed Time:"<<endl; timer.Print();
   cout<<"Total events= "<<jentry<<endl;
   cout<<"hcount values: 1_TRK="<<_1TRK<<" 1eTRK="<<e_1TRK<<" 1piTRK="<<pi_1TRK<<" elCC="<<el_CC<<" piCC="<<pi_CC<<endl;
   
@@ -1490,7 +1496,11 @@ void trdclass::Loop() {
 
   printf("Writing .root output file... \n");
   TFile* fOut;
-  char rootFileName[256]; sprintf(rootFileName, "RootOutput/Run_%06d_Output.root", RunNum);
+  #if ANALYZE_MERGED
+    char rootFileName[256]; sprintf(rootFileName, "RootOutput/fermiMerged/Run_%06d_%0dEntries_Output.root",RunNum,nEntries);
+  #else 
+    char rootFileName[256]; sprintf(rootFileName, "RootOutput/Run_%06d_Output.root",RunNum);
+  #endif
   fOut = new TFile(rootFileName, "RECREATE");
   fOut->cd();
   cout<<"Writing Output File: "<<rootFileName<<endl;
@@ -1517,10 +1527,18 @@ void trdclass::Loop() {
   //=====================================================================================
   //===                 P L O T     H I S T O G R A M S                               ===
   //=====================================================================================
-  const char *OutputDir="RootOutput";
+  #if ANALYZE_MERGED
+    const char *OutputDir="RootOutput/fermiMerged";
+  #else
+    const char *OutputDir="RootOutput";
+  #endif
   #ifdef SAVE_PDF
     char ctit[120];
-    sprintf(G_DIR,"%s/Run_%06d",OutputDir,RunNum);
+    #if ANALYZE_MERGED
+      sprintf(G_DIR,"%s/Run_%06d_%06dEntries",OutputDir,RunNum,nEntries);
+    #else
+      sprintf(G_DIR,"%s/Run_%06d",OutputDir,RunNum);
+    #endif
     sprintf(ctit,"File=%s",G_DIR);
     bool COMPACT=false;
     TCanvas *cc;
@@ -1535,6 +1553,7 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);  gPad->SetLogy();  hCher_u_adc->Draw();
     cc=NextPlot(nxd,nyd);  gPad->SetLogy();  hCher_dout_adc->Draw();
     cc=NextPlot(nxd,nyd);  hCCor_ud->Draw("colz");
+    
     //--------------------- new page --------------------
     htitle(" GEM-Tracker (SRS) ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);  hgemtrkr_peak_xy->Draw("colz");
@@ -1549,9 +1568,9 @@ void trdclass::Loop() {
     fbox.SetFillStyle(0);
     fbox.SetLineWidth(1);
     */
+    
     //--------------------- new page --------------------
     htitle("  TRD Prototype (Fadc125) Amplitudes ");    if (!COMPACT) cc=NextPlot(0,0);
-    //nxd=2; nyd=5;
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    f125_el->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    f125_pi->Draw();
     cc=NextPlot(nxd,nyd);   f125_el_max->Draw();
@@ -1560,15 +1579,16 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    mmg1_f125_pi->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    if (RunNum<3262 && RunNum>3147) {urw_f125_el->Draw();}
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    if (RunNum<3262 && RunNum>3147) {urw_f125_pi->Draw();}
+    
     //--------------------- new page --------------------
     htitle("  TRD Prototype (Fadc125) Amplitudes - 2D");    if (!COMPACT) cc=NextPlot(0,0);
-    //nxd=2; nyd=3;
     cc=NextPlot(nxd,nyd);   f125_el_amp2ds->Draw("colz");
     cc=NextPlot(nxd,nyd);   f125_pi_amp2ds->Draw("colz");
     cc=NextPlot(nxd,nyd);   mmg1_f125_el_amp2ds->Draw("colz");
     cc=NextPlot(nxd,nyd);   mmg1_f125_pi_amp2ds->Draw("colz");
     cc=NextPlot(nxd,nyd);   if (RunNum<3262 && RunNum>3147) {urw_f125_el_amp2ds->Draw("colz");}
     cc=NextPlot(nxd,nyd);   if (RunNum<3262 && RunNum>3147) {urw_f125_pi_amp2ds->Draw("colz");}
+    
     //--------------------- new page --------------------
     htitle(" SRS & TRD Prototypes - GEMTRD Correlations");    if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);  gem_mmg1_x->Draw("colz");  ftrk.Draw("same");
@@ -1576,6 +1596,7 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);  singleTrackIndex->Draw("colz text");
     cc=NextPlot(nxd,nyd);  multiTrackIndex->Draw("colz text");
     //--------------------- new page --------------------
+    
     htitle(" SRS & TRD Prototypes - Y Correlations");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);  srs_mmg1_y->Draw("colz"); ftrk.Draw("same");
     cc=NextPlot(nxd,nyd);  srs_mmg1_x->Draw("colz");
@@ -1586,7 +1607,6 @@ void trdclass::Loop() {
     }
     //--- close PDF file ----
     cc=NextPlot(-1,-1);
-    cout<<"Close PDF OK"<<endl;
   #endif
   cout<<"=========== END OF RUN "<<RunNum<<" ============"<<endl;
 }

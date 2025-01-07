@@ -29,6 +29,8 @@
 //--  0=dEdx 1=Params 2=dEdx+Params ; change MAXpar to 17 !
 #define NN_MODE 3
 //#define VERBOSE
+#define ANALYZE_MERGED 1
+//#define NO_RAD_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
@@ -165,8 +167,11 @@ std::pair<double,double> Reject(TH1 *hp, TH1 *he, double thr) {
 }
 
 //---------------------------------------------------------------------
+#if ANALYZE_MERGED
+int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3, int nEntries) {
+#else
 int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_tst, TTree *bg_tst, int RunNum, int *rtw1, int *rtw3) {
-  
+#endif
    // Set object pointer
   gem_nhit = 0;
   gem_nclu = 0;
@@ -364,7 +369,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       if (parID->size()>0) {
         if(parID->at(0)==1) {
         type=1; ntrk_e++; Count("ntrk_e");
-        } else   if(parID->at(0)==0) {
+        } else  if(parID->at(0)==0) {
           type=0; ntrk_pi++; Count("ntrk_pi");
         }
       }
@@ -536,7 +541,11 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   int COMPACT=0;
   TCanvas *c1,*c0;
   char ctit[120];
-  sprintf(G_DIR,"mlpOutput/hd_rawdata_%06d.root",RunNum);
+  #if ANALYZE_MERGED
+    sprintf(G_DIR,"mlpOutput/fermiMerged/hd_rawdata_%06d_%06dEntries.root",RunNum,nEntries);
+  #else
+    sprintf(G_DIR,"mlpOutput/hd_rawdata_%06d.root",RunNum);
+  #endif
   sprintf(ctit,"File=%s",G_DIR);
   htitle(ctit);
   
@@ -610,10 +619,12 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
 } //--- End fill _trees() ---
 
 //==================================================================
-//
-//==================================================================
 
+#if ANALYZE_MERGED
+void trd_mlp_fermi(int RunNum, int nEntries) {
+#else
 void trd_mlp_fermi(int RunNum) {
+#endif
   
   hcount= new TH1D("hcount","Count",3,0,3);
   hcount->SetStats(0);   hcount->SetFillColor(38);   hcount->SetMinimum(1.);
@@ -628,7 +639,15 @@ void trd_mlp_fermi(int RunNum) {
   gStyle->SetTitleSize(0.05,"XY");
   
   char rootfile[256];
-  sprintf(rootfile,"RootOutput/trd_singleTrackHits_Run_%06d.root",RunNum);
+  #if ANALYZE_MERGED
+    #if NO_RAD_COMPARE
+      sprintf(rootfile,"RootOutput/fermiMerged/nrc_trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #else
+      sprintf(rootfile,"RootOutput/fermiMerged/trd_singleTrackHits_Run_%06d_%06dEntries.root",RunNum,nEntries);
+    #endif
+  #else
+    sprintf(rootfile,"RootOutput/trd_singleTrackHits_Run_%06d.root",RunNum);
+  #endif
   char basename[120];
   char *hd = strstr(rootfile,"/");
   strncpy(basename,&hd[1],120-1);   char *dot= strstr(basename,"."); *dot=0;
@@ -645,10 +664,14 @@ void trd_mlp_fermi(int RunNum) {
     cout<<"Input file "<<rootfile<<" does not exist - exiting..."<<endl;
     return;
   }
-  TTree *ttree_hits = (TTree *) inputFile->Get("gem_hits");
   
+  TTree *ttree_hits = (TTree *) inputFile->Get("gem_hits");
   char mlpname[128];
-  sprintf(mlpname,"mlpOutput/mlp_run%06d.root",RunNum);
+  #if ANALYZE_MERGED
+    sprintf(mlpname,"mlpOutput/fermiMerged/mlp_run%06d_%06dEntries.root",RunNum,nEntries);
+  #else
+    sprintf(mlpname,"mlpOutput/mlp_run%06d.root",RunNum);
+  #endif
   TFile* outputFile = new TFile(mlpname,"RECREATE");
   
   TTree *sig_tst = new TTree("sig_tst", "Filtered Events");
@@ -656,8 +679,11 @@ void trd_mlp_fermi(int RunNum) {
   TTree *signal = new TTree("signal", "Filtered Events");
   TTree *background = new TTree("background", "Filtered Events");
   TTree *simu = new TTree("simu", "Filtered Events");
-  
-  char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum);
+  #if ANALYZE_MERGED
+    char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_%06d",RunNum,nEntries);
+  #else
+    char ctit[120];   sprintf(ctit,"hd_rawdata_%06d_000",RunNum);
+  #endif
   dispe =  new TH2F("dispe","disp e; time ; X strip",300,-0.5,299.5,200,40.5,240.5);
   disppi = new TH2F("disppi","disp #pi; time ; X strip",300,-0.5,299.5,200,40.5,240.5);
   dispe->SetStats(0);
@@ -690,7 +716,11 @@ void trd_mlp_fermi(int RunNum) {
     cout << " Get trees signal=" << signal << endl;
   #endif
   int rtw1, rtw3;
+  #if ANALYZE_MERGED
+    int nn_mode = fill_trees(ttree_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3, nEntries);
+  #else
   int nn_mode = fill_trees(ttree_hits, signal, background, sig_tst, bg_tst, RunNum, &rtw1, &rtw3);
+  #endif
   
   #ifdef VERBOSE
     signal->Print();

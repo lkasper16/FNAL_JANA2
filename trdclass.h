@@ -9,12 +9,9 @@
 #define trdclass_h
 
 #include "TSystem.h"
-//#include <TROOT.h>
 #include <TChain.h>
-//#include <TFile.h>
-//#include <TH2.h>
 #include <sstream>
-
+#include <TStopwatch.h>
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -24,7 +21,6 @@
 #include <iostream>
 #include "TRandom3.h"
 #include "TCanvas.h"
-//#include "TSocket.h"
 #include "TMarker.h"
 #include "TMultiGraph.h"
 #include "TMultiLayerPerceptron.h"
@@ -33,25 +29,20 @@
 #include "TGraph.h"
 #include "TString.h"
 #include "TLatex.h"
-//#include "TStyle.h"
 #include "TLine.h"
 #include "TLinearFitter.h"
 #include "TGraphErrors.h"
-//#include <TError.h>
 #include "TF1.h"
 #include "TPaveStats.h"
 #include "TCutG.h"
 #include "TProfile.h"
 #include "TBox.h"
-
 #include "stdio.h"
 
+#define ANALYZE_MERGED 1
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
-//#include "vector"
-//#include "vector"
-//#include "vector"
 
 class trdclass {
 public :
@@ -263,8 +254,11 @@ public :
    TBranch        *b_gem_peak_width;   //!
    TBranch        *b_gem_peak_area;   //!
    TBranch        *b_gem_peak_real_pos;   //!
-   
-   trdclass(int RunNum, int MaxEvt, int FirstEvt);
+   #if ANALYZE_MERGED
+    trdclass(int RunNum, int nEntries, int nTrees, int MaxEvt, int FirstEvt);
+   #else
+    trdclass(int RunNum, int MaxEvt, int FirstEvt);
+   #endif
    virtual ~trdclass();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -281,9 +275,11 @@ public :
    //==================  Histograms ========================
    
    int RunNum;
+   int nEntries;
+   int nTrees;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
-   TH1F *h250_size;
+   //TH1F *h250_size;
    TH1D *hcount;
    TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
    TH1F *hCal_occ;
@@ -292,30 +288,19 @@ public :
    TH1F *hCal_sum_pi;
    #define  NCAL 7
    TH1F *hCal_adc[7];  //---  FADC250 channles 0 - 8
-   //TH2F *hCal_cor[7];      //---  FADC250 channles 0 - 8
-   //TH2F *hCal_trk[7];      //---  FADC250 channles 0 - 8
    TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
-   //TH1F *hCal_time[7];  //---  FADC250 channles 0 - 8
    TH2F *cal_el_evt, *cal_pi_evt;
    const int NCHER=3;
-   //TH1F *hCher_adc[3]; //-- FADC250 channels 13,14,15
    TH1F *hCher_u_adc;
-   //TH1F *hCher_din_adc;
    TH1F *hCher_dout_adc;
    TH1F *hCher_u_time;
-   //TH1F *hCher_din_time;
    TH1F *hCher_dout_time;
-   //TH1F *gem_trk_fit_integral;
    
    TH2F *hCCor_ud;
-   //TH2F *hCCCor_u;
-   //TH2F *hCCCor_dout;
-   //TH2F *srs_cal_corr, *srs_gemtrd_el, *srs_etrd_beam, *srs_gemtrd_pion, *srs_etrd_ratio;
    TH2F *multiTrackIndex, *multiTrackIndex_e, *multiTrackIndex_pi;
    TH2F *singleTrackIndex, *singleTrackIndex_e, *singleTrackIndex_pi;
    TH1F *hgemtrkr_peak_x, *hgemtrkr_peak_x_height, *hmmg1_peak_y, *hmmg1_peak_y_height, *hurw_peak_y, *hurw_peak_y_height, *hgemtrkr_peak_y, *hgemtrkr_peak_y_height;
    TH2F *hgemtrkr_peak_xy;
-   //TH2F *srs_gem_x, *srs_gem_dx, *srs_gem_dy;
    TH2F *srs_mmg1_x, *srs_mmg1_y;
    TH2F *srs_urw_x, *srs_urw_y;
    TH1F *hgemtrkr_max_xch, *hgemtrkr_max_ych, *hgemtrkr_max_xamp, *hgemtrkr_max_yamp;
@@ -323,15 +308,12 @@ public :
    
    TH1F *f125_el, *f125_el_max;
    TH1F *hClusterMaxdEdx_e, *hClusterTotaldEdx_e;
-   //TH1F *f125_el_chi2, *f125_el_fita, *mmg1_f125_el_chi2, *mmg1_f125_el_fita, *urw_f125_el_chi2, *urw_f125_el_fita, *mmg2_f125_el_chi2, *mmg2_f125_el_fita;
    TH1F *f125_pi, *f125_pi_max;
    TH1F *hClusterMaxdEdx_pi, *hClusterTotaldEdx_pi;
-   //TH1F *f125_pi_chi2, *f125_pi_fita, *mmg1_f125_pi_chi2, *mmg1_f125_pi_fita, *urw_f125_pi_chi2, *urw_f125_pi_fita, *mmg2_f125_pi_chi2, *mmg2_f125_pi_fita;
    TH2F *f125_el_amp2ds, *f125_el_raw;
    TH2F *f125_fit, *mmg1_f125_fit, *urw_f125_fit;
    TH2F *mmg1_f125_el_amp2ds, *urw_f125_el_amp2ds;
    TH2F *f125_pi_amp2ds, *f125_pi_raw;
-   //TH2F *f125_pi_fit, *mmg1_f125_pi_fit, *urw_f125_pi_fit, *mmg2_f125_pi_fit;
    TH2F *mmg1_f125_pi_amp2ds, *urw_f125_pi_amp2ds, *mmg2_f125_pi_amp2ds;
    //TH2F *f125_el_clu2d;
    //TH2F *f125_pi_clu2d;
@@ -350,8 +332,6 @@ public :
    
    TH2F *gem_mmg1_x;
    TH2F *gem_urw_x;
-   //TH2F *gem_mmg1_y;
-   //TH2F *gem_urw_y;
    TH2F *mmg1_urw_y;
    TH2F *mmg1_xy;
    TH2F *urw_xy;
@@ -365,10 +345,10 @@ public :
    int gem_nhit;
    int gem_nclu;
    std::vector <int> gem_xpos;
-   std::vector <int> gem_ypos;
+   //std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
-   std::vector <int> gem_trackID;
+   //std::vector <int> gem_trackID;
    std::vector <bool> gem_parID;
    std::vector <float> gem_zHist_vect;
    std::vector <float> clu_xpos;
@@ -386,7 +366,7 @@ public :
    std::vector <int> mmg1_ypos;
    std::vector <float> mmg1_zpos;
    std::vector <float> mmg1_dedx;
-   std::vector <int> mmg1_trackID;
+   //std::vector <int> mmg1_trackID;
    std::vector <bool> mmg1_parID;
    std::vector <float> mmg1_zHist_vect;
    TH1F *mmg1_zHist;
@@ -396,7 +376,7 @@ public :
    std::vector <int> urw_ypos;
    std::vector <float> urw_zpos;
    std::vector <float> urw_dedx;
-   std::vector <int> urw_trackID;
+   //std::vector <int> urw_trackID;
    std::vector <bool> urw_parID;
    std::vector <float> urw_zHist_vect;
    TH1F *urw_zHist;
@@ -406,11 +386,52 @@ public :
 #endif
 
 #ifdef trdclass_cxx
+
+
+#if ANALYZE_MERGED
+
+trdclass::trdclass(int RunNum_in, int nEntries_in=0, int nTrees_in=0, int MaxEvt_in=0,  int FirstEvt_in=0 ) : fChain(0)
+{
+  RunNum=RunNum_in;
+  nEntries=nEntries_in;
+  nTrees=nTrees_in;
+  MaxEvt=MaxEvt_in;
+  FirstEvt=FirstEvt_in;
+  
+  printf("====== trdclass constructor MERGED, last Run=%d ============\n",RunNum);
+  
+  TChain* chain;
+  TTree *tree=NULL;
+  char chainFiles[128];
+  
+  // if parameter tree is not specified (or zero), connect the file
+  // used to generate this class and read the Tree.
+  if (tree == 0) {
+    char FileName[128];
+    sprintf(FileName,"ROOT_MERGED/eventsChain%0d_%0dEntries_%01dTrees.root",RunNum,nEntries,nTrees);
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
+    if (!f || !f->IsOpen()) {
+      f = new TFile(FileName);
+      printf("---> Opening file = %s \n",FileName);
+    } else {
+      printf("---> File %s cannot be opened !\n",FileName);
+    }
+    f->GetObject("events",tree);
+   }
+   Init(tree);
+}
+
+  
+#else
+
 trdclass::trdclass(int RunNum_in, int MaxEvt_in=0, int FirstEvt_in=0) : fChain(0)
 {
   RunNum=RunNum_in;
   MaxEvt=MaxEvt_in;
   FirstEvt=FirstEvt_in;
+  
+  printf("========== trdclass constructor Run=%d  ============\n",RunNum);
+  
   TTree *tree=NULL;
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -419,13 +440,16 @@ trdclass::trdclass(int RunNum_in, int MaxEvt_in=0, int FirstEvt_in=0) : fChain(0
      sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
-         f = new TFile(FileName);
+        f = new TFile(FileName);
+        printf("---> Opening file = %s \n",FileName);
+      } else {
+        printf("---> File %s cannot be opened !\n",FileName);
       }
       f->GetObject("events",tree);
-
    }
    Init(tree);
 }
+#endif //--END ANALYZE_MERGED check
 
 trdclass::~trdclass()
 {
@@ -721,19 +745,9 @@ std::pair<Double_t, Double_t> trdclass::TrkFit(TH2F *h2_evt, TF1 &fx, const char
   Double_t chi2x = fx.GetChisquare();
   Double_t Ndfx = fx.GetNDF();
   Double_t integral = profx->Integral(profx->GetXaxis()->FindBin(100.), profx->GetXaxis()->FindBin(190.));
-  //Double_t p0x = fx.GetParameter(0);
-  //Double_t p1x = fx.GetParameter(1);
-  
-  //int kfit = 0;
-  ////if (chi2x/Ndfx<100 && chi2y/Ndfy<10 && Ndfx>10 && Ndfy>10) {
-  //if (chi2x/Ndfx<100 && Ndfx>10) {
-  //  kfit=1;
-  //}
   double chi2=chi2x/Ndfx; if (Ndfx<3) chi2=-chi2;
-  //return chi2;
   return std::make_pair(chi2, integral);
 }
-
 
 //==================================================================
 void trdclass::Count(const char *tit) {
