@@ -38,16 +38,16 @@ void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
 
 const int NDEslices = 10;
-const int NFixed = 7;
+const int NFixed = 8; // -- 7;
 
 #if    NN_MODE == 0
-const int MAXpar = NDEslices; //10; 17
+const int MAXpar = NDEslices;
 #elif  NN_MODE == 1
-const int MAXpar = NFixed; //10; 17
+const int MAXpar = NFixed;
 #elif  NN_MODE == 2
-const int MAXpar = NFixed+NDEslices; //10; 17
+const int MAXpar = NFixed+NDEslices;
 #elif  NN_MODE == 3
-const int MAXpar = NFixed+NDEslices; //10; 17
+const int MAXpar = NFixed+NDEslices;
 #else
   ne rabotaet !!!!
 #endif
@@ -488,17 +488,17 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     } else if (NN_MODE==3) {  //--  fermi dEdx(amp) + Par
       if (MAXpar<(NFixed+NDE)) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
       Par[0]=amax2/Ascale/5.;
-      Par[1]=khit;  // -- clu_nhits*5;
-      Par[2]=xaver2; // -- xaver2*8;
-      Par[3]=etot/Escale/10.; // -- atot/Escale/50.;
-      Par[4]=etrzon/Escale/10.; // -- etrzon/Escale/10.;
+      Par[1]=clu_nhits*5; // -- khit;
+      Par[2]=xaver2*8; // -- xaver2;
+      Par[3]=atot/Escale/50.; // -- etot/Escale/10.;
+      Par[4]=etrzon/Escale/50.; // -- etrzon/Escale/10.;
       Par[5]=NTR;
-      Par[6]=atot/1000.; // -- maxwidthc*5.;
-      //Par[7]=max_dedxc/Ascale/5.;
+      Par[6]=max_widthc*5.; // -- atot/1000.;
+      Par[7]=max_dedxc/Ascale/5.; ///////////
       int np=NDE;
-      double coef=Ascale*3.;  // -- coef=Ascale/2.;
+      double coef=Ascale*3.;  // -- coef=Ascale/2.; // -- =Ascale*3.;
       for (int ip=0; ip<np; ip++) {
-        Par[ip+NFixed]=dEdx[ip]/coef; // -- =dEdx[NDE-1-ip]/coef;
+        Par[ip+NFixed]=dEdx[NDE-1-ip]/coef; // -- Par[ip+NFixed]=dEdx[ip]/coef;
       }
     } else {   //-- dEdx only
       int np=min(MAXpar,NDE);
@@ -748,7 +748,7 @@ void trd_mlp_fermi(int RunNum) {
   // interested  by high pt events.
   // The datasets used here are the same as the default ones.
   //----------------------------
-  const int NPAR=MAXpar; // MAXpar=10
+  const int NPAR=MAXpar;
   string INL, NNcfg;
   for (int il=0; il<NPAR; il++) {
     stringstream ss;  ss << il;  string si = ss.str();
@@ -777,7 +777,11 @@ void trd_mlp_fermi(int RunNum) {
   //=====            Train                                             ========
   //===========================================================================
   mlpa_canvas->cd(ipad++);
-  mlp->Train(ntrain, "text,graph,update=10,current");
+  #ifdef VERBOSE
+    mlp->Train(ntrain, "text,graph,update=10,current");
+  #else
+    mlp->Train(ntrain, "graph,update=10,current");
+  #endif
   mlp->Export("trd_ann","C++");
   //-------------------------------
   TMLPAnalyzer ana(mlp);
