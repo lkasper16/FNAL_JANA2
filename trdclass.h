@@ -39,7 +39,7 @@
 #include "TBox.h"
 #include "stdio.h"
 
-#define ANALYZE_MERGED 1
+//#define ANALYZE_MERGED 1
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -287,8 +287,10 @@ public :
    TH1F *hCal_sum_el;
    TH1F *hCal_sum_pi;
    #define  NCAL 7
-   TH1F *hCal_adc[7];  //---  FADC250 channles 0 - 8
-   TH2F *hCal_cal[7];      //---  FADC250 channles 0 - 8
+   TH1F *hCal_adc[7];   //---  FADC250 channles 0 - 8
+   TH2F *hCal_cal[7];   //---  FADC250 channles 0 - 8
+   TH2F *hCal_cor[7];
+   TH2F *hCal_trk[7];
    TH2F *cal_el_evt, *cal_pi_evt;
    const int NCHER=3;
    TH1F *hCher_u_adc;
@@ -303,6 +305,7 @@ public :
    TH2F *hgemtrkr_peak_xy;
    TH2F *srs_mmg1_x, *srs_mmg1_y;
    TH2F *srs_urw_x, *srs_urw_y;
+   TH2F *srs_cal_corr, *urw_cal_corr, *mmg1_cal_corr, *srs_gemtrd_el, *srs_gemtrd_pion, *srs_etrd_beam, *hradshadow, *hradshadow_u, *hradshadow_m, *srs_gem_x, *srs_gem_xy, *mmg1_srs_xy, *urw_srs_xy;
    TH1F *hgemtrkr_max_xch, *hgemtrkr_max_ych, *hgemtrkr_max_xamp, *hgemtrkr_max_yamp;
    TH2F *hgemtrkr_max_xy;
    
@@ -332,10 +335,11 @@ public :
    
    TH2F *gem_mmg1_x;
    TH2F *gem_urw_x;
+   TH2F *mmg1_urw_x;
    TH2F *mmg1_urw_y;
    TH2F *mmg1_xy;
    TH2F *urw_xy;
-   
+   TH2F *srs_mmg1_xy, *srs_urw_xy;
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
    TTree *EVENT_VECT_MMG1;
