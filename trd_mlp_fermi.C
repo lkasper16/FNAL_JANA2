@@ -335,10 +335,10 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       case 3197:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       case 3198:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       case 3199:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
-      case 3200:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3200:   tw1=107; tw2=150; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       
       case 3201:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
-      case 3202:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
+      case 3202:   tw1=107; tw2=150; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
       
       case 3203:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
       case 3204:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
