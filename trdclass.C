@@ -175,20 +175,23 @@ void trdclass::Loop() {
   f125_pi_raw->SetStats(0); f125_pi_raw->SetMinimum(GEM_THR); f125_pi_raw->SetMaximum(1000.);
   
   //============ Calorimeter & Cherenkovs Plots ===============
-  hCal_occ = new TH1F("hCal_occ"," Calorimeter Occupancy ; Cal. Cell Number ",8,-0.5,7.5);  HistList->Add(hCal_occ);
-  hCal_sum = new TH1F("hCal_sum"," Calorimeter Sum (GeV)",100.,0.,25.); HistList->Add(hCal_sum);
-  hCal_sum_el = new TH1F("hCal_sum_el"," Calorimeter Sum for electrons",100,0.,25.); HistList->Add(hCal_sum_el);
-  hCal_sum_pi = new TH1F("hCal_sum_pi"," Calorimeter Sum for pions",100,0.,25.); HistList->Add(hCal_sum_pi);
+  hCal_occ = new TH1F("hCal_occ","Calorimeter Occupancy; Cal. Cell Number",8,-0.5,7.5);  HistList->Add(hCal_occ);
+  hCal_sum = new TH1F("hCal_sum","Calorimeter Sum (GeV); Total Deposited Energy [GeV]",125.,-0.5,24.5); HistList->Add(hCal_sum);
+  hCal_sum_el = new TH1F("hCal_sum_el","Calorimeter Sum for electrons; Electron Energy Deposit [GeV]",125,-0.5,24.5); HistList->Add(hCal_sum_el);
+  hCal_sum_pi = new TH1F("hCal_sum_pi","Calorimeter Sum for pions; Pion Energy Deposit [GeV]",125,-0.5,24.5); HistList->Add(hCal_sum_pi);
   for (int cc=0; cc<NCAL; cc++) {
+    //double CellSum[cc]=0;
     char hName[128];  sprintf(hName,"hCal_adc%d",cc);
-    char hTitle[128]; sprintf(hTitle,"Calorimeter ADC, cell %d",cc);
+    char hTitle[128]; sprintf(hTitle,"Calorimeter ADC Distribution, Cell %d",cc);
     hCal_adc[cc] = new TH1F(hName,hTitle,200,-0.5,4095.5); HistList->Add(hCal_adc[cc]);
-    //sprintf(hName,"hCal_cor%d",cc);  sprintf(hTitle,"Correlation GEMTRD X & CAL, cell %d",cc);
+    //sprintf(hName,"hCal_cor%d",cc);  sprintf(hTitle,"Correlation GEMTRD X & CAL, Cell %d",cc);
     //hCal_cor[cc] = new TH2F(hName,hTitle,128,-0.4,102.,25,-0.5,24.5);  hCal_cor[cc]->SetMaximum(12000.);  HistList->Add(hCal_cor[cc]);
-    sprintf(hName,"hCal_trk%d",cc);  sprintf(hTitle,"Correlation GEMTRKR & CAL, cell %d",cc);
-    hCal_trk[cc] = new TH2F(hName,hTitle,128,-0.4,102.,128,-0.4,102.); hCal_trk[cc]->SetMaximum(4.);  HistList->Add(hCal_trk[cc]);
-    //sprintf(hName,"hCal_cal%d",cc);  sprintf(hTitle,"Calorimeter ADC Calib, cell %d",cc);
-    //hCal_cal[cc] = new TH2F(hName,hTitle,10,-0.5,4095.5,10,-5.,15.);  HistList->Add(hCal_cal[cc]);
+    //sprintf(hName,"hCal_trk%d",cc);  sprintf(hTitle,"Correlation GEMTRKR & CAL, Cell %d",cc);
+    //hCal_trk[cc] = new TH2F(hName,hTitle,128,-0.4,102.,128,-0.4,102.); hCal_trk[cc]->SetMaximum(4.);  HistList->Add(hCal_trk[cc]);
+    sprintf(hName,"hCal_cal%d",cc);  sprintf(hTitle,"Calorimeter ADC Calib, Cell %d; Cell Energy; Distance from Cell Center [mm]",cc);
+    hCal_cal[cc] = new TH2F(hName,hTitle,112,-1.5,12.5,40,-0.4,15.6);  HistList->Add(hCal_cal[cc]);
+    sprintf(hName,"hCal_cell_sum%d",cc);  sprintf(hTitle,"Calorimeter Sum (GeV), Cell %d; Cell Total Energy [GeV]",cc);
+    hCal_cell_sum[cc] = new TH1F(hName,hTitle,81,-2.5,24.5);  HistList->Add(hCal_cell_sum[cc]);
   }
   //h250_size = new TH1F("h250_size"," fa250 Raw data size",4096,0.5,4095.5); HistList->Add(h250_size);
   cal_el_evt = new TH2F("cal_el_evt","Calorimeter Electron Event ; X ; Y ",3,-0.5,2.5,3,-0.5,2.5); HistList->Add(cal_el_evt);
@@ -354,8 +357,8 @@ void trdclass::Loop() {
   if  (3255 <= RunNum && RunNum <= 3261) {    Ebeam=120.;  }   // protons
   if  (3272 <= RunNum && RunNum <= 3288) {    Ebeam=10.;   }   // NEG 10 GeV
   if  (3289 <= RunNum && RunNum <= 3290) {    Ebeam=120.;  }   // protons
-  double Ebeam_el=0.2*Ebeam;
-  double Ebeam_pi=0.1*Ebeam;
+  double Ebeam_el= 0.35*Ebeam; /////0.2*Ebeam;
+  double Ebeam_pi= 0.1*Ebeam; /////0.1*Ebeam;
   
   //=======================================================
   //     Create TTrees of Single Track Evt Info for NN
@@ -506,6 +509,7 @@ void trdclass::Loop() {
     bool electron=false;
     bool pion=false;
     double Ecal[NCAL]; for (int i=0; i<NCAL; i++) Ecal[i]=0;
+    double CellSum[NCAL]; for (int i=0; i<NCAL; i++) CellSum[i]=0;
     
     for (ULong64_t i=0; i<f250_wraw_count; i++) {
       int fadc_chan = f250_wraw_channel->at(i);
@@ -534,10 +538,24 @@ void trdclass::Loop() {
           tmax=si;
         }
       } //--  end of fADC 250 samples loop
+      double gaus_mean=1.;
       if (fadc_chan<NCAL) { //-- Cal Energy Sum
         Ecal[fadc_chan]=fcal[fadc_chan]->Eval(amax);
+        //-- NEW FINER CALIBRATION
+        switch (fadc_chan) {
+        case (0): gaus_mean=9.66; break;
+        case (1): gaus_mean=9.66; break;
+        case (2): gaus_mean=9.66; break;
+        case (3): gaus_mean=9.87; break;
+        case (4): gaus_mean=8.83; break;
+        case (5): gaus_mean=8.93; break;
+        case (6): gaus_mean=9.66; break;
+        }
+        Ecal[fadc_chan] = Ecal[fadc_chan]*(9.66/gaus_mean);
         hCal_adc[fadc_chan]->Fill(amax);
         CalSum+=Ecal[fadc_chan];
+        CellSum[fadc_chan]+=Ecal[fadc_chan];
+        
       } else { // Cherenkov
         if (fadc_chan==13) { if(amax>130)electron_chUp=true; hCher_u_adc->Fill(amax);  hCher_u_time->Fill(tmax); Ch_u=amax; Count("eCHR_Up"); }
         if (fadc_chan==15) { if(amax>300)electron_ch=true; hCher_dout_adc->Fill(amax);  hCher_dout_time->Fill(tmax); Ch_out=amax; Count("eCHR"); }
@@ -564,6 +582,10 @@ void trdclass::Loop() {
       hCal_sum_el->Fill(CalSum);
     } else if (pion) {
       hCal_sum_pi->Fill(CalSum);
+    }
+    
+    for (int cc=0; cc<NCAL; cc++) {
+      if (CellSum[cc]>0.) hCal_cell_sum[cc]->Fill(CellSum[cc]);
     }
     
     if (!electron && !pion) continue;
@@ -1382,26 +1404,53 @@ void trdclass::Loop() {
           if (urw_amp_max>0.) urw_f125_pi_max->Fill(urw_amp_max);
         }
         
+        double x_min=0., x_max=0., x_center=0., y_min=0., y_max=0., y_center=0.; 
+        double cell_dx[NCAL]; for (int i=0; i<NCAL; i++) cell_dx[i]=0;
         for (int cc=0; cc<NCAL; cc++) {
-        if (Ecal[cc]>0.8*Ebeam) {
-          for (ULong64_t j=0; j<gt_idx_y; j++) {
-            for (ULong64_t k=0; k<gt_idx_x; k++) {
-              srs_cal_corr->Fill(gemtrkr_peak_pos_x[k], gemtrkr_peak_pos_y[j]);
-              hCal_trk[cc]->Fill(gemtrkr_peak_pos_x[k], gemtrkr_peak_pos_y[j]);
-            }
+         
+        //-- NEW -- Calorimeter cell positions in SRS coord. sys
+          switch(cc) {
+          case 0: x_min=23; x_max=41; x_center=33; y_min=4; y_max=22; y_center=13;  break;
+          case 1: x_min=44; x_max=64; x_center=54; y_min=4; y_max=22; y_center=13;  break;
+          case 2: x_min=66; x_max=84; x_center=75; y_min=4; y_max=22; y_center=13;  break;
+          case 3: x_min=23; x_max=41; x_center=33; y_min=23; y_max=43; y_center=33;  break;
+          case 4: x_min=44; x_max=64; x_center=54; y_min=23; y_max=43; y_center=33;  break;
+          case 5: x_min=66; x_max=84; x_center=75; y_min=24; y_max=42; y_center=33;  break;
+          case 6: x_min=44; x_max=64; x_center=54; y_min=44; y_max=64; y_center=54;  break;
           }
-          for (ULong64_t j=0; j<urw_idx_y; j++) {
-            for (ULong64_t k=0; k<urw_idx_x; k++) {
-              urw_cal_corr->Fill(urw_pos_x[k], urw_peak_pos_y[j]);
+          
+            for (ULong64_t j=0; j<urw_idx_y; j++) {
+              if (urw_peak_pos_y[j]<=y_max && urw_peak_pos_y[j]>=y_min) {
+                for (ULong64_t k=0; k<urw_idx_x; k++) {
+                  if (urw_pos_x[k]<=x_max && urw_pos_x[k]>=x_min) {
+                    cell_dx[cc] = sqrt((urw_pos_x[k]-x_center)*(urw_pos_x[k]-x_center) + (urw_peak_pos_y[j]-y_center)*(urw_peak_pos_y[j]-y_center));
+                    //hCal_cal[cc]->Fill(Ecal[cc], cell_dx[cc]);
+                    hCal_cal[cc]->Fill(CalSum, cell_dx[cc]);
+                  }
+                }
+              }    
             }
-          }
-          for (ULong64_t j=0; j<mmg1_idx_y; j++) {
-            for (ULong64_t k=0; k<mmg1_idx_x; k++) {
-              mmg1_cal_corr->Fill(mmg1_pos_x[k], mmg1_peak_pos_y[j]);
+          //-- End switch
+          
+          if (Ecal[cc]>0.8*Ebeam) {
+            for (ULong64_t j=0; j<gt_idx_y; j++) {
+              for (ULong64_t k=0; k<gt_idx_x; k++) {
+                srs_cal_corr->Fill(gemtrkr_peak_pos_x[k], gemtrkr_peak_pos_y[j]);
+                //hCal_trk[cc]->Fill(gemtrkr_peak_pos_x[k], gemtrkr_peak_pos_y[j]);
+              }
+            }
+            for (ULong64_t j=0; j<urw_idx_y; j++) {
+              for (ULong64_t k=0; k<urw_idx_x; k++) {
+                urw_cal_corr->Fill(urw_pos_x[k], urw_peak_pos_y[j]);
+              }
+            }
+            for (ULong64_t j=0; j<mmg1_idx_y; j++) {
+              for (ULong64_t k=0; k<mmg1_idx_x; k++) {
+                mmg1_cal_corr->Fill(mmg1_pos_x[k], mmg1_peak_pos_y[j]);
+              }
             }
           }
         }
-      } 
         
         for (ULong64_t i=0; i<gem_idx_x; i++) {
           if (gem_pos_x[i]>=0.) {
@@ -1649,7 +1698,7 @@ void trdclass::Loop() {
     fbox.SetLineWidth(1);
     
     //--------------------- new page --------------------
-    htitle(" Cherenkov (Fadc250)  ");   //if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" FADC250 - Cherenkovs & Calorimeter ");   //if (!COMPACT) cc=NextPlot(0,0);
     nxd=2; nyd=5;
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();  hcount->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();  hCher_u_adc->Draw();
@@ -1660,7 +1709,7 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();  hCal_sum_pi->Draw();
     
     //--------------------- new page --------------------
-    htitle(" Calorimeter ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" Calorimeter Cell Distributions ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);                      hCal_occ->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();   hCal_adc[6]->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();   hCal_adc[3]->Draw();
@@ -1671,7 +1720,19 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();   hCal_adc[2]->Draw();
     
     //--------------------- new page --------------------
-    htitle(" Calorimeter GEMTRD Correlation ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" Calorimeter Cell Calibrations ");   if (!COMPACT) cc=NextPlot(0,0);
+    for (int i=0; i<NCAL; i++) {
+      cc=NextPlot(nxd,nyd);   hCal_cal[i]->Draw("colz");
+    }
+    
+    //--------------------- new page --------------------
+    htitle(" Calorimeter Cell Energy Sums ");   if (!COMPACT) cc=NextPlot(0,0);
+    for (int i=0; i<NCAL; i++) {
+      cc=NextPlot(nxd,nyd);   gPad->SetLogy();  hCal_cell_sum[i]->Draw();
+    }
+    
+    //--------------------- new page --------------------
+    htitle(" SRS Correlations & Distributions ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);   hgemtrkr_peak_x->Draw();
     cc=NextPlot(nxd,nyd);   hgemtrkr_peak_x_height->Draw();
     cc=NextPlot(nxd,nyd);   hgemtrkr_peak_y->Draw();
@@ -1685,13 +1746,13 @@ void trdclass::Loop() {
     //}
     
     //--------------------- new page --------------------
-    htitle(" Calorimeter GEMTRKR Correlation ");   if (!COMPACT) cc=NextPlot(0,0);
+    /*htitle(" Calorimeter & GEMTRKR Correlation ");   if (!COMPACT) cc=NextPlot(0,0);
     for (int i=0; i<NCAL; i++) {
       cc=NextPlot(nxd,nyd);   hCal_trk[i]->Draw("colz");
     }
-    
+    */
     //--------------------- new page --------------------
-    htitle(" Hit Mapping Correlations ");   if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" Hit Mapping (2D) Correlations ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);  mmg1_xy->Draw("colz");
     cc=NextPlot(nxd,nyd);  urw_xy->Draw("colz");
     cc=NextPlot(nxd,nyd);  srs_urw_xy->Draw("colz");
@@ -1733,7 +1794,7 @@ void trdclass::Loop() {
     }    
     
     //--------------------- new page --------------------
-    htitle("  TRD Prototype (Fadc125) Amplitudes ");    if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" TRD Prototype (Fadc125) Amplitudes ");    if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    f125_el->Draw();
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    f125_pi->Draw();
     cc=NextPlot(nxd,nyd);   f125_el_max->Draw();
@@ -1744,7 +1805,7 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);   gPad->SetLogy();    if (RunNum<3262 && RunNum>3147) {urw_f125_pi->Draw();}
     
     //--------------------- new page --------------------
-    htitle("  TRD Prototype (Fadc125) Amplitudes - 2D");    if (!COMPACT) cc=NextPlot(0,0);
+    htitle(" TRD Prototype (Fadc125) Amplitudes - 2D");    if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);   f125_el_amp2ds->Draw("colz");
     cc=NextPlot(nxd,nyd);   f125_pi_amp2ds->Draw("colz");
     cc=NextPlot(nxd,nyd);   mmg1_f125_el_amp2ds->Draw("colz");

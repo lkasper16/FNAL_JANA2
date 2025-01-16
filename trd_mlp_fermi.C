@@ -30,7 +30,7 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
-//#define NO_RAD_COMPARE 1
+#define NO_RAD_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
@@ -341,7 +341,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       case 3202:   tw1=107; tw2=150; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
       
       case 3203:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
-      case 3204:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
+      case 3204:   tw1=107; tw2=150; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
       
       case 3287:   tw1=108; tw2=153; tw3=184; e_chan1=90;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
       case 3288:   tw1=108; tw2=153; tw3=184; e_chan1=90;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)

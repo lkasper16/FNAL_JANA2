@@ -291,6 +291,7 @@ public :
    TH2F *hCal_cal[7];   //---  FADC250 channles 0 - 8
    TH2F *hCal_cor[7];
    TH2F *hCal_trk[7];
+   TH1F *hCal_cell_sum[7];
    TH2F *cal_el_evt, *cal_pi_evt;
    const int NCHER=3;
    TH1F *hCher_u_adc;
