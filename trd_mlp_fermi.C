@@ -213,22 +213,22 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   fChain->SetBranchAddress("widthc_max", &widthc_max, &b_widthc_max);
   
   //========================================
-  TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",100,0.5,300.5,240,-0.5,239.5);
-  TH2F *hits2d_pi = new TH2F("hits2d_pi","Pion dEdx in Time;Time (*8ns);Channel",100,0.5,300.5,240,-0.5,239.5);
+  TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
+  TH2F *hits2d_pi = new TH2F("hits2d_pi","Pion dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   
-  TH2F *aver2d_e = new TH2F("aver2d_e","aver-rms electrons",100,0.,240.,100,0.,100.);
-  TH2F *aver2d_pi = new TH2F("aver2d_pi","aver-rms pions",100,0.,240.,100,0.,100.);
+  TH2F *aver2d_e = new TH2F("aver2d_e","aver-rms electrons",120,0.,240.,100,0.,100.);
+  TH2F *aver2d_pi = new TH2F("aver2d_pi","aver-rms pions",120,0.,240.,100,0.,100.);
   
   TH1F *hNhits  = new TH1F("hNhits","Hits in GEMTRD",100,-0.5,99.5);  hNhits->SetStats(0);
   TH1F *hNclu  = new TH1F("hNclu","",70,-0.5,69.5);  hNclu->SetStats(0);
   
   TH1F *helectron_maxamp = new TH1F("helectron_maxamp","Electron max amp",200,0.5,4000.5);
   TH1F *hpion_maxamp = new TH1F("hpion_maxamp","Pion max amp",200,0.5,4000.5);
-  TH1F *helectron_dedxtotal = new TH1F("helectron_dedxtotal","Electron e_total",600,0.5,100000.5);
-  TH1F *hpion_dedxtotal = new TH1F("hpion_dedxtotal","Pion e_total",600,0.5,100000.5);
+  TH1F *helectron_dedxtotal = new TH1F("helectron_dedxtotal","Electron e_total",500,0.5,50000.5);
+  TH1F *hpion_dedxtotal = new TH1F("hpion_dedxtotal","Pion e_total",500,0.5,50000.5);
   
-  TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time;Time (*8ns)",330,0.5,330.5);
-  TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time;Time (*8ns)",330,0.5,330.5);
+  TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time;Time (*8ns)",250,0.5,250.5);
+  TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time;Time (*8ns)",250,0.5,250.5);
   
   TH1F *par_e[MAXpar];
   TH1F *par_pi[MAXpar];
@@ -335,13 +335,13 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       case 3197:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       case 3198:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       case 3199:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
-      case 3200:   tw1=107; tw2=150; tw3=186; e_chan1=94;   e_chan2=144;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3200:   tw1=108; tw2=134; tw3=182; e_chan1=94;   e_chan2=146;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       
       case 3201:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
-      case 3202:   tw1=107; tw2=150; tw3=186; e_chan1=94;   e_chan2=144;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
+      case 3202:   tw1=108; tw2=132; tw3=182; e_chan1=94;   e_chan2=146;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
       
       case 3203:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
-      case 3204:   tw1=107; tw2=150; tw3=186; e_chan1=94;   e_chan2=144;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
+      case 3204:   tw1=108; tw2=132; tw3=182; e_chan1=94;   e_chan2=146;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
       
       case 3287:   tw1=108; tw2=153; tw3=184; e_chan1=90;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
       case 3288:   tw1=108; tw2=153; tw3=184; e_chan1=90;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
@@ -550,12 +550,12 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   htitle(ctit);
   
   c1=NextPlot(nxd,nyd);   hits2d_e->Draw("colz");
-  TLine *lin1 = new TLine(0.,e_chan1,300.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,300.,e_chan2);
+  TLine *lin1 = new TLine(0.,e_chan1,250.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,250.,e_chan2);
   lin1->SetLineColor(kRed);   lin2->SetLineColor(kRed);   lin1->Draw();  lin2->Draw();
   gPad->Modified(); gPad->Update();
   
   c1=NextPlot(nxd,nyd);   hits2d_pi->Draw("colz");
-  TLine *lin1p = new TLine(0.,pi_chan1-1,300.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2-1,300.,pi_chan2);
+  TLine *lin1p = new TLine(0.,pi_chan1,250.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2,250.,pi_chan2);
   lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();
   gPad->Modified(); gPad->Update();
   
@@ -800,12 +800,12 @@ void trd_mlp_fermi(int RunNum) {
   // This will give approx. the same result as DrawNetwork.
   // All entries are used, while DrawNetwork focuses on
   // the test sample. Also the xaxis range is manually set.
-  TH1F *bg = new TH1F("bgh", "NN bg output, single mod",115, -0.05, 1.1);
-  TH1F *sig = new TH1F("sigh", "NN sig output, single mod",115, -0.05, 1.1);
+  TH1F *bg = new TH1F("bgh", "NN bg output, single mod",120, -0.1, 1.1);
+  TH1F *sig = new TH1F("sigh", "NN sig output, single mod",120, -0.1, 1.1);
   
   char htit[120]; sprintf(htit,"NN output, Nmod=%d",Nmod);
-  TH1F *bgm = new TH1F("bgm",htit, 115, -.05, 1.1);
-  TH1F *sigm = new TH1F("sigm",htit,115, -.05, 1.1);
+  TH1F *bgm = new TH1F("bgm",htit, 120, -0.1, 1.1);
+  TH1F *sigm = new TH1F("sigm",htit,120, -0.1, 1.1);
   TH1F *hrejection_errors = new TH1F("hrejection_errors","Rej Factor Relative Error; Electron Purity %; Rejection Factor",6,62.5,92.5); hrejection_errors->SetStats(0);
   
   //---------------------------------------------------------------------
@@ -868,11 +868,11 @@ void trd_mlp_fermi(int RunNum) {
     }
     sig->Fill(out);
     
+    #ifdef VERBOSE
     if (tout1<out && out<tout2) {
-      #ifdef VERBOSE
         for (int ip=0; ip<NPAR; ip++) printf(" %f ",params[ip]); printf(" type = %d out=%f iev=%d \n",type,out,ievent);
-      #endif
     }
+    #endif
     if (out<0.1 && DISP>1 ) {
       #ifdef VERBOSE
         printf(" e low : out=%f type=%d iev=%d par=%5.1f %5.0f  %5.1f %5.1f %5.1f  \n",out,type,ievent,Par[0],Par[1],Par[2],Par[3],Par[4]);
@@ -926,7 +926,7 @@ void trd_mlp_fermi(int RunNum) {
   sig->SetStats(0);
   bg->Draw();
   std::pair<double,double> rejLine90 = Reject(bg,sig,0.9);
-  std::pair<double,double> rejLine70 = Reject(bg, sig, 0.7);
+  std::pair<double,double> rejLine70 = Reject(bg,sig,0.7);
   TLine *line90 = new TLine(rejLine90.first,0,rejLine90.first,bg->GetMaximum()+1);
   TLine *line70 = new TLine(rejLine70.first,0,rejLine70.first,bg->GetMaximum()+1);
   line90->SetLineStyle(kDashed);   line70->SetLineStyle(kDashed);
@@ -1020,7 +1020,7 @@ void trd_mlp_fermi(int RunNum) {
   //---------------------------------------------
   mlpa_canvas->cd(1);
   stringstream ss;
-  ss << "Nmod=" << 1 << ", e=70%, #pi=" << std::fixed << std::setprecision(2) << rej70.first*100. << "%, Rej=" << 1./rej70.first ;  string str = ss.str();
+  ss << "Nmod=" << 1 << ", e=70%, Eff #pi=" << std::fixed << std::setprecision(2) << rej70.first*100. << "%, Rej=" << 1./rej70.first ;  string str = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str.data());
   //--
   ss.str("");  ss.clear();
