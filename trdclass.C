@@ -180,7 +180,6 @@ void trdclass::Loop() {
   hCal_sum_el = new TH1F("hCal_sum_el","Calorimeter Sum for electrons; Electron Energy Deposit [GeV]",125,-0.5,24.5); HistList->Add(hCal_sum_el);
   hCal_sum_pi = new TH1F("hCal_sum_pi","Calorimeter Sum for pions; Pion Energy Deposit [GeV]",125,-0.5,24.5); HistList->Add(hCal_sum_pi);
   for (int cc=0; cc<NCAL; cc++) {
-    //double CellSum[cc]=0;
     char hName[128];  sprintf(hName,"hCal_adc%d",cc);
     char hTitle[128]; sprintf(hTitle,"Calorimeter ADC Distribution, Cell %d",cc);
     hCal_adc[cc] = new TH1F(hName,hTitle,200,-0.5,4095.5); HistList->Add(hCal_adc[cc]);
@@ -510,6 +509,7 @@ void trdclass::Loop() {
     bool pion=false;
     double Ecal[NCAL]; for (int i=0; i<NCAL; i++) Ecal[i]=0;
     double CellSum[NCAL]; for (int i=0; i<NCAL; i++) CellSum[i]=0;
+    double maxDeposit=0.;
     
     for (ULong64_t i=0; i<f250_wraw_count; i++) {
       int fadc_chan = f250_wraw_channel->at(i);
@@ -555,6 +555,7 @@ void trdclass::Loop() {
         hCal_adc[fadc_chan]->Fill(amax);
         CalSum+=Ecal[fadc_chan];
         CellSum[fadc_chan]+=Ecal[fadc_chan];
+        //if (CellSum[fadc_chan]>maxDeposit) maxDeposit = CellSum[fadc_chan];
         
       } else { // Cherenkov
         if (fadc_chan==13) { if(amax>130)electron_chUp=true; hCher_u_adc->Fill(amax);  hCher_u_time->Fill(tmax); Ch_u=amax; Count("eCHR_Up"); }
@@ -565,8 +566,17 @@ void trdclass::Loop() {
     //=======================================================
     //                   S e t    P I D
     //=======================================================
+    //if (CalSum>0.) {Count("calSum");}
+    //if (CalSum>=Ebeam_el) {Count("calSumEl");}
+    //if (CalSum<Ebeam_pi && CalSum>0.) {Count("calSumPi");}
+    //if (Ecal[4]>0.) Ebeam_el=0.5*Ebeam;
+    for (int cc=0; cc<NCAL; cc++) {
+      if (CellSum[cc]>0.) hCal_cell_sum[cc]->Fill(CellSum[cc]);
+      if (Ecal[cc]>maxDeposit) maxDeposit=Ecal[cc];
+    }
+    if (maxDeposit==Ecal[4]) { Ebeam_el=0.5*Ebeam; } else { Ebeam_el=0.35*Ebeam; }
     if (CalSum>0.) {Count("calSum");}
-    if (CalSum>Ebeam_el) {Count("calSumEl");}
+    if (CalSum>=Ebeam_el) {Count("calSumEl");}
     if (CalSum<Ebeam_pi && CalSum>0.) {Count("calSumPi");}
     
     //--- CHERENKOV ONLY PID
@@ -575,18 +585,18 @@ void trdclass::Loop() {
 
     //--- CHERENKOV & CALORIMETER PID
     if (electron_ch  && CalSum>Ebeam_el) { electron=true;  Count("elCC"); el_CC++;}
-    if (!electron_ch && CalSum<Ebeam_pi) { pion=true;  Count("piCC"); pi_CC++;}
+    if (!electron_ch && CalSum<=Ebeam_pi) { pion=true;  Count("piCC"); pi_CC++;}
     
-    if (CalSum>0.) hCal_sum->Fill(CalSum);
+    if (electron || pion) hCal_sum->Fill(CalSum);
     if (electron) {
       hCal_sum_el->Fill(CalSum);
     } else if (pion) {
       hCal_sum_pi->Fill(CalSum);
     }
     
-    for (int cc=0; cc<NCAL; cc++) {
-      if (CellSum[cc]>0.) hCal_cell_sum[cc]->Fill(CellSum[cc]);
-    }
+    //for (int cc=0; cc<NCAL; cc++) {
+    //  if (CellSum[cc]>0.) hCal_cell_sum[cc]->Fill(CellSum[cc]);
+    //}
     
     if (!electron && !pion) continue;
     
