@@ -305,6 +305,7 @@ public :
    TH2F *singleTrackIndex, *singleTrackIndex_e, *singleTrackIndex_pi;
    TH1F *hgemtrkr_peak_x, *hgemtrkr_peak_x_height, *hmmg1_peak_y, *hmmg1_peak_y_height, *hurw_peak_y, *hurw_peak_y_height, *hgemtrkr_peak_y, *hgemtrkr_peak_y_height;
    TH2F *hgemtrkr_peak_xy;
+   TH1F *hmmg1_peak_y_height_el, *hmmg1_peak_y_height_pi, *hurw_peak_y_height_el, *hurw_peak_y_height_pi;
    TH2F *srs_mmg1_x, *srs_mmg1_y;
    TH2F *srs_urw_x, *srs_urw_y;
    TH2F *gem_urw_corr, *srs_cal_corr, *urw_cal_corr, *mmg1_cal_corr, *srs_gemtrd_el, *srs_gemtrd_pion, *srs_etrd_beam, *hradshadow, *hradshadow_u, *hradshadow_ux, *hradshadow_m, *srs_gem_x, *srs_gem_xy, *mmg1_srs_xy, *urw_srs_xy;

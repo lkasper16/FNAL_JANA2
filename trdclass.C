@@ -291,12 +291,14 @@ void trdclass::Loop() {
   hgemtrkr_max_xy = new TH2F("hgemtrkr_max_xy","GEM-TRKR Max Pulse X-Y Correlation; Max X [mm]; Max Y [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(hgemtrkr_max_xy);
   hmmg1_peak_y = new TH1F("hmmg1_peak_y","MMG1 Peak Y Position (SRS); Y [mm]",128,-0.4,102.);  HistList->Add(hmmg1_peak_y);
   hmmg1_peak_y_height = new TH1F("hmmg1_peak_y_height","MMG1 Peak Y Amp (SRS); ADC Value",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height);
+  hmmg1_peak_y_height_el = new TH1F("hmmg1_peak_y_height_el","MMG1 Peak Y Amp for Electrons (SRS); ADC Value",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height_el);
+  hmmg1_peak_y_height_pi = new TH1F("hmmg1_peak_y_height_pi","MMG1 Peak Y Amp for Pions (SRS); ADC Value",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height_pi);
   hurw_peak_y = new TH1F("hurw_peak_y","URW Peak Y Position (SRS); Y [mm]",128,-0.4,102.);  HistList->Add(hurw_peak_y);
   hurw_peak_y_height = new TH1F("hurw_peak_y_height","URW Peak Y Amp (SRS); ADC Value",100,0.,4096.);  HistList->Add(hurw_peak_y_height);
+  hurw_peak_y_height_el = new TH1F("hurw_peak_y_height_el","URW Peak Y Amp for Electrons (SRS); ADC Value",100,0.,4096.);  HistList->Add(hurw_peak_y_height_el);
+  hurw_peak_y_height_pi = new TH1F("hurw_peak_y_height_pi","URW Peak Y Amp for Pions (SRS); ADC Value",100,0.,4096.);  HistList->Add(hurw_peak_y_height_pi);
   hchan_u_el = new TH1F("hchan_u_el","URW Max X Position for Electrons; uRWell X Max [mm]",128,-0.4,102.);  HistList->Add(hchan_u_el);
   hchan_u_pi = new TH1F("hchan_u_pi","URW Max X Position for Pions; uRWell X Max [mm]",128,-0.4,102.);  HistList->Add(hchan_u_pi);
-  hchan_el = new TH1F("hchan_el","GEMTRD Max X Position for Electrons; GEMTRD X Max [mm]",128,-0.4,102.);  HistList->Add(hchan_el);
-  hchan_pi = new TH1F("hchan_pi","GEMTRD Max X Position for Pions; GEMTRD X Max [mm]",128,-0.4,102.);  HistList->Add(hchan_pi);
   
   //============= Prototype ADC Amplitude Distributions ============
   f125_el = new TH1F("f125_el","GEM-TRD f125 Peak Amp for Electrons ; ADC Amplitude ; Counts ",100,0.,4096);  HistList->Add(f125_el);
@@ -966,7 +968,7 @@ void trdclass::Loop() {
             }  //---  end tracks loop
             
             #ifdef SHOW_EVTbyEVT
-              if (NTRACKS<1 || NTRACKS>2) continue;  // --- skip event ----
+              //if (NTRACKS<1 || NTRACKS>2) continue;  // --- skip event ----
               char mgTitle[80]; sprintf(mgTitle,"GEM ML-FPGA response, #Tracks=%d; z pos [mm]; y pos [mm]",NTRACKS);
               mg->SetTitle(mgTitle);
               c2->cd(3); mg->Draw("APsame"); //AP?
@@ -1066,13 +1068,13 @@ void trdclass::Loop() {
           mmg1_peak_pos_y[mmg1_idx_y] = gem_peak_real_pos->at(i);
           if (mmg1_peak_pos_y[mmg1_idx_y]<=0) mmg1_peak_pos_y[mmg1_idx_y]+=51.2; else mmg1_peak_pos_y[mmg1_idx_y]-=51.2;  mmg1_peak_pos_y[mmg1_idx_y]*=-1.; mmg1_peak_pos_y[mmg1_idx_y]+=51.2;
           mmg1_peak_y_height[mmg1_idx_y] = gem_peak_height->at(i);
-          mmg1_idx_y++;
+          if (mmg1_peak_y_height[mmg1_idx_y]>1000.) mmg1_idx_y++;
         }
         if (gem_peak_plane_name->at(i) == "URWELLY") {
           urw_peak_pos_y[urw_idx_y] = gem_peak_real_pos->at(i);
           urw_peak_pos_y[urw_idx_y]*=-1.;  urw_peak_pos_y[urw_idx_y]+=51.2;
           urw_peak_y_height[urw_idx_y] = gem_peak_height->at(i);
-          urw_idx_y++;
+          if (urw_peak_y_height[urw_idx_y]>1000.) urw_idx_y++;
         }
       } //--- End SRS Peaks Loop
       
@@ -1123,6 +1125,8 @@ void trdclass::Loop() {
       for (ULong64_t i=0; i<mmg1_idx_y; i++) {
         hmmg1_peak_y->Fill(mmg1_peak_pos_y[i]);
         hmmg1_peak_y_height->Fill(mmg1_peak_y_height[i]);
+        if (electron) hmmg1_peak_y_height_el->Fill(mmg1_peak_y_height[i]);
+        if (pion) hmmg1_peak_y_height_pi->Fill(mmg1_peak_y_height[i]);
         if (electron && mmg1_peak_y_height[i]>mmg1_el_yamp_max) {
           mmg1_el_yamp_max=mmg1_peak_y_height[i];
           mmg1_el_ych_max=mmg1_peak_pos_y[i];
@@ -1135,6 +1139,8 @@ void trdclass::Loop() {
         for (ULong64_t h=0; h<urw_idx_y; h++) {
           hurw_peak_y->Fill(urw_peak_pos_y[h]);
           hurw_peak_y_height->Fill(urw_peak_y_height[h]);
+          if (electron) hurw_peak_y_height_el->Fill(urw_peak_y_height[h]);
+          if (pion) hurw_peak_y_height_pi->Fill(urw_peak_y_height[h]);
           if (electron && urw_peak_y_height[h]>urw_el_yamp_max) {
             urw_el_yamp_max=urw_peak_y_height[h];
             urw_el_ych_max=urw_peak_pos_y[h];
@@ -1332,20 +1338,20 @@ void trdclass::Loop() {
           if (gem_amp_max>0.) f125_el_max->Fill(gem_amp_max);
           if (mmg1_amp_max>0.) mmg1_f125_el_max->Fill(mmg1_amp_max);
           if (urw_amp_max>0.) urw_f125_el_max->Fill(urw_amp_max);
-          if (urw_el_amp_max>0. && abs(urw_el_chan_max-mmg1_el_chan_max-0.5)<5) {
+          if (urw_el_amp_max>0. /*&& abs(urw_el_chan_max-mmg1_el_chan_max-0.5)<5*/) {
             urw_el_idx_x++;
           }
-          if (mmg1_el_amp_max>0. && abs(urw_el_chan_max-mmg1_el_chan_max-0.5)<5) {
+          if (mmg1_el_amp_max>0. /*&& abs(urw_el_chan_max-mmg1_el_chan_max-0.5)<5*/) {
             mmg1_el_idx_x++;
           }
         } else if (pion) {
           if (gem_amp_max>0.) f125_pi_max->Fill(gem_amp_max);
           if (mmg1_amp_max>0.) mmg1_f125_pi_max->Fill(mmg1_amp_max);
           if (urw_amp_max>0.) urw_f125_pi_max->Fill(urw_amp_max);
-          if (urw_pi_amp_max>0. && abs(urw_pi_chan_max-mmg1_pi_chan_max-0.5)<5) {
+          if (urw_pi_amp_max>0. /*&& abs(urw_pi_chan_max-mmg1_pi_chan_max-0.5)<5*/) {
             urw_pi_idx_x++;
           }
-          if (mmg1_pi_amp_max>0. && abs(urw_pi_chan_max-mmg1_pi_chan_max-0.5)<5) {
+          if (mmg1_pi_amp_max>0. /*&& abs(urw_pi_chan_max-mmg1_pi_chan_max-0.5)<5*/) {
             mmg1_pi_idx_x++;
           }
         }
@@ -1353,12 +1359,14 @@ void trdclass::Loop() {
       
       bool trackFound=false, trackSeen=false;
       if (electron) {
-        if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_el_idx_x<2 && abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5) {
+        //if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_el_idx_x<2 && abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5) {
+        if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2) {
           hNExpected_el->Fill(urw_el_chan_max);
           trackFound=true;
         }
       } else if (pion) {
-        if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_pi_idx_x<2 && abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5) { 
+        //if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_pi_idx_x<2 && abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5) { 
+        if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2) {
           hNExpected_pi->Fill(urw_pi_chan_max);
           trackFound=true;
         }
@@ -1396,19 +1404,12 @@ void trdclass::Loop() {
         urw_zHist_vect.clear();
       }
       
-      //if (electron) 
       f125_el_raw->Reset();
-      //if (pion) 
       f125_pi_raw->Reset();
       
-      double gem_el_amp_max=0., gem_el_chan_max=-1.;
-      double gem_pi_amp_max=0., gem_pi_chan_max=-1.;
       
       //if (isSingleTrack && fiducialArea) {
       if (fiducialArea) {
-        
-        gem_el_amp_max=0., gem_el_chan_max=-1.;
-        gem_pi_amp_max=0., gem_pi_chan_max=-1.;
         
         for (ULong64_t i=0; i<f125_pulse_count; i++) { //--- Fadc125 Pulse Loop
           
@@ -1425,7 +1426,6 @@ void trdclass::Loop() {
           double gemChan_x = gemChan*0.4 + 3.2;
           int mmg1Chan = GetMMG1Chan(fADCChan, fADCSlot, RunNum);
           int rwellChan = GetRWELLChan(fADCChan, fADCSlot, RunNum);
-          //trackSeen=false;
           
           if (amp>GEM_THR && gemChan>-1 && 100.<=time && time<=185.) {
             for (ULong64_t j=0; j<urw_idx_y; j++) {
@@ -1439,16 +1439,11 @@ void trdclass::Loop() {
           
           if (electron) {
             if (amp>GEM_THR && gemChan>-1) {
-              if (gem_el_amp_max<amp && abs(urw_el_chan_max-mmg1_el_chan_max-0.5)<5) {
-                gem_el_amp_max=amp;
-                gem_el_chan_max=gemChan*0.4 + 3.2;
-              }
-              if (trackFound && abs(urw_el_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5*/) {
+              if (trackFound && (!trackSeen) && abs(urw_el_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5*/) {
                 hNHits_el->Fill(urw_el_chan_max);
                 trackSeen=true;
-                trackFound=false;
               }
-              if (abs(urw_el_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5*/) {
+              if (trackFound && abs(urw_el_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5*/) {
                 f125_el->Fill(amp);
                 f125_el_amp2ds->Fill(time, gemChan, amp);
                 gem_xpos.push_back(gemChan);
@@ -1485,16 +1480,11 @@ void trdclass::Loop() {
             
           } else if (pion) {
             if (amp>GEM_THR && gemChan>-1) {
-              if (gem_pi_amp_max<amp && abs(urw_pi_chan_max-mmg1_pi_chan_max-0.5)<5) {
-                gem_pi_amp_max=amp;
-                gem_pi_chan_max=gemChan*0.4 + 3.2;
-              }
-              if (trackFound && abs(urw_pi_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5*/) {
+              if (trackFound && (!trackSeen) && abs(urw_pi_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5*/) {
                 hNHits_pi->Fill(urw_pi_chan_max);
                 trackSeen=true;
-                trackFound=false;
               }
-              if (abs(urw_pi_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5*/) {
+              if (trackFound && abs(urw_pi_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5*/) {
                 f125_pi->Fill(amp);
                 f125_pi_amp2ds->Fill(time, gemChan, amp);
                 gem_xpos.push_back(gemChan);
@@ -1548,8 +1538,6 @@ void trdclass::Loop() {
           case 6: x_min=44; x_max=64; x_center=54; y_min=44; y_max=64; y_center=54;  break;
           }
           
-          if (gem_el_chan_max>=0.) hchan_el->Fill(gem_el_chan_max);
-          if (gem_pi_chan_max>=0.) hchan_pi->Fill(gem_pi_chan_max);
           if (urw_el_chan_max>=0.) hchan_u_el->Fill(urw_el_chan_max);
           if (urw_pi_chan_max>=0.) hchan_u_pi->Fill(urw_pi_chan_max);
           
@@ -1681,7 +1669,7 @@ void trdclass::Loop() {
       c0->cd(1); f125_el_raw->Draw("colz");  eline.Draw("same");  gPad->Modified(); gPad->Update();
       c0->cd(2); f125_pi_raw->Draw("colz");  piline.Draw("same"); gPad->Modified(); gPad->Update();
       
-      if ((pion) && (f125_el_raw->GetEntries()>0 || f125_pi_raw->GetEntries()>0)) { c0->cd(1); gPad->WaitPrimitive(); }
+      if ((electron || pion) && (f125_el_raw->GetEntries()>0 || f125_pi_raw->GetEntries()>0)) { c0->cd(1); gPad->WaitPrimitive(); }
         //c0->cd(1); f125_el_amp2ds->Draw("colz");
         //c0->cd(5); f125_pi_amp2ds->Draw("colz");
         //c0->cd(2); f125_el_evt_display->Draw("colz");
@@ -1883,14 +1871,18 @@ void trdclass::Loop() {
     
     //--------------------- new page --------------------
     htitle(" SRS Correlations & Distributions ");   if (!COMPACT) cc=NextPlot(0,0);
-    cc=NextPlot(nxd,nyd);   hgemtrkr_peak_x->Draw();
-    cc=NextPlot(nxd,nyd);   hgemtrkr_peak_x_height->Draw();
-    cc=NextPlot(nxd,nyd);   hgemtrkr_peak_y->Draw();
-    cc=NextPlot(nxd,nyd);   hgemtrkr_peak_y_height->Draw();
+    //cc=NextPlot(nxd,nyd);   hgemtrkr_peak_x->Draw();
+    //cc=NextPlot(nxd,nyd);   hgemtrkr_peak_x_height->Draw();
+    //cc=NextPlot(nxd,nyd);   hgemtrkr_peak_y->Draw();
+    //cc=NextPlot(nxd,nyd);   hgemtrkr_peak_y_height->Draw();
     cc=NextPlot(nxd,nyd);   hmmg1_peak_y->Draw();
     cc=NextPlot(nxd,nyd);   hmmg1_peak_y_height->Draw();
+    cc=NextPlot(nxd,nyd);   hmmg1_peak_y_height_el->Draw();
+    cc=NextPlot(nxd,nyd);   hmmg1_peak_y_height_pi->Draw();
     cc=NextPlot(nxd,nyd);   hurw_peak_y->Draw();
     cc=NextPlot(nxd,nyd);   hurw_peak_y_height->Draw();
+    cc=NextPlot(nxd,nyd);   hurw_peak_y_height_el->Draw();
+    cc=NextPlot(nxd,nyd);   hurw_peak_y_height_pi->Draw();
     //for (int i=0; i<NCAL; i++) {
       //cc=NextPlot(nxd,nyd);   hCal_cor[i]->Draw("colz");
     //}
@@ -1940,13 +1932,6 @@ void trdclass::Loop() {
     cc=NextPlot(nxd,nyd);  hNTracks_pi->Draw();
     cc=NextPlot(nxd,nyd);  hNTracks->Draw();
     
-    //--------------------- new page --------------------
-    htitle(" Track Number Distributions ");   if (!COMPACT) cc=NextPlot(0,0);
-    cc=NextPlot(nxd,nyd);  hchan_el->Draw();
-    cc=NextPlot(nxd,nyd);  hchan_pi->Draw();
-    cc=NextPlot(nxd,nyd);  hchan_u_el->Draw();
-    cc=NextPlot(nxd,nyd);  hchan_u_pi->Draw();
-
     //--------------------- new page --------------------
     htitle(" GEMTRD Efficiency Plots ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);  hNHits_el->Draw();
