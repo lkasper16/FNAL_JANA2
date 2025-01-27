@@ -307,9 +307,10 @@ public :
    TH2F *hgemtrkr_peak_xy;
    TH2F *srs_mmg1_x, *srs_mmg1_y;
    TH2F *srs_urw_x, *srs_urw_y;
-   TH2F *srs_cal_corr, *urw_cal_corr, *mmg1_cal_corr, *srs_gemtrd_el, *srs_gemtrd_pion, *srs_etrd_beam, *hradshadow, *hradshadow_u, *hradshadow_m, *srs_gem_x, *srs_gem_xy, *mmg1_srs_xy, *urw_srs_xy;
+   TH2F *gem_urw_corr, *srs_cal_corr, *urw_cal_corr, *mmg1_cal_corr, *srs_gemtrd_el, *srs_gemtrd_pion, *srs_etrd_beam, *hradshadow, *hradshadow_u, *hradshadow_ux, *hradshadow_m, *srs_gem_x, *srs_gem_xy, *mmg1_srs_xy, *urw_srs_xy;
    TH1F *hgemtrkr_max_xch, *hgemtrkr_max_ych, *hgemtrkr_max_xamp, *hgemtrkr_max_yamp;
    TH2F *hgemtrkr_max_xy;
+   TH1F *hchan_el, *hchan_pi, *hchan_u_el, *hchan_u_pi;
    
    TH1F *f125_el, *f125_el_max;
    TH1F *hClusterMaxdEdx_e, *hClusterTotaldEdx_e;
