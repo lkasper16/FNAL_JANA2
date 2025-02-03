@@ -1069,12 +1069,14 @@ void trdclass::Loop() {
           if (mmg1_peak_pos_y[mmg1_idx_y]<=0) mmg1_peak_pos_y[mmg1_idx_y]+=51.2; else mmg1_peak_pos_y[mmg1_idx_y]-=51.2;  mmg1_peak_pos_y[mmg1_idx_y]*=-1.; mmg1_peak_pos_y[mmg1_idx_y]+=51.2;
           mmg1_peak_y_height[mmg1_idx_y] = gem_peak_height->at(i);
           if (mmg1_peak_y_height[mmg1_idx_y]>1000.) mmg1_idx_y++;
+          //mmg1_idx_y++;
         }
         if (gem_peak_plane_name->at(i) == "URWELLY") {
           urw_peak_pos_y[urw_idx_y] = gem_peak_real_pos->at(i);
           urw_peak_pos_y[urw_idx_y]*=-1.;  urw_peak_pos_y[urw_idx_y]+=51.2;
           urw_peak_y_height[urw_idx_y] = gem_peak_height->at(i);
           if (urw_peak_y_height[urw_idx_y]>1000.) urw_idx_y++;
+          //urw_idx_y++;
         }
       } //--- End SRS Peaks Loop
       
@@ -1360,13 +1362,13 @@ void trdclass::Loop() {
       bool trackFound=false, trackSeen=false;
       if (electron) {
         //if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_el_idx_x<2 && abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5) {
-        if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2) {
+        if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1) {
           hNExpected_el->Fill(urw_el_chan_max);
           trackFound=true;
         }
       } else if (pion) {
         //if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_pi_idx_x<2 && abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5) { 
-        if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2) {
+        if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1) {
           hNExpected_pi->Fill(urw_pi_chan_max);
           trackFound=true;
         }
