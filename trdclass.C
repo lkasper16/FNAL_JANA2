@@ -1174,11 +1174,14 @@ void trdclass::Loop() {
       
       if ((RunNum > 3200 && RunNum < 3203) || (RunNum >  3245 && RunNum < 3249)) { //-- GEMTRD Double Fleece
         x_cut1=44., x_cut2=69., y_cut1=28., y_cut2=65.;
-        for (ULong64_t i=0; i<urw_idx_y; i++) {
-          if (y_cut2>=urw_peak_pos_y[i] && urw_peak_pos_y[i]>=y_cut1) {
-            fiducialArea=true;
-            Count("fidOK"); fid_OK++;
-            break;
+        if (pion) { fiducialArea=true;
+        } else {
+          for (ULong64_t i=0; i<urw_idx_y; i++) {
+            if (y_cut2>=urw_peak_pos_y[i] && urw_peak_pos_y[i]>=y_cut1) {
+              fiducialArea=true;
+              Count("fidOK"); fid_OK++;
+              break;
+            }
           }
         }
       }
@@ -1206,10 +1209,13 @@ void trdclass::Loop() {
       }
       if ((RunNum >  3195 && RunNum < 3201) || (RunNum >  3214 && RunNum < 3219)) { //-- GEMTRD Double Foil
         x_cut1=44., x_cut2=72, y_cut1=19., y_cut2=61.;
-        for (ULong64_t i=0; i<urw_idx_y; i++) {
-          if (y_cut2>urw_peak_pos_y[i] && urw_peak_pos_y[i]>y_cut1) {
-            fiducialArea=true;
-            break;
+        if (pion) { fiducialArea=true;
+        } else {
+          for (ULong64_t i=0; i<urw_idx_y; i++) {
+            if (y_cut2>urw_peak_pos_y[i] && urw_peak_pos_y[i]>y_cut1) {
+              fiducialArea=true;
+              break;
+            }
           }
         }
       }
@@ -1361,14 +1367,14 @@ void trdclass::Loop() {
       
       bool trackFound=false, trackSeen=false;
       if (electron) {
-        //if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_el_idx_x<2 && abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5) {
-        if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1) {
+        //if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_el_idx_x<2 && abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5 && abs(urw_el_chan_max-mmg1_el_chan_max-0.5)<5) {
+        if (urw_idx_y==1 && urw_el_idx_x==1 && urw_el_chan_max>=x_cut1 && urw_el_chan_max<=x_cut2) {
           hNExpected_el->Fill(urw_el_chan_max);
           trackFound=true;
         }
       } else if (pion) {
-        //if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_pi_idx_x<2 && abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5) { 
-        if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1) {
+        //if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2 && mmg1_idx_y==1 && mmg1_pi_idx_x<2 && abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5 && abs(urw_pi_chan_max-mmg1_pi_chan_max-0.5)<5) { 
+        if (urw_idx_y==1 && urw_pi_idx_x==1 && urw_pi_chan_max>=x_cut1 && urw_pi_chan_max<=x_cut2) {
           hNExpected_pi->Fill(urw_pi_chan_max);
           trackFound=true;
         }
