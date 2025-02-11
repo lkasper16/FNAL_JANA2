@@ -279,7 +279,6 @@ public :
    int nTrees;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
-   //TH1F *h250_size;
    TH1D *hcount;
    TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
    TH1D *hNHits_el, *hNHits_pi, *hNExpected_el, *hNExpected_pi, *trdRatio_el, *trdRatio_pi;
@@ -301,8 +300,6 @@ public :
    TH1F *hCher_dout_time;
    
    TH2F *hCCor_ud;
-   TH2F *multiTrackIndex, *multiTrackIndex_e, *multiTrackIndex_pi;
-   TH2F *singleTrackIndex, *singleTrackIndex_e, *singleTrackIndex_pi;
    TH1F *hgemtrkr_peak_x, *hgemtrkr_peak_x_height, *hmmg1_peak_y, *hmmg1_peak_y_height, *hurw_peak_y, *hurw_peak_y_height, *hgemtrkr_peak_y, *hgemtrkr_peak_y_height;
    TH2F *hgemtrkr_peak_xy;
    TH1F *hmmg1_peak_y_height_el, *hmmg1_peak_y_height_pi, *hurw_peak_y_height_el, *hurw_peak_y_height_pi;

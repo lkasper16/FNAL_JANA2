@@ -30,16 +30,16 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
-#define NO_RAD_COMPARE 1
-//#define ALL_PION_COMPARE 1
+//#define NO_RAD_COMPARE 1
+#define ALL_PION_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
 void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
 
-const int NDEslices = 10;
-const int NFixed = 8; // -- 7;
+const int NDEslices = 8; //10;
+const int NFixed = 8; //////8; // -- 7;
 
 #if    NN_MODE == 0
 const int MAXpar = NDEslices;
@@ -380,23 +380,23 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     //             C L U S T E R S 
     //----------------------------------------------------------------
     
-    int clu_nhits=gem_nclu;
+    //int clu_nhits=gem_nclu;
     hNhits->Fill(gem_nhit);
     hNclu->Fill(gem_nclu);
-    float max_widthc=widthc_max;
-    float max_dedxc=dedxc_max;
+    //float max_widthc=widthc_max;
+    //float max_dedxc=dedxc_max;
     
     //=================== Loop to calculate average & RMS beam position ========
     double xaver=0, xaver2=0;
     int naver=0;
-    for (int i=0;i<gem_nhit;i++) {
+    for (int i=0; i<gem_nhit; i++) {
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
       xaver+=xpos->at(i); naver++;
     }
     xaver=xaver/naver;
     
     //====================================================================
-    for (int i=0;i<gem_nhit;i++) { // count fixed parameters
+    for (int i=0; i<gem_nhit; i++) { // count fixed parameters
       
       Count("Gem_Hits");
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
@@ -475,12 +475,13 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     } else if (NN_MODE==2) {  //--  dEdx + Par
       if (MAXpar<(NFixed+NDE)) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
       Par[0]=amax2/Ascale/5.;
-      Par[1]=khit;
-      Par[2]=emax2/Escale;
-      Par[3]=etot/Escale/10.;
-      Par[4]=etrzon/Escale/10.;
-      Par[5]=NTR;
-      Par[6]=atot/1000.;
+      Par[1]=gem_nhit*5; //khit;
+      Par[2]=xaver2*8; //emax2/Escale;
+      Par[3]=NTR;
+      Par[4]=widthc_max*5; //atot/1000.;
+      Par[5]=dedxc_max/5.; //max_dedxc/Ascale/5.; ///////////
+      Par[6]=gem_nclu*5;
+      Par[7]=zposc_max*5.;
       int np=NDE;
       double coef=Ascale*3.;  // Escale; Ascale;
       for (int ip=0; ip<np; ip++) {
@@ -489,13 +490,15 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     } else if (NN_MODE==3) {  //--  fermi dEdx(amp) + Par
       if (MAXpar<(NFixed+NDE)) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
       Par[0]=amax2/Ascale/5.;
-      Par[1]=clu_nhits*5; // -- khit;
+      Par[1]=gem_nhit*5;
       Par[2]=xaver2*8; // -- xaver2;
-      Par[3]=atot/Escale/50.; // -- etot/Escale/10.;
-      Par[4]=etrzon/Escale/50.; // -- etrzon/Escale/10.;
-      Par[5]=NTR;
-      Par[6]=max_widthc*5.; // -- atot/1000.;
-      Par[7]=max_dedxc/Ascale/5.; ///////////
+      //Par[3]=atot/Escale/50.; // -- etot/Escale/10.;
+      //Par[4]=etrzon/Escale/50.; // -- etrzon/Escale/10.;
+      Par[3]=NTR;
+      Par[4]=widthc_max*5.; //max_widthc*5.; // -- atot/1000.;
+      Par[5]=dedxc_max/5.; //max_dedxc/Ascale/5.; ///////////
+      Par[6]=gem_nclu*5;
+      Par[7]=zposc_max*5.;
       int np=NDE;
       double coef=Ascale*3.;  // -- coef=Ascale/2.; // -- =Ascale*3.;
       for (int ip=0; ip<np; ip++) {
@@ -850,7 +853,7 @@ void trd_mlp_fermi(int RunNum) {
       ttree_hits->GetEntry(ievent);
       c2->cd(); disppi->Reset();
       char htit[128]; sprintf(htit,"#pi event %d; time 8 ns/bin ; x-strip ",ievent);   disppi->SetTitle(htit);
-      for (int i=0;i<gem_nhit;i++) {
+      for (int i=0; i<gem_nhit; i++) {
         if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
       }
       if (disppi->GetEntries()!=0) disppi->Draw("colz");
@@ -885,7 +888,7 @@ void trd_mlp_fermi(int RunNum) {
       char htit[128]; sprintf(htit,"electrons event %d ; time 8 ns/bin ; x-strip",ievent);  dispe->SetTitle(htit);
       int ii=0; double x[1000], y[1000], ey[1000];
       double yaver=0;
-      for (int i=0;i<gem_nhit;i++) {
+      for (int i=0; i<gem_nhit; i++) {
         if (dedx->at(i)>0) {
           dispe->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
 	        if (rtw1 < zpos->at(i) && zpos->at(i) < rtw3) {
