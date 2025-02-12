@@ -31,6 +31,7 @@ float     xposc_max;
 float     zposc_max;
 float     dedxc_max;
 float     widthc_max;
+float     dedxc_tot;
 
 // List of branches
 TBranch        *b_event_num;   //!
@@ -49,3 +50,4 @@ TBranch        *b_xposc_max;
 TBranch        *b_zposc_max;
 TBranch        *b_dedxc_max;
 TBranch        *b_widthc_max;
+TBranch        *b_dedxc_tot;

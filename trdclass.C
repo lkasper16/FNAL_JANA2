@@ -189,9 +189,9 @@ void trdclass::Loop() {
     char hTitle[128]; sprintf(hTitle,"Calorimeter ADC Distribution, Cell %d",cc);
     hCal_adc[cc] = new TH1F(hName,hTitle,200,-0.5,4095.5); HistList->Add(hCal_adc[cc]);
     //sprintf(hName,"hCal_cor%d",cc);  sprintf(hTitle,"Correlation GEMTRD X & CAL, Cell %d",cc);
-    //hCal_cor[cc] = new TH2F(hName,hTitle,128,-0.4,102.,25,-0.5,24.5);  hCal_cor[cc]->SetMaximum(12000.);  HistList->Add(hCal_cor[cc]);
+    //hCal_cor[cc] = new TH2F(hName,hTitle,128,-0.2,102.2,25,-0.5,24.5);  hCal_cor[cc]->SetMaximum(12000.);  HistList->Add(hCal_cor[cc]);
     //sprintf(hName,"hCal_trk%d",cc);  sprintf(hTitle,"Correlation GEMTRKR & CAL, Cell %d",cc);
-    //hCal_trk[cc] = new TH2F(hName,hTitle,128,-0.4,102.,128,-0.4,102.); hCal_trk[cc]->SetMaximum(4.);  HistList->Add(hCal_trk[cc]);
+    //hCal_trk[cc] = new TH2F(hName,hTitle,128,-0.2,102.2,128,-0.2,102.2); hCal_trk[cc]->SetMaximum(4.);  HistList->Add(hCal_trk[cc]);
     sprintf(hName,"hCal_cal%d",cc);  sprintf(hTitle,"Calorimeter ADC Calib, Cell %d; Cell Energy; Distance from Cell Center [mm]",cc);
     hCal_cal[cc] = new TH2F(hName,hTitle,112,-1.5,12.5,40,-0.4,15.6);  HistList->Add(hCal_cal[cc]);
     sprintf(hName,"hCal_cell_sum%d",cc);  sprintf(hTitle,"Calorimeter Sum (GeV), Cell %d; Cell Total Energy [GeV]",cc);
@@ -211,36 +211,36 @@ void trdclass::Loop() {
   
   // ============= Detector Correlation Plots =============
   //-- GEM-TRKR & Prototype Correlations
-  srs_mmg1_xy = new TH2F("srs_mmg1_xy","MMG1 Y & GEMTRKR X Hit Display; GEMTRKR Peak X [mm]; MMG-1 Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_mmg1_xy);
-  srs_mmg1_y = new TH2F("srs_mmg1_y","Correlation MMG1 & GEMTRKR Y; GEMTRKR Peak Y [mm]; MMG-1 Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_mmg1_y);
-  srs_mmg1_x = new TH2F("srs_mmg1_x","Correlation MMG1 & GEMTRKR X; GEMTRKR Peak X [mm]; MMG-1 X [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_mmg1_x);
+  srs_mmg1_xy = new TH2F("srs_mmg1_xy","MMG1 Y & GEMTRKR X Hit Display; GEMTRKR Peak X [mm]; MMG-1 Y(SRS) [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(srs_mmg1_xy);
+  srs_mmg1_y = new TH2F("srs_mmg1_y","Correlation MMG1 & GEMTRKR Y; GEMTRKR Peak Y [mm]; MMG-1 Y(SRS) [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(srs_mmg1_y);
+  srs_mmg1_x = new TH2F("srs_mmg1_x","Correlation MMG1 & GEMTRKR X; GEMTRKR Peak X [mm]; MMG-1 X [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(srs_mmg1_x);
   if (RunNum>3147 && RunNum<3262) {
-    srs_urw_xy = new TH2F("srs_urw_xy","uRWell Y & GEMTRKR X Hit Display; GEMTRKR Peak X [mm]; uRWell Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_urw_xy);
-    srs_urw_y = new TH2F("srs_urw_y","Correlation uRWell & GEMTRKR Y; GEMTRKR Peak Y [mm]; uRWell Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_urw_y);
-    srs_urw_x = new TH2F("srs_urw_x","Correlation uRWell & GEMTRKR X; GEMTRKR Peak X [mm]; uRWell X [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_urw_x);
+    srs_urw_xy = new TH2F("srs_urw_xy","uRWell Y & GEMTRKR X Hit Display; GEMTRKR Peak X [mm]; uRWell Y(SRS) [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(srs_urw_xy);
+    srs_urw_y = new TH2F("srs_urw_y","Correlation uRWell & GEMTRKR Y; GEMTRKR Peak Y [mm]; uRWell Y(SRS) [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(srs_urw_y);
+    srs_urw_x = new TH2F("srs_urw_x","Correlation uRWell & GEMTRKR X; GEMTRKR Peak X [mm]; uRWell X [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(srs_urw_x);
     //-- GEM-TRD & Other TRD Prototypes fADC Correlations
-    gem_urw_x = new TH2F("gem_urw_x","Correlation GEMTRD & uRWell X ; GEMTRD X [mm]; uRWell X [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(gem_urw_x);
-    mmg1_urw_x = new TH2F("mmg1_urw_x","Correlation MMG1 & uRWell X ; MMG-1 X [mm]; uRWell X [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(mmg1_urw_x);
+    gem_urw_x = new TH2F("gem_urw_x","Correlation GEMTRD & uRWell X ; GEMTRD X [mm]; uRWell X [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(gem_urw_x);
+    mmg1_urw_x = new TH2F("mmg1_urw_x","Correlation MMG1 & uRWell X ; MMG-1 X [mm]; uRWell X [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(mmg1_urw_x);
     urw_xy = new TH2F("urw_xy","uRWellTRD X&Y Hit Display; uRWell X [mm] ; uRWell Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(urw_xy);
-    mmg1_urw_y = new TH2F("mmg1_urw_y","Correlation MMG1 & uRWell Y ; MMG-1 Y(SRS) [mm]; uRWell Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(mmg1_urw_y);
+    mmg1_urw_y = new TH2F("mmg1_urw_y","Correlation MMG1 & uRWell Y ; MMG-1 Y(SRS) [mm]; uRWell Y(SRS) [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(mmg1_urw_y);
   }
-  gem_mmg1_x = new TH2F("gem_mmg1_x","Correlation GEMTRD & MMG1 X ; GEMTRD X [mm]; MMG-1 X [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(gem_mmg1_x);
-  mmg1_xy = new TH2F("mmg1_xy","MMG1TRD X&Y Hit Display; MMG-1 X [mm] ; MMG-1 Y(SRS) [mm]",128,-0.4,102.,128,-0.4,102.);            HistList->Add(mmg1_xy);
-  gem_urw_corr = new TH2F("gem_urw_corr","GEMTRD X & uRWell Y Hit Display; GEMTRD X [mm]; uRWell Y (SRS) [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(gem_urw_corr);
-  srs_gem_x = new TH2F("srs_gem_x","Correlation GEMTRD & GEMTRKR X; GEMTRKR X [mm]; GEMTRD X [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_gem_x);
-  srs_gem_xy = new TH2F("srs_gem_xy","GEMTRD X & GEMTRKR Y Hit Display; GEMTRD X [mm]; GEMTRKR Y [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(srs_gem_xy);
-  mmg1_srs_xy = new TH2F("mmg1_srs_xy","MMG1 X & GEMTRKR Y Hit Display; MMG-1 X [mm]; GEMTRKR Y [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(mmg1_srs_xy);
-  urw_srs_xy = new TH2F("urw_srs_xy","uRWell X & GEMTRKR Y Hit Display; uRWell X [mm]; GEMTRKR Y [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(urw_srs_xy);
+  gem_mmg1_x = new TH2F("gem_mmg1_x","Correlation GEMTRD & MMG1 X ; GEMTRD X [mm]; MMG-1 X [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(gem_mmg1_x);
+  mmg1_xy = new TH2F("mmg1_xy","MMG1TRD X&Y Hit Display; MMG-1 X [mm] ; MMG-1 Y(SRS) [mm]",128,-0.2,102.2,128,-0.2,102.2);            HistList->Add(mmg1_xy);
+  gem_urw_corr = new TH2F("gem_urw_corr","GEMTRD X & uRWell Y Hit Display; GEMTRD X [mm]; uRWell Y (SRS) [mm]",128,-0.2,102.2,128,-0.4,102.);    HistList->Add(gem_urw_corr);
+  srs_gem_x = new TH2F("srs_gem_x","Correlation GEMTRD & GEMTRKR X; GEMTRKR X [mm]; GEMTRD X [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(srs_gem_x);
+  srs_gem_xy = new TH2F("srs_gem_xy","GEMTRD X & GEMTRKR Y Hit Display; GEMTRD X [mm]; GEMTRKR Y [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(srs_gem_xy);
+  mmg1_srs_xy = new TH2F("mmg1_srs_xy","MMG1 X & GEMTRKR Y Hit Display; MMG-1 X [mm]; GEMTRKR Y [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(mmg1_srs_xy);
+  urw_srs_xy = new TH2F("urw_srs_xy","uRWell X & GEMTRKR Y Hit Display; uRWell X [mm]; GEMTRKR Y [mm]",128,-0.4,102.,128,-0.2,102.2);    HistList->Add(urw_srs_xy);
   //-- GEM-TRKR & PID/Beam Correlations
-  srs_cal_corr = new TH2F("srs_cal_corr","Correlation GEMTRKR & CAL, All Cells; GEMTRKR X [mm]; GEMTRKR Y [mm]",128,-0.4,102.,128,-0.4,102.); srs_cal_corr->SetMaximum(4.);  HistList->Add(srs_cal_corr);
+  srs_cal_corr = new TH2F("srs_cal_corr","Correlation GEMTRKR & CAL, All Cells; GEMTRKR X [mm]; GEMTRKR Y [mm]",128,-0.2,102.2,128,-0.2,102.2); srs_cal_corr->SetMaximum(4.);  HistList->Add(srs_cal_corr);
   urw_cal_corr = new TH2F("urw_cal_corr","Correlation uRWell & CAL, All Cells; uRWell X [mm]; uRWell Y [mm]",128,-0.4,102.,128,-0.4,102.);   HistList->Add(urw_cal_corr);
-  mmg1_cal_corr = new TH2F("mmg1_cal_corr","Correlation MMG1 & CAL, All Cells; MMG-1 X [mm]; MMG-1 Y [mm]",128,-0.4,102.,128,-0.4,102.);   HistList->Add(mmg1_cal_corr);
+  mmg1_cal_corr = new TH2F("mmg1_cal_corr","Correlation MMG1 & CAL, All Cells; MMG-1 X [mm]; MMG-1 Y [mm]",128,-0.2,102.2,128,-0.2,102.2);   HistList->Add(mmg1_cal_corr);
   srs_gemtrd_el = new TH2F("srs_gemtrd_el","Correlation uRWell & GEMTRD Electron Hit; uRWell X [mm]; uRWell Y [mm]",128,-0.4,102.,128,-0.4,102.);  HistList->Add(srs_gemtrd_el);
   srs_etrd_beam = new TH2F("srs_etrd_beam","Correlation uRWell & Beam; uRWell X [mm]; uRWell Y [mm]",128,-0.4,102.,128,-0.4,102.); HistList->Add(srs_etrd_beam);
   srs_gemtrd_pion = new TH2F("srs_gemtrd_pion","Correlation uRWell & GEMTRD Pion Hit; uRWell X [mm]; uRWell Y [mm]",128,-0.4,102.,128,-0.4,102.);  HistList->Add(srs_gemtrd_pion);
-  hradshadow = new TH2F("hradshadow","GEMTRKR Y Hits & GEMTRD Time; GEMTRD Time(*8ns); GEMTRKR Y [mm]",140,79.5,219.5,128,-0.4,102.); HistList->Add(hradshadow);
+  hradshadow = new TH2F("hradshadow","GEMTRKR Y Hits & GEMTRD Time; GEMTRD Time(*8ns); GEMTRKR Y [mm]",140,79.5,219.5,128,-0.2,102.2); HistList->Add(hradshadow);
   hradshadow_u = new TH2F("hradshadow_u","uRWell Y Hits & GEMTRD Time; GEMTRD Time(*8ns); uRWell Y [mm]",140,79.5,219.5,128,-0.4,102.); HistList->Add(hradshadow_u);
-  hradshadow_m = new TH2F("hradshadow_m","MMG1TRD Y Hits & GEMTRD Time; GEMTRD Time(*8ns); MMG-1 Y [mm]",140,79.5,219.5,128,-0.4,102.); HistList->Add(hradshadow_m);
+  hradshadow_m = new TH2F("hradshadow_m","MMG1TRD Y Hits & GEMTRD Time; GEMTRD Time(*8ns); MMG-1 Y [mm]",140,79.5,219.5,128,-0.2,102.2); HistList->Add(hradshadow_m);
   hradshadow_ux = new TH2F("hradshadow_ux","uRWell X Hits & GEMTRD Time; GEMTRD Time(*8ns); uRWell X [mm]",140,79.5,219.5,128,-0.4,102.); HistList->Add(hradshadow_ux);
   
   //=============== Track Fitting & chi^2 ==================
@@ -261,17 +261,17 @@ void trdclass::Loop() {
   ftrk.SetLineWidth(1);
   
   //======== GEM-TRKR (SRS) ========
-  hgemtrkr_peak_xy = new TH2F("hgemtrkr_peak_xy","GEM-TRKR Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",128,-0.4,102.,128,-0.4,102.);    HistList->Add(hgemtrkr_peak_xy);
-  hgemtrkr_peak_x = new TH1F("hgemtrkr_peak_x","GEM-TRKR Peak X; X [mm]",128,-0.4,102.);  HistList->Add(hgemtrkr_peak_x);
+  hgemtrkr_peak_xy = new TH2F("hgemtrkr_peak_xy","GEM-TRKR Peak X-Y Correlation (mm); Peak X [mm]; Peak Y [mm] ",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(hgemtrkr_peak_xy);
+  hgemtrkr_peak_x = new TH1F("hgemtrkr_peak_x","GEM-TRKR Peak X; X [mm]",128,-0.2,102.2);  HistList->Add(hgemtrkr_peak_x);
   hgemtrkr_peak_x_height = new TH1F("hgemtrkr_peak_x_height","GEM-TRKR Peak X Amp; ADC Value",100,0.,4096.);  HistList->Add(hgemtrkr_peak_x_height);
-  hgemtrkr_peak_y = new TH1F("hgemtrkr_peak_y","GEM-TRKR Peak Y; Y [mm]",128,-0.4,102.);  HistList->Add(hgemtrkr_peak_y);
+  hgemtrkr_peak_y = new TH1F("hgemtrkr_peak_y","GEM-TRKR Peak Y; Y [mm]",128,-0.2,102.2);  HistList->Add(hgemtrkr_peak_y);
   hgemtrkr_peak_y_height = new TH1F("hgemtrkr_peak_y_height","GEM-TRKR Peak Y Amp; ADC Value",100,0.,4096.);  HistList->Add(hgemtrkr_peak_y_height);
-  hgemtrkr_max_xch = new TH1F("hgemtrkr_max_xch","GEM-TRKR Max X Hit Position; X [mm]",128,-0.4,102.);  HistList->Add(hgemtrkr_max_xch);
+  hgemtrkr_max_xch = new TH1F("hgemtrkr_max_xch","GEM-TRKR Max X Hit Position; X [mm]",128,-0.2,102.2);  HistList->Add(hgemtrkr_max_xch);
   hgemtrkr_max_xamp = new TH1F("hgemtrkr_max_xamp","GEM-TRKR Max X Hit Distribution; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_max_xamp);
-  hgemtrkr_max_ych = new TH1F("hgemtrkr_max_ych","GEM-TRKR Max Y Hit Position; Y [mm]",128,-0.4,102.);  HistList->Add(hgemtrkr_max_ych);
+  hgemtrkr_max_ych = new TH1F("hgemtrkr_max_ych","GEM-TRKR Max Y Hit Position; Y [mm]",128,-0.2,102.2);  HistList->Add(hgemtrkr_max_ych);
   hgemtrkr_max_yamp = new TH1F("hgemtrkr_max_yamp","GEM-TRKR Max Y Hit Distribution ; ADC Value ",100,0.,4096.);  HistList->Add(hgemtrkr_max_yamp);
-  hgemtrkr_max_xy = new TH2F("hgemtrkr_max_xy","GEM-TRKR Max Pulse X-Y Correlation; Max X [mm]; Max Y [mm]",128,-0.4,102.,128,-0.4,102.);    HistList->Add(hgemtrkr_max_xy);
-  hmmg1_peak_y = new TH1F("hmmg1_peak_y","MMG1 Peak Y Position (SRS); Y [mm]",128,-0.4,102.);  HistList->Add(hmmg1_peak_y);
+  hgemtrkr_max_xy = new TH2F("hgemtrkr_max_xy","GEM-TRKR Max Pulse X-Y Correlation; Max X [mm]; Max Y [mm]",128,-0.2,102.2,128,-0.2,102.2);    HistList->Add(hgemtrkr_max_xy);
+  hmmg1_peak_y = new TH1F("hmmg1_peak_y","MMG1 Peak Y Position (SRS); Y [mm]",128,-0.2,102.2);  HistList->Add(hmmg1_peak_y);
   hmmg1_peak_y_height = new TH1F("hmmg1_peak_y_height","MMG1 Peak Y Amp (SRS); ADC Value",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height);
   hmmg1_peak_y_height_el = new TH1F("hmmg1_peak_y_height_el","MMG1 Peak Y Amp for Electrons (SRS); ADC Value",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height_el);
   hmmg1_peak_y_height_pi = new TH1F("hmmg1_peak_y_height_pi","MMG1 Peak Y Amp for Pions (SRS); ADC Value",100,0.,4096.);  HistList->Add(hmmg1_peak_y_height_pi);
@@ -309,14 +309,22 @@ void trdclass::Loop() {
   }
   #ifdef USE_125_RAW
     //---  Clustering Histograms (Pattern Recognition Track-Finding) ---
-    int nx0=100;    int ny0=256;
-    hevt  = new TH2F("hevt","GEM Event Display; z pos [mm]; y pos [mm]",nx0,0.,+30.,ny0,-0.4,102.); hevt->SetStats(0); hevt->SetMaximum(10.);
+    int nx0=100;    int ny0=256; //--240
+    hevt  = new TH2F("hevt","GEM Event Display; z pos [mm]; y pos [mm]",nx0,0.,+30.,ny0,-0.2,102.2); hevt->SetStats(0); hevt->SetMaximum(10.);
     hevtc = new TH2F("hevtc","GEM Clustering; FADC bins; GEM X strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);  hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
-    hevtf = new TH2F("hevtf","GEM Clusters for FPGA; z pos [mm]; y pos,mm ",nx0,0.,+30.,ny0,-0.4,102.);  hevtf->SetStats(0); hevtf->SetMaximum(10.);
+    hevtf = new TH2F("hevtf","GEM Clusters for FPGA; z pos [mm]; y pos,mm ",nx0,0.,+30.,ny0,-0.2,102.2);  hevtf->SetStats(0); hevtf->SetMaximum(10.);
     hClusterMaxdEdx_e = new TH1F("hClusterMaxdEdx_e","Maximum Cluster Energy for Single Track Events (Electrons); Cluster Energy ; Counts ",100,0.,4960); HistList->Add(hClusterMaxdEdx_e);
     hClusterMaxdEdx_pi = new TH1F("hClusterMaxdEdx_pi","Maximum Cluster Energy for Single Track Events (Pions); Cluster Energy ; Counts ",100,0.,4960); HistList->Add(hClusterMaxdEdx_pi);
     hClusterTotaldEdx_e = new TH1F("hClusterTotaldEdx_e","Total Cluster Energy for Single Track Events (Electrons); Total Cluster Energy ; Counts ",100,0.,4960); HistList->Add(hClusterTotaldEdx_e);
     hClusterTotaldEdx_pi = new TH1F("hClusterTotaldEdx_pi","Total Cluster Energy for Single Track Events (Pions); Total Cluster Energy ; Counts ",100,0.,4960); HistList->Add(hClusterTotaldEdx_pi);
+    hClusterDiff_e = new TH1F("hClusterDiff_e","Cluster Distance from External Track (Electrons); Distance [mm]",160,-20.,20.); HistList->Add(hClusterDiff_e);
+    hClusterDiff_pi = new TH1F("hClusterDiff_pi","Cluster Distance from External Track (Pions); Distance [mm]",160,-20.,20.); HistList->Add(hClusterDiff_pi);
+    hClusterDiffCut_e = new TH1F("hClusterDiffCut_e","Cluster Distance from External Track With Cut (Electrons); Distance [mm]",160,-20.,20.); HistList->Add(hClusterDiffCut_e);
+    hClusterDiffCut_pi = new TH1F("hClusterDiffCut_pi","Cluster Distance from External Track With Cut (Pions); Distance [mm]",160,-20.,20.); HistList->Add(hClusterDiffCut_pi);
+    hPulseDiff_e = new TH1F("hPulseDiff_e","Pulse Distance from External Track (Electrons); Distance [mm]",160,-20.,20.); HistList->Add(hPulseDiff_e);
+    hPulseDiff_pi = new TH1F("hPulseDiff_pi","Pulse Distance from External Track (Pions); Distance [mm]",160,-20.,20.); HistList->Add(hPulseDiff_pi);
+    hPulseDiffCut_e = new TH1F("hPulseDiffCut_e","Pulse Distance from External Track With Cut (Electrons); Distance [mm]",160,-20.,20.); HistList->Add(hPulseDiffCut_e);
+    hPulseDiffCut_pi = new TH1F("hPulseDiffCut_pi","Pulse Distance from External Track With Cut (Pions); Distance [mm]",160,-20.,20.); HistList->Add(hPulseDiffCut_pi);
   #endif
   //============================ End Histogram Booking =====================================
   
@@ -385,6 +393,7 @@ void trdclass::Loop() {
     EVENT_VECT_GEM->Branch("zposc_max",&clu_zpos_max,"clu_zpos_max/f");
     EVENT_VECT_GEM->Branch("dedxc_max",&clu_dedx_max,"clu_dedx_max/f");
     EVENT_VECT_GEM->Branch("widthc_max",&clu_width_max,"clu_width_max/f");
+    EVENT_VECT_GEM->Branch("dedxc_tot",&clu_dedx_tot,"clu_dedx_tot/f");
     
     //-- MMG1-TRD
     EVENT_VECT_MMG1 = new TTree("mmg1_hits","MMG1 TTree with single track hit info");
@@ -969,6 +978,7 @@ void trdclass::Loop() {
     clu_zpos_max=0;
     clu_dedx_max=0;
     clu_width_max=0;
+    clu_dedx_tot=0;
     
     #ifdef USE_125_RAW
       
@@ -1008,8 +1018,8 @@ void trdclass::Loop() {
             if (gemChan>-1) {
               time-=TimeWindowStart;
           	  if ( 0 > time || time > 100 ) continue; // --- drop early and late hits ---
-    	        hevtc->SetBinContent(100-time,gemChan,adc/100.); //Why 100-time ???
-    	        hevt->SetBinContent(100-time,gemChan,adc/100.);
+    	        hevtc->SetBinContent(100-time,gemChan+1.,adc/100.);
+    	        hevt->SetBinContent(100-time,gemChan+1.,adc/100.);
             }
           }
         } // --  end of time samples loop
@@ -1067,9 +1077,9 @@ void trdclass::Loop() {
         
         for (int iy=0; iy<ny; iy++) {
           for (int ix=0; ix<nx; ix++) {  //---- clustering loop ----
-            double c1 = hpc->GetBinContent(ix,iy);                    // energy
-            double x1=double(ix)/double(nx)*(xma-xmi)+xmi-binx/2.;    // drift time
-            double y1=double(iy)/double(ny)*(yma-ymi)+ymi-biny/2.;    // X strip
+            double c1 = hpc->GetBinContent(ix+1.,iy+1.);              // energy
+            double x1=double(ix)/double(nx)*(xma-xmi)+xmi+binx/2.;    // drift time
+            double y1=double(iy)/double(ny)*(yma-ymi)+ymi+biny/2.;    // X strip
             if (c1<THR2) continue;
             if (nclust==0) {
               clust_Xpos[nclust]=y1; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
@@ -1127,7 +1137,13 @@ void trdclass::Loop() {
           #endif
           //----  Cluster Filter  ----
           if ((clust_Size[k] >= MinClustSize && zStart < clust_Zpos[k] && clust_Zpos[k] < zEnd && clust_Width[k][2]>=MinClustWidth)  || clust_Length[k][2]<=MaxClustLength) {
-            if (trackFound && (abs(urw_el_chan_max-clust_Xpos[k]-5.5)<5 || abs(urw_pi_chan_max-clust_Xpos[k]-5.5)<5)) { //--NEW External tracking condition from uRWell
+            //FILL HIT DIFF HISTO
+            if (electron) hClusterDiff_e->Fill(urw_el_chan_max-clust_Xpos[k]-(5.5+3.2));
+            else if (pion) hClusterDiff_pi->Fill(urw_pi_chan_max-clust_Xpos[k]-(5.5+3.2));
+            if (trackFound && (abs(urw_el_chan_max-clust_Xpos[k]-(5.5+3.2))<5 || abs(urw_pi_chan_max-clust_Xpos[k]-(5.5+3.2))<5)) { //--NEW External tracking condition from uRWell
+              //FILL HIT DIFF HISTO
+              if (electron) hClusterDiffCut_e->Fill(urw_el_chan_max-clust_Xpos[k]-(5.5+3.2));
+              else if (pion) hClusterDiffCut_pi->Fill(urw_pi_chan_max-clust_Xpos[k]-(5.5+3.2));
               #if (USE_MAXPOS>0)
   	            hits_Xpos[ii]=clust_Xmax[k];
   	            hits_Zpos[ii]=clust_Zmax[k];
@@ -1149,6 +1165,7 @@ void trdclass::Loop() {
   	      }
         }
         int nhits=ii;
+        clu_dedx_tot=totalClust_dEdx;
         // -----  end hist dist clustering  -----
         
         // ----- Draw HITS and CLUST -----
@@ -1297,7 +1314,7 @@ void trdclass::Loop() {
               mg->SetTitle(mgTitle);
               c2->cd(3); mg->Draw("APsame"); //AP?
               mg->GetXaxis()->SetLimits(0.,30.);
-              mg->SetMinimum(-0.4);
+              mg->SetMinimum(-0.);
               mg->SetMaximum(+102.);
               gPad->Modified(); gPad->Update();
             #endif
@@ -1421,7 +1438,9 @@ void trdclass::Loop() {
                 hNHits_el->Fill(urw_el_chan_max);
                 trackSeen=true;
               }
+              hPulseDiff_e->Fill(urw_el_chan_max-gemChan_x-5.5);
               if (trackFound && abs(urw_el_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_el_ych_max-mmg1_el_ych_max-3.5)<5*/) {
+                hPulseDiffCut_e->Fill(urw_el_chan_max-gemChan_x-5.5);
                 f125_el->Fill(amp);
                 f125_el_amp2ds->Fill(time, gemChan, amp);
                 gem_xpos.push_back(gemChan);
@@ -1464,7 +1483,9 @@ void trdclass::Loop() {
                 hNHits_pi->Fill(urw_pi_chan_max);
                 trackSeen=true;
               }
+              hPulseDiff_pi->Fill(urw_pi_chan_max-gemChan_x-5.5);
               if (trackFound && abs(urw_pi_chan_max-gemChan_x-5.5)<5 /*&& abs(urw_pi_ych_max-mmg1_pi_ych_max-3.5)<5*/) {
+                hPulseDiffCut_pi->Fill(urw_pi_chan_max-gemChan_x-5.5);
                 f125_pi->Fill(amp);
                 f125_pi_amp2ds->Fill(time, gemChan, amp);
                 gem_xpos.push_back(gemChan);
@@ -1739,7 +1760,7 @@ void trdclass::Loop() {
     char pdfname[120];  sprintf(pdfname,"%s_evdisp.pdf",G_DIR);
     
     TBox fbox(x_cut1,y_cut1,x_cut2,y_cut2);  //-- draw fid. area cut --
-    fbox.Draw("same");
+    //fbox.Draw("same");
     fbox.SetLineColor(kRed);
     fbox.SetFillStyle(0);
     fbox.SetLineWidth(1);
@@ -1835,6 +1856,17 @@ void trdclass::Loop() {
     
     //--------------------- new page --------------------
     htitle(" fADC125 Raw (Clustering) Distributions ");   if (!COMPACT) cc=NextPlot(0,0);
+    cc=NextPlot(nxd,nyd);  hPulseDiff_e->Draw();
+    cc=NextPlot(nxd,nyd);  hPulseDiff_pi->Draw();
+    cc=NextPlot(nxd,nyd);  hPulseDiffCut_e->Draw();
+    cc=NextPlot(nxd,nyd);  hPulseDiffCut_pi->Draw();
+    cc=NextPlot(nxd,nyd);  hClusterDiff_e->Draw();
+    cc=NextPlot(nxd,nyd);  hClusterDiff_pi->Draw();
+    cc=NextPlot(nxd,nyd);  hClusterDiffCut_e->Draw();
+    cc=NextPlot(nxd,nyd);  hClusterDiffCut_pi->Draw();
+    
+    //--------------------- new page --------------------
+    htitle(" fADC125 Raw (Clustering) Track Distributions ");   if (!COMPACT) cc=NextPlot(0,0);
     cc=NextPlot(nxd,nyd);  hClusterMaxdEdx_e->Draw();
     cc=NextPlot(nxd,nyd);  hClusterMaxdEdx_pi->Draw();
     cc=NextPlot(nxd,nyd);  hClusterTotaldEdx_e->Draw();

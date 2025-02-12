@@ -30,8 +30,8 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
-//#define NO_RAD_COMPARE 1
-#define ALL_PION_COMPARE 1
+#define NO_RAD_COMPARE 1
+//#define ALL_PION_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
@@ -39,7 +39,7 @@ void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
 
 const int NDEslices = 8; //10;
-const int NFixed = 8; //////8; // -- 7;
+const int NFixed = 9; //////8; // -- 7;
 
 #if    NN_MODE == 0
 const int MAXpar = NDEslices;
@@ -212,6 +212,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   fChain->SetBranchAddress("zposc_max", &zposc_max, &b_zposc_max);
   fChain->SetBranchAddress("dedxc_max", &dedxc_max, &b_dedxc_max);
   fChain->SetBranchAddress("widthc_max", &widthc_max, &b_widthc_max);
+  fChain->SetBranchAddress("dedxc_tot", &dedxc_tot, &b_dedxc_tot);
   
   //========================================
   TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
@@ -499,6 +500,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       Par[5]=dedxc_max/5.; //max_dedxc/Ascale/5.; ///////////
       Par[6]=gem_nclu*5;
       Par[7]=zposc_max*5.;
+      Par[8]=dedxc_tot/5.;
       int np=NDE;
       double coef=Ascale*3.;  // -- coef=Ascale/2.; // -- =Ascale*3.;
       for (int ip=0; ip<np; ip++) {

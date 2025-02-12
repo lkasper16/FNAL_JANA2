@@ -282,6 +282,8 @@ public :
    TH1D *hcount;
    TH1D *hNTracks, *hNTracks_e, *hNTracks_pi;
    TH1D *hNHits_el, *hNHits_pi, *hNExpected_el, *hNExpected_pi, *trdRatio_el, *trdRatio_pi;
+   TH1F *hClusterDiff_e, *hClusterDiff_pi, *hClusterDiffCut_e, *hClusterDiffCut_pi;
+   TH1F *hPulseDiff_e, *hPulseDiff_pi, *hPulseDiffCut_e, *hPulseDiffCut_pi;
    TH1F *hCal_occ;
    TH1F *hCal_sum;
    TH1F *hCal_sum_el;
@@ -364,6 +366,7 @@ public :
    float clu_zpos_max;
    float clu_dedx_max;
    float clu_width_max;
+   float clu_dedx_tot;
    TH1F *gem_zHist;
    
    int mmg1_nhit;
