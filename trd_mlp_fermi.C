@@ -39,7 +39,7 @@ void Count(const char *tit, double cut1, double cut2);
 TH1D *hcount;
 
 const int NDEslices = 8; //10;
-const int NFixed = 9; //////8; // -- 7;
+const int NFixed = 12; //////8; // -- 7;
 
 #if    NN_MODE == 0
 const int MAXpar = NDEslices;
@@ -48,7 +48,7 @@ const int MAXpar = NFixed;
 #elif  NN_MODE == 2
 const int MAXpar = NFixed+NDEslices;
 #elif  NN_MODE == 3
-const int MAXpar = NFixed+NDEslices;
+const int MAXpar = NFixed+NDEslices+NDEslices;
 #else
   ne rabotaet !!!!
 #endif
@@ -189,6 +189,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   zposc_max = 0;
   dedxc_max = 0;
   widthc_max = 0;
+  dedxc_tot = 0;
   
   // Set branch addresses and branch pointers
   if (!ttree_hits) return -1;
@@ -218,8 +219,14 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   TH2F *hits2d_pi = new TH2F("hits2d_pi","Pion dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   
+  TH2F *clu2d_e = new TH2F("clu2d_e","Electron Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
+  TH2F *clu2d_pi = new TH2F("clu2d_pi","Pion Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
+  
   TH2F *aver2d_e = new TH2F("aver2d_e","aver-rms electrons",120,0.,240.,100,0.,100.);
   TH2F *aver2d_pi = new TH2F("aver2d_pi","aver-rms pions",120,0.,240.,100,0.,100.);
+  
+  TH2F *c_aver2d_e = new TH2F("c_aver2d_e","aver-rms electrons (clusters)",50,0.,100.,100,0.,100.);
+  TH2F *c_aver2d_pi = new TH2F("c_aver2d_pi","aver-rms pions (clusters)",50,0.,100.,100,0.,100.);
   
   TH1F *hNhits  = new TH1F("hNhits","Hits in GEMTRD",100,-0.5,99.5);  hNhits->SetStats(0);
   TH1F *hNclu  = new TH1F("hNclu","",70,-0.5,69.5);  hNclu->SetStats(0);
@@ -229,8 +236,14 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   TH1F *helectron_dedxtotal = new TH1F("helectron_dedxtotal","Electron e_total",500,0.5,50000.5);
   TH1F *hpion_dedxtotal = new TH1F("hpion_dedxtotal","Pion e_total",500,0.5,50000.5);
   
+  TH1F *helectron_maxcamp = new TH1F("helectron_maxcamp","Electron max cluster amp",65,0.5,1500.5);
+  TH1F *hpion_maxcamp = new TH1F("hpion_maxcamp","Pion max cluster amp",65,0.5,1500.5);
+  
   TH1F *time_e  = new TH1F("time_e","Electron Amplitude in Time;Time (*8ns)",250,0.5,250.5);
   TH1F *time_pi = new TH1F("time_pi","Pion Amplitude in Time;Time (*8ns)",250,0.5,250.5);
+  
+  TH1F *ctime_e  = new TH1F("ctime_e","Electron Amp in Time (Clusters);Time (*8ns)",250,0.5,250.5);
+  TH1F *ctime_pi = new TH1F("ctime_pi","Pion Amp in Time (Clusters);Time (*8ns)",250,0.5,250.5);
   
   TH1F *par_e[MAXpar];
   TH1F *par_pi[MAXpar];
@@ -258,6 +271,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   //==============================================================================
   const int NDE=NDEslices; // MAXpar;
   double dEdx[NDE];
+  double dEdxc[NDE];
   int NPF=MAXpar; // number of parameters filled
   int ntrk_e=0, ntrk_pi=0;
   int e_chan1=0;    //-- first TR channel
@@ -276,7 +290,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     Count("EVT");
     if (!(iev % 1000)) cout<<" ===> Event = "<<iev<<" out of "<<nentries<<endl;
     for (int ip=0; ip<MAXpar; ip++) Par[ip]=0;
-    for (int i=0; i<NDE; i++) dEdx[i]=0;
+    for (int i=0; i<NDE; i++) { dEdx[i]=0; dEdxc[i]=0; }
     channel = 22;
     int trkch=22;
     //------------------------------------------------------------------------------
@@ -285,9 +299,11 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     
     float amax2=-1.;
     float emax2=-1.;
+    float amax2_c=-1;
     
     int khit=0;
     int NTR=0;
+    int NTRc=0;
     
     float THR1=100.;
     float THR2=500.;
@@ -297,6 +313,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     float atot=0.;
     float etot=0.;
     float etrzon=0.;
+    float etrzonc=0.;
     
     int tw1=0;
     int tw2=tw1+1;
@@ -395,18 +412,30 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       xaver+=xpos->at(i); naver++;
     }
     xaver=xaver/naver;
+    //=== Same for clusters ===
+    double clu_xaver=0, clu_xaver2=0;
+    int ncaver=0;
+    for (int i=0; i<gem_nclu; i++) {
+      float ztimec=zposc->at(i);
+      ztimec = -1.*(ztimec/0.3)+100.5+100.;
+      if (tw1 > ztimec || ztimec > tw3) continue; /////
+      clu_xaver+=xposc->at(i); ncaver++; /////
+    }
+    clu_xaver=clu_xaver/ncaver;
     
     //====================================================================
     for (int i=0; i<gem_nhit; i++) { // count fixed parameters
       
       Count("Gem_Hits");
       if (tw1 > zpos->at(i) || zpos->at(i) > tw3) continue;
-      Count("Gem_zHits");
-      
+      Count("Gem_zHits");   
       xaver2+=((xpos->at(i)-xaver)*(xpos->at(i)-xaver));
       if (dedx->at(i)>THR1) {
-        if (type==1) hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
-        else if (type==0) hits2d_pi->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
+        if (type==1) {
+          hits2d_e->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
+        } else if (type==0) {
+          hits2d_pi->Fill(zpos->at(i),xpos->at(i),dedx->at(i));
+        }
       }
       if(dedx->at(i)>amax2 && tw1<zpos->at(i) && zpos->at(i)<tw3) { //-- tw1 or tw2 ???
         amax2=dedx->at(i);
@@ -414,21 +443,56 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       if(dedx->at(i)>emax2) {  // currently same as amp
         emax2=dedx->at(i);
       }
-      
       if (type>=0 ) {  //-- rad.pos. window OK
         if (tw1<zpos->at(i) && zpos->at(i)<tw3 && dedx->at(i)>THR1) {
-          khit++; etot+=dedx->at(i);  atot+=dedx->at(i);
-          int ibin=(zpos->at(i)-tw1)/dt;  ibin=min(max(0,ibin),(NDE-1)); dEdx[ibin]+=dedx->at(i)/10;
+          khit++;
+          etot+=dedx->at(i);
+          atot+=dedx->at(i);
+          int ibin=(zpos->at(i)-tw1)/dt;
+          ibin=min(max(0,ibin),(NDE-1));
+          dEdx[ibin]+=dedx->at(i)/10;
         }
-        if (tw2 < zpos->at(i) && zpos->at(i) < tw3)  {  etrzon+=dedx->at(i); }
+        if (tw2 < zpos->at(i) && zpos->at(i) < tw3)  { etrzon+=dedx->at(i); }
         if (dedx->at(i)>THR2) { NTR++;  Count("NTR"); }
       }
       
-      if (dedx->at(i)>THR1)  {
+      if (dedx->at(i)>THR1) {
         if (type==1) time_e->Fill(zpos->at(i),dedx->at(i));
         if (type==0) time_pi->Fill(zpos->at(i),dedx->at(i));
       }
     } //--- End Loop over detector nhits
+    
+    //--NEW
+    for (int i=0; i<gem_nclu; i++) {
+      Count("Gem_Clus");
+      float ztimec=zposc->at(i);
+      ztimec = -1.*(ztimec/0.3)+100.5+100.;
+      if (tw1 > ztimec || ztimec > tw3) continue;
+      Count("Gem_zClus");
+      clu_xaver2+=((xposc->at(i)-clu_xaver)*(xposc->at(i)-clu_xaver));
+      if (dedxc->at(i)>THR1) {
+        if (type==1) {
+          clu2d_e->Fill(ztimec,xposc->at(i),dedxc->at(i)); /////
+          ctime_e->Fill(ztimec,dedxc->at(i)); /////
+        } else if (type==0) {
+          clu2d_pi->Fill(ztimec,xposc->at(i),dedxc->at(i)); /////
+          ctime_pi->Fill(ztimec,dedxc->at(i)); /////
+        }
+      }
+      if(dedxc->at(i)>amax2_c && tw1<ztimec && ztimec<tw3) { /////
+        amax2_c=dedxc->at(i);
+      }
+      if (type>=0 ) {  //-- rad.pos. window OK
+        //if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>THR1) { /////
+        if (tw1<ztimec && ztimec<tw3 && dedxc->at(i)>0.) { /////
+          int ibinc=(ztimec-tw1)/dt; ////
+          ibinc=min(max(0,ibinc),(NDE-1));
+          dEdxc[ibinc]+=dedxc->at(i)/10;
+        }
+        if (tw2<ztimec && ztimec<tw3)  { etrzonc+=dedxc->at(i); } /////
+        if (dedxc->at(i)>THR2) { NTRc++;  Count("NTRc"); }
+      }
+    }
     
     //=================================================================
     
@@ -436,14 +500,27 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     if (type==1 ) {
       Count("el");
       aver2d_e->Fill(xaver,xaver2);
-    } else {
+    } else if (type==0) {
       Count("pi");
       aver2d_pi->Fill(xaver,xaver2);
     }
-    if (e_chan1 > xaver || xaver > e_chan2) continue; //--- radiator  area  ; for Y - need a track
+    if (e_chan1 > xaver || xaver > e_chan2) continue; //--- radiator  area
     Count("radAreaHits");
     if (naver<3) continue; // --- too small number of hits ----
     Count("nHits");
+    //=== For clusters ===
+    clu_xaver2=sqrt(clu_xaver2/ncaver);
+    if (type==1 ) {
+      Count("el_c");
+      c_aver2d_e->Fill(clu_xaver,clu_xaver2);
+    } else if (type==0) {
+      Count("pi_c");
+      c_aver2d_pi->Fill(clu_xaver,clu_xaver2);
+    }
+    //if (e_chan1 > clu_xaver || clu_xaver > e_chan2) continue; //--- radiator  area
+    Count("radAreaHits_c");
+    //if (ncaver<3) continue; // --- too small number of hits ----
+    Count("nClus");
     
     //--------------------------------------------------------------------------------
     //                    electron case
@@ -451,6 +528,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     if (type==1) {
       helectron_maxamp->Fill(amax2);
       helectron_dedxtotal->Fill(etot);
+      helectron_maxcamp->Fill(amax2_c);
     }
     //--------------------------------------------------------------------------------
     //                    pion case
@@ -458,6 +536,7 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     if (type==0) {
       hpion_maxamp->Fill(amax2);
       hpion_dedxtotal->Fill(etot);
+      hpion_maxcamp->Fill(amax2_c);
     }
     //-----------------------------------------------
     if (type<0) continue;
@@ -491,21 +570,27 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     } else if (NN_MODE==3) {  //--  fermi dEdx(amp) + Par
       if (MAXpar<(NFixed+NDE)) { printf("ERROR :: MAXpar array too small =%d \n",MAXpar); exit(1); }
       Par[0]=amax2/Ascale/5.;
-      Par[1]=gem_nhit*5;
-      Par[2]=xaver2*8; // -- xaver2;
+      Par[1]=gem_nhit*2; //gem_nhit*5;
+      Par[2]=xaver2*10; // -- xaver2*8;
       //Par[3]=atot/Escale/50.; // -- etot/Escale/10.;
       //Par[4]=etrzon/Escale/50.; // -- etrzon/Escale/10.;
-      Par[3]=NTR;
-      Par[4]=widthc_max*5.; //max_widthc*5.; // -- atot/1000.;
-      Par[5]=dedxc_max/5.; //max_dedxc/Ascale/5.; ///////////
+      Par[3]=NTR*3; //NTR;
+      Par[4]=widthc_max*7.; //widthc_max*5.;
+      Par[5]=dedxc_max/10.; //dedxc_max/5.;
       Par[6]=gem_nclu*5;
-      Par[7]=zposc_max*5.;
-      Par[8]=dedxc_tot/5.;
+      Par[7]=zposc_max*3; //zposc_max*5.;
+      Par[8]=dedxc_tot/18.; //dedxc_tot/5.;
+      Par[9]=etrzonc;
+      Par[10]=clu_xaver2*14;
+      Par[11]=amax2_c/8.;
       int np=NDE;
       double coef=Ascale*3.;  // -- coef=Ascale/2.; // -- =Ascale*3.;
       for (int ip=0; ip<np; ip++) {
         Par[ip+NFixed]=dEdx[NDE-1-ip]/coef; // -- Par[ip+NFixed]=dEdx[ip]/coef;
       }
+     for (int ip=0; ip<np; ip++) {
+        Par[ip+NFixed+NDE]=dEdxc[NDE-1-ip];
+      } 
     } else {   //-- dEdx only
       int np=min(MAXpar,NDE);
       double coef=Ascale*3.;
@@ -600,15 +685,33 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   sprintf(pdfname,"%s_dqm_m%d.pdf",G_DIR,NN_MODE);
   c1->Print(pdfname);
   
-  c0 = new TCanvas("Plot","Plot",400,200,1200,900);     c0->Divide(2,2);
+  c0 = new TCanvas("Plot","Plot",400,200,1200,900);     c0->Divide(3,3);
   c0->cd(1);  hscale(time_e,time_pi,1.,0,2); // --- already scaled before
   
-  c0->cd(3);  hits2d_e->Draw("colz"); // --- already scaled before
+  c0->cd(2);  hscale(ctime_e,ctime_pi,escale_trk,NORM,2); // --- scale clustering time hist here
+  
+  c0->cd(4);  hits2d_e->Draw("colz");
   lin1->Draw();  lin2->Draw();
   gPad->Modified(); gPad->Update();
   
-  c0->cd(4);  hits2d_pi->Draw("colz"); // --- already scaled before 
+  c0->cd(7);  hits2d_pi->Draw("colz");
   lin1p->Draw(); lin2p->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(5);  clu2d_e->Draw("colz");
+  //lin1->Draw();  lin2->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(8);  clu2d_pi->Draw("colz");
+  //lin1->Draw();  lin2->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(3);  hscale(helectron_maxcamp,hpion_maxcamp,0.,NORM,2); // --- scale clustering amp  hist here
+  
+  c0->cd(6);  c_aver2d_e->Draw("colz");
+  gPad->Modified(); gPad->Update();
+  
+  c0->cd(9);  c_aver2d_pi->Draw("colz");
   gPad->Modified(); gPad->Update();
   
   #ifdef VERBOSE
