@@ -30,7 +30,7 @@
 #define NN_MODE 3
 //#define VERBOSE
 #define ANALYZE_MERGED 1
-#define NO_RAD_COMPARE 1
+//#define NO_RAD_COMPARE 1
 //#define ALL_PION_COMPARE 1
 
 void Count(const char *tit);
@@ -219,8 +219,8 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   TH2F *hits2d_e = new TH2F("hits2d_e","Electron dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   TH2F *hits2d_pi = new TH2F("hits2d_pi","Pion dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,240,-0.5,239.5);
   
-  TH2F *clu2d_e = new TH2F("clu2d_e","Electron Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
-  TH2F *clu2d_pi = new TH2F("clu2d_pi","Pion Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,128,-0.2,102.2);
+  TH2F *clu2d_e = new TH2F("clu2d_e","Electron Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,256,-0.2,102.2);
+  TH2F *clu2d_pi = new TH2F("clu2d_pi","Pion Cluster dEdx in Time;Time (*8ns);Channel",125,0.5,250.5,256,-0.2,102.2);
   
   TH2F *aver2d_e = new TH2F("aver2d_e","aver-rms electrons",120,0.,240.,100,0.,100.);
   TH2F *aver2d_pi = new TH2F("aver2d_pi","aver-rms pions",120,0.,240.,100,0.,100.);
@@ -354,13 +354,13 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
       case 3197:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       case 3198:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       case 3199:   tw1=107; tw2=148; tw3=186; e_chan1=93;   e_chan2=147;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
-      case 3200:   tw1=109; tw2=143; tw3=182; e_chan1=94;   e_chan2=150;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
+      case 3200:   tw1=109; tw2=143; tw3=186; e_chan1=94;   e_chan2=150;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Foil
       
       case 3201:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
-      case 3202:   tw1=109; tw2=143; tw3=182; e_chan1=94;   e_chan2=150;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
+      case 3202:   tw1=109; tw2=143; tw3=186; e_chan1=94;   e_chan2=150;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Double Fleece
       
       case 3203:   tw1=107; tw2=148; tw3=186; e_chan1=89;   e_chan2=148;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
-      case 3204:   tw1=109; tw2=143; tw3=182; e_chan1=94;   e_chan2=150;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
+      case 3204:   tw1=109; tw2=143; tw3=186; e_chan1=94;   e_chan2=150;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- No Rad
       
       case 3287:   tw1=108; tw2=153; tw3=184; e_chan1=90;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
       case 3288:   tw1=108; tw2=153; tw3=184; e_chan1=90;   e_chan2=145;  pi_chan1=e_chan1;   pi_chan2=e_chan2;   break; //-- Single Foil (TU)
@@ -650,6 +650,17 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();
   gPad->Modified(); gPad->Update();
   
+  c1=NextPlot(nxd,nyd);   clu2d_e->Draw("colz"); 
+  TLine *lin1c = new TLine(0.,(e_chan1*0.4)+3.2,250.,(e_chan1*0.4)+3.2);    TLine *lin2c = new TLine(0.,(e_chan2*0.4)+3.2,250.,(e_chan2*0.4)+3.2);
+  lin1c->SetLineColor(kRed);   lin2c->SetLineColor(kRed);   lin1c->Draw();  lin2c->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  c1=NextPlot(nxd,nyd);   clu2d_pi->Draw("colz");
+  TLine *lin1pc = new TLine(0.,(pi_chan1*0.4)+3.2,250.,(pi_chan1*0.4)+3.2); TLine *lin2pc = new TLine(0.,(pi_chan2*0.4)+3.2,250.,(pi_chan2*0.4)+3.2);
+  lin1pc->SetLineColor(kCyan); lin2pc->SetLineColor(kCyan); lin1pc->Draw(); lin2pc->Draw();
+  gPad->Modified(); gPad->Update();
+  
+  
   #ifdef VERBOSE
     printf(" Draw Lines :: %d %d %d %d \n",e_chan1,e_chan2, pi_chan1, pi_chan2);
   #endif
@@ -699,11 +710,11 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   gPad->Modified(); gPad->Update();
   
   c0->cd(5);  clu2d_e->Draw("colz");
-  //lin1->Draw();  lin2->Draw();
+  lin1c->Draw();  lin2c->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(8);  clu2d_pi->Draw("colz");
-  //lin1->Draw();  lin2->Draw();
+  lin1c->Draw();  lin2c->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(3);  hscale(helectron_maxcamp,hpion_maxcamp,0.,NORM,2); // --- scale clustering amp  hist here
@@ -917,7 +928,7 @@ void trd_mlp_fermi(int RunNum) {
   char htit[120]; sprintf(htit,"NN output, Nmod=%d",Nmod);
   TH1F *bgm = new TH1F("bgm",htit, 120, -0.1, 1.1);
   TH1F *sigm = new TH1F("sigm",htit,120, -0.1, 1.1);
-  TH1F *hrejection_errors = new TH1F("hrejection_errors","Rej Factor Relative Error; Electron Purity %; Rejection Factor",6,62.5,92.5); hrejection_errors->SetStats(0);
+  TH1F *hrejection_errors = new TH1F("hrejection_errors","Sup. Factor Relative Error; Electron Efficiency [%]; Suppression Factor",7,62.5,97.5); hrejection_errors->SetStats(0);
   
   //---------------------------------------------------------------------
   //---------           test net                              -----------
@@ -962,7 +973,7 @@ void trd_mlp_fermi(int RunNum) {
         if (dedx->at(i)>0) disppi->Fill(xpos->at(i),zpos->at(i),dedx->at(i));
       }
       if (disppi->GetEntries()!=0) disppi->Draw("colz");
-      TLine lin1(0.,rtw1,350.,rtw1);   TLine lin2(0.,rtw3,350.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();
+      TLine lin1(0.,rtw1,300.,rtw1);   TLine lin2(0.,rtw3,300.,rtw3);  lin1.SetLineColor(kBlue); lin2.SetLineColor(kBlue); lin1.Draw(); lin2.Draw();
       c2->Modified(); c2->Update();
     }
   }
@@ -1095,6 +1106,8 @@ void trd_mlp_fermi(int RunNum) {
   //---------------------------------------------------------------------
   std::pair<double,double> rej70 = Reject(bg, sig, 0.7);
   cout << "---------------------------------------- \n" << endl;
+  std::pair<double,double> rej75 = Reject(bg, sig, 0.75);
+  cout << "---------------------------------------- \n" << endl; 
   std::pair<double,double> rej80 = Reject(bg, sig, 0.8);
   cout << "---------------------------------------- \n" << endl;
   std::pair<double,double> rej85 = Reject(bg, sig, 0.85);
@@ -1102,17 +1115,17 @@ void trd_mlp_fermi(int RunNum) {
   std::pair<double,double> rej90 = Reject(bg, sig, 0.9);
   cout << "---------------------------------------- \n" << endl;
   
-  double rejectionValues[4] = {rej70.first, rej80.first, rej85.first, rej90.first};
-  double rejErrors[4] = {rej70.second, rej80.second, rej85.second, rej90.second};
-  for (int i=1; i<=6; i++) {
-    if (i==2) {
+  double rejectionValues[5] = {rej70.first, rej75.first, rej80.first, rej85.first, rej90.first};
+  double rejErrors[5] = {rej70.second, rej75.second, rej80.second, rej85.second, rej90.second};
+  for (int i=1; i<7; i++) {
+    if (i>1) {
       hrejection_errors->SetBinContent(i, 1./rejectionValues[i-2]);
       hrejection_errors->SetBinError(i, rejErrors[i-2]*hrejection_errors->GetBinContent(i));
     }
-    if (i>3) {
-      hrejection_errors->SetBinContent(i, 1./rejectionValues[i-3]);
-      hrejection_errors->SetBinError(i, rejErrors[i-3]*hrejection_errors->GetBinContent(i));
-    }
+    //if (i>3) {
+    //  hrejection_errors->SetBinContent(i, 1./rejectionValues[i-3]);
+    //  hrejection_errors->SetBinError(i, rejErrors[i-3]*hrejection_errors->GetBinContent(i));
+    //}
   }
   
   #ifdef VERBOSE
@@ -1135,16 +1148,20 @@ void trd_mlp_fermi(int RunNum) {
   latex.DrawLatex(0.05,ypos-=ystep,str.data());
   //--
   ss.str("");  ss.clear();
-  ss << "Nmod=" << 1 << ", e=80%, Eff #pi=" << rej80.first*100. << "%, Rej=" << 1./rej80.first ;  string str0 = ss.str();
+  ss << "Nmod=" << 1 << ", e=75%, Eff #pi=" << rej75.first*100. << "%, Rej=" << 1./rej75.first ;  string str0 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str0.data());
   //--
   ss.str("");  ss.clear();
-  ss << "Nmod=" << 1 << ", e=85%, Eff #pi=" << rej85.first*100. << "%, Rej=" << 1./rej85.first ;  string str1 = ss.str();
+  ss << "Nmod=" << 1 << ", e=80%, Eff #pi=" << rej80.first*100. << "%, Rej=" << 1./rej80.first ;  string str1 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str1.data());
   //--
   ss.str("");  ss.clear();
-  ss << "Nmod=" << 1 << ", e=90%, Eff #pi=" << rej90.first*100. << "%, Rej=" << 1./rej90.first ;  string str2 = ss.str();
+  ss << "Nmod=" << 1 << ", e=85%, Eff #pi=" << rej85.first*100. << "%, Rej=" << 1./rej85.first ;  string str2 = ss.str();
   latex.DrawLatex(0.05,ypos-=ystep,str2.data());
+  //--
+  ss.str("");  ss.clear(); 
+  ss << "Nmod=" << 1 << ", e=90%, Eff #pi=" << rej90.first*100. << "%, Rej=" << 1./rej90.first ;  string str3 = ss.str();
+  latex.DrawLatex(0.05,ypos-=ystep,str3.data());
   latex.DrawLatex(0.05,ypos-=ystep,"--------------");
   //--
   #ifdef VERBOSE
