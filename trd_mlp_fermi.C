@@ -31,7 +31,7 @@
 //#define VERBOSE
 #define ANALYZE_MERGED 1
 //#define NO_RAD_COMPARE 1
-//#define ALL_PION_COMPARE 1
+#define ALL_PION_COMPARE 1
 
 void Count(const char *tit);
 void Count(const char *tit, double cut1);
@@ -278,6 +278,9 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   int e_chan2=0;    //-- last  TR channel
   int pi_chan1=0;   //-- first pion (no-rad) channlel
   int pi_chan2=0;   //-- last  pion (no-rad) channel
+  int tw1=0;
+  int tw2=tw1+1;
+  int tw3=tw2+1;
   
   cout << "============== BEGIN RUN " << RunNum << "===============" <<endl;
   int ievOK=0;
@@ -314,10 +317,6 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
     float etot=0.;
     float etrzon=0.;
     float etrzonc=0.;
-    
-    int tw1=0;
-    int tw2=tw1+1;
-    int tw3=tw2+1;
     
     //---- run specific ---
     if ( 3000 < RunNum && RunNum <= 3999 ) { //------------------  FERMILAB   2023  ---------------------
@@ -643,21 +642,29 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   c1=NextPlot(nxd,nyd);   hits2d_e->Draw("colz");
   TLine *lin1 = new TLine(0.,e_chan1,250.,e_chan1);    TLine *lin2 = new TLine(0.,e_chan2,250.,e_chan2);
   lin1->SetLineColor(kRed);   lin2->SetLineColor(kRed);   lin1->Draw();  lin2->Draw();
+  TLine *tlin1 = new TLine(tw1,0.,tw1,256.);    TLine *tlin2 = new TLine(tw3,0.,tw3,256.);
+  tlin1->SetLineColor(kRed);  tlin1->SetLineStyle(7);  tlin2->SetLineColor(kRed);  tlin2->SetLineStyle(7);  tlin1->Draw();  tlin2->Draw();
   gPad->Modified(); gPad->Update();
   
   c1=NextPlot(nxd,nyd);   hits2d_pi->Draw("colz");
   TLine *lin1p = new TLine(0.,pi_chan1,250.,pi_chan1); TLine *lin2p = new TLine(0.,pi_chan2,250.,pi_chan2);
   lin1p->SetLineColor(kCyan); lin2p->SetLineColor(kCyan); lin1p->Draw(); lin2p->Draw();
+   TLine *tlin1p = new TLine(tw1,0.,tw1,256.);    TLine *tlin2p = new TLine(tw3,0.,tw3,256.);
+  tlin1p->SetLineColor(kCyan);  tlin1p->SetLineStyle(7);  tlin2p->SetLineColor(kCyan);  tlin2p->SetLineStyle(7);  tlin1p->Draw();  tlin2p->Draw();
   gPad->Modified(); gPad->Update();
   
   c1=NextPlot(nxd,nyd);   clu2d_e->Draw("colz"); 
   TLine *lin1c = new TLine(0.,(e_chan1*0.4)+3.2,250.,(e_chan1*0.4)+3.2);    TLine *lin2c = new TLine(0.,(e_chan2*0.4)+3.2,250.,(e_chan2*0.4)+3.2);
   lin1c->SetLineColor(kRed);   lin2c->SetLineColor(kRed);   lin1c->Draw();  lin2c->Draw();
+   TLine *tlin1c = new TLine(tw1,0.,tw1,102.);    TLine *tlin2c = new TLine(tw3,0.,tw3,102.);
+  tlin1c->SetLineColor(kRed);  tlin1c->SetLineStyle(7);  tlin2c->SetLineColor(kRed);  tlin2c->SetLineStyle(7);  tlin1c->Draw();  tlin2c->Draw();
   gPad->Modified(); gPad->Update();
   
   c1=NextPlot(nxd,nyd);   clu2d_pi->Draw("colz");
   TLine *lin1pc = new TLine(0.,(pi_chan1*0.4)+3.2,250.,(pi_chan1*0.4)+3.2); TLine *lin2pc = new TLine(0.,(pi_chan2*0.4)+3.2,250.,(pi_chan2*0.4)+3.2);
   lin1pc->SetLineColor(kCyan); lin2pc->SetLineColor(kCyan); lin1pc->Draw(); lin2pc->Draw();
+  TLine *tlin1pc = new TLine(tw1,0.,tw1,102.);    TLine *tlin2pc = new TLine(tw3,0.,tw3,102.);
+  tlin1pc->SetLineColor(kCyan);  tlin1pc->SetLineStyle(7);  tlin2pc->SetLineColor(kCyan);  tlin2pc->SetLineStyle(7);  tlin1pc->Draw();  tlin2pc->Draw();
   gPad->Modified(); gPad->Update();
   
   
@@ -703,18 +710,22 @@ int fill_trees(TTree *ttree_hits, TTree *signal, TTree *background, TTree *sig_t
   
   c0->cd(4);  hits2d_e->Draw("colz");
   lin1->Draw();  lin2->Draw();
+  tlin1->Draw();  tlin2->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(7);  hits2d_pi->Draw("colz");
   lin1p->Draw(); lin2p->Draw();
+  tlin1p->Draw();  tlin2p->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(5);  clu2d_e->Draw("colz");
   lin1c->Draw();  lin2c->Draw();
+  tlin1c->Draw();  tlin2c->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(8);  clu2d_pi->Draw("colz");
-  lin1c->Draw();  lin2c->Draw();
+  lin1pc->Draw();  lin2pc->Draw();
+  tlin1pc->Draw();  tlin2pc->Draw();
   gPad->Modified(); gPad->Update();
   
   c0->cd(3);  hscale(helectron_maxcamp,hpion_maxcamp,0.,NORM,2); // --- scale clustering amp  hist here
@@ -1114,18 +1125,18 @@ void trd_mlp_fermi(int RunNum) {
   cout << "---------------------------------------- \n" << endl;
   std::pair<double,double> rej90 = Reject(bg, sig, 0.9);
   cout << "---------------------------------------- \n" << endl;
+  std::pair<double,double> rej95 = Reject(bg, sig, 0.95);
+  cout << "---------------------------------------- \n" << endl;
+  std::pair<double,double> rej100 = Reject(bg, sig, 1.0);
+  cout << "---------------------------------------- \n" << endl;
   
-  double rejectionValues[5] = {rej70.first, rej75.first, rej80.first, rej85.first, rej90.first};
-  double rejErrors[5] = {rej70.second, rej75.second, rej80.second, rej85.second, rej90.second};
-  for (int i=1; i<7; i++) {
+  double rejectionValues[7] = {rej70.first, rej75.first, rej80.first, rej85.first, rej90.first, rej95.first, rej100.first};
+  double rejErrors[7] = {rej70.second, rej75.second, rej80.second, rej85.second, rej90.second, rej95.second, rej100.second};
+  for (int i=1; i<9; i++) {
     if (i>1) {
       hrejection_errors->SetBinContent(i, 1./rejectionValues[i-2]);
       hrejection_errors->SetBinError(i, rejErrors[i-2]*hrejection_errors->GetBinContent(i));
     }
-    //if (i>3) {
-    //  hrejection_errors->SetBinContent(i, 1./rejectionValues[i-3]);
-    //  hrejection_errors->SetBinError(i, rejErrors[i-3]*hrejection_errors->GetBinContent(i));
-    //}
   }
   
   #ifdef VERBOSE
